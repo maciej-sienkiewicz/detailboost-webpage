@@ -1,5 +1,6 @@
 import { DeviceFrame, Stage3D } from './Stage3D';
-import { SceneTabs, SceneVideos, useScenePlayer, type Scene } from './ScenePlayer';
+import { SceneTabs, SceneVideos, useScenePlayer } from './ScenePlayer';
+import { SCENES } from '../scenes';
 
 type Feature = {
     title: string;
@@ -45,41 +46,6 @@ const FEATURES: readonly Feature[] = [
             ['Dane firmy', 'z GUS po NIP'],
             ['Import', 'vCard (.vcf)'],
         ],
-    },
-];
-
-// Względem `base` Vite, nie od korzenia serwera: strona bywa podawana z podkatalogu
-// (podgląd, artefakt), a ścieżka „/scenes/…" celowałaby wtedy w cudzy katalog.
-const SCENE_DIR = `${import.meta.env.BASE_URL}scenes/`;
-
-/**
- * Trzy nagrania z działającego CRM (capture/). `features` mówi, które bloki korzyści
- * nagranie właśnie pokazuje - te dostają złotą linię, więc oko łączy obraz z tekstem.
- */
-const SCENES: readonly (Scene & { features: readonly number[] })[] = [
-    {
-        id: 'reservation',
-        title: 'Rezerwacja z historii klienta',
-        summary: 'Stały klient pyta o termin. CRM pokazuje jego wizyty i obrót, podsuwa usługi z cennika i sam wypełnia rezerwację.',
-        poster: `${SCENE_DIR}reservation-poster.webp`,
-        video: `${SCENE_DIR}reservation`,
-        features: [0, 1, 3],
-    },
-    {
-        id: 'ksef',
-        title: 'Faktura w KSeF przy wydaniu auta',
-        summary: 'Auto gotowe, klient dostaje SMS. Przy wydaniu faktura VAT idzie do KSeF i wraca z numerem KSeF i kodem QR.',
-        poster: `${SCENE_DIR}ksef-poster.webp`,
-        video: `${SCENE_DIR}ksef`,
-        features: [2],
-    },
-    {
-        id: 'instagram',
-        title: 'Nowa kampania u konkurencji',
-        summary: 'Konkurent z okolicy ogłasza promocję i puszcza reklamę. Widzisz zasięg, odbiorców i treść, zanim zadzwoni klient.',
-        poster: `${SCENE_DIR}instagram-poster.webp`,
-        video: `${SCENE_DIR}instagram`,
-        features: [],
     },
 ];
 
@@ -146,7 +112,7 @@ export function Hero() {
                             <SceneTabs scenes={SCENES} player={player} />
                         </div>
                         <p className="mt-6 text-center font-mono text-[0.6875rem] tracking-[0.04em] text-dim">
-                            Nagrania z działającej aplikacji, konto demonstracyjne.
+                            Nagrania z działającej aplikacji na koncie demonstracyjnym. Animacja przed nagraniem kosztów pokazuje drogę faktury przez KSeF.
                         </p>
                     </div>
 

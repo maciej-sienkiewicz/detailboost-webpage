@@ -7,6 +7,8 @@
 // element strony. Dzięki temu jest na każdej klatce nagrania, dokładnie tam,
 // gdzie trafia kliknięcie Playwrighta.
 import { chromium } from 'playwright-core';
+import { execFileSync } from 'node:child_process';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 
 export const BASE = process.env.CRM_URL ?? 'http://localhost:5173';
 const CHROME = process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -81,6 +83,23 @@ const CURSOR_SCRIPT = `
 })();
 `;
 
+/*
+ * Logo marki w nagłówku wizyty i leada CRM pobiera z CDN (jsDelivr, zbiór
+ * car-logos-dataset), a przy błędzie wstawia zastępczą ikonę auta. W tym środowisku
+ * ruch wychodzący idzie przez proxy, z którym przeglądarka bywa kapryśna - nagranie
+ * raz miało logo, raz ikonę. Dlatego te same pliki z tego samego CDN pobiera raz curl
+ * (do pamięci podręcznej), a przeglądarka dostaje je z niej, z nagłówkiem CORS, którego
+ * CRM potrzebuje do przycięcia marginesów logo.
+ */
+const LOGO_CACHE = '/tmp/detailboost-car-logos';
+
+function cachedLogo(url) {
+    mkdirSync(LOGO_CACHE, { recursive: true });
+    const file = `${LOGO_CACHE}/${url.split('/').pop()}`;
+    if (!existsSync(file)) execFileSync('curl', ['-sSfL', '--retry', '3', '-o', file, url]);
+    return readFileSync(file);
+}
+
 export async function openDemo({ width = 1440, height = 900, dpr = 1.5 } = {}) {
     const browser = await chromium.launch({ executablePath: CHROME });
     const ctx = await browser.newContext({
@@ -90,6 +109,18 @@ export async function openDemo({ width = 1440, height = 900, dpr = 1.5 } = {}) {
         timezoneId: 'Europe/Warsaw',
     });
     await ctx.addInitScript(CURSOR_SCRIPT);
+    await ctx.route(/car-logos-dataset@master\/logos\//, (route) => {
+        try {
+            route.fulfill({
+                status: 200,
+                contentType: 'image/png',
+                headers: { 'access-control-allow-origin': '*', 'cache-control': 'max-age=86400' },
+                body: cachedLogo(route.request().url()),
+            });
+        } catch {
+            route.fulfill({ status: 404, body: '' });
+        }
+    });
     const page = await ctx.newPage();
     page.on('pageerror', (e) => console.warn('[page]', e.message));
     await page.goto(`${BASE}/login`, { waitUntil: 'networkidle' });
@@ -141,4 +172,72 @@ export async function type(page, text, base = 55) {
 export async function showCursorAt(page, x, y) {
     await page.evaluate(([x, y]) => window.__cursor.show(x, y), [x, y]);
     await page.mouse.move(x, y);
+}
+
+/**
+ * Krok sceny dla warstwy „motion" na stronie: chwila + obszar kadru (w % okna), na
+ * którym ma spocząć kamera i złota ramka. Obszar brany z prawdziwego położenia
+ * elementu, nie wpisywany ręcznie - zmiana układu CRM nie rozjedzie ramki z treścią.
+ */
+export async function beat(page, rec, id, locator, pad = 10) {
+    if (!locator) return rec.mark(id);
+    const box = await locator.boundingBox();
+    const vp = page.viewportSize();
+    if (!box) return rec.mark(id);
+    let x = Math.max(0, box.x - pad);
+    let y = Math.max(0, box.y - pad);
+    let w = Math.min(vp.width - x, box.width + pad * 2);
+    let h = Math.min(vp.height - y, box.height + pad * 2);
+    let W = vp.width;
+    let H = vp.height;
+    if (vp.width < 600) {
+        // Telefon: kadr ma 1440 × 900, a ekran telefonu stoi w nim w ramce (patrz
+        // composePhoneFrames: wysokość 90% kadru, 12 px ramki, wyśrodkowany).
+        W = 1440;
+        H = 900;
+        const ph = Math.round(H * 0.9);
+        const scale = (ph - 24) / vp.height;
+        const pw = Math.round(vp.width * scale) + 24;
+        const ox = Math.round((W - pw) / 2) + 12;
+        const oy = Math.round((H - ph) / 2) + 12;
+        [x, y, w, h] = [ox + x * scale, oy + y * scale, w * scale, h * scale];
+    }
+    const r = (v) => Math.round(v * 10) / 10;
+    rec.mark(id, { x: r((x / W) * 100), y: r((y / H) * 100), w: r((w / W) * 100), h: r((h / H) * 100) });
+}
+
+/** Odręczny podpis myszą: kilka pociągnięć z wygładzonymi punktami, pierścień jedzie razem. */
+export async function drawSignature(page, box) {
+    const strokes = [
+        // „M" z zawijasem, potem „Sz", potem kreska podkreślenia.
+        [[0.08, 0.62], [0.12, 0.3], [0.17, 0.6], [0.22, 0.28], [0.27, 0.64], [0.31, 0.5], [0.36, 0.52]],
+        [[0.4, 0.42], [0.46, 0.36], [0.44, 0.5], [0.5, 0.58], [0.47, 0.66], [0.42, 0.62]],
+        [[0.53, 0.4], [0.6, 0.4], [0.54, 0.6], [0.62, 0.6], [0.66, 0.46], [0.7, 0.58], [0.74, 0.44], [0.8, 0.54]],
+        [[0.12, 0.76], [0.4, 0.73], [0.7, 0.71], [0.86, 0.7]],
+    ];
+    for (const stroke of strokes) {
+        const pts = stroke.map(([fx, fy]) => [box.x + fx * box.width, box.y + fy * box.height]);
+        await page.evaluate(([x, y]) => window.__cursor.move(x, y, 220), pts[0]);
+        await page.mouse.move(pts[0][0], pts[0][1]);
+        await page.mouse.down();
+        for (let i = 1; i < pts.length; i++) {
+            const [x0, y0] = pts[i - 1];
+            const [x1, y1] = pts[i];
+            for (let k = 1; k <= 4; k++) {
+                const x = x0 + ((x1 - x0) * k) / 4;
+                const y = y0 + ((y1 - y0) * k) / 4;
+                await page.mouse.move(x, y);
+                await page.evaluate(([x, y]) => window.__cursor.show(x, y), [x, y]);
+            }
+        }
+        await page.mouse.up();
+        await page.waitForTimeout(80);
+    }
+}
+
+/** Czeka, aż logo marki w nagłówku naprawdę się narysuje (CRM przycina je w canvas). */
+export async function waitForLogo(page) {
+    await page.waitForFunction(() => [...document.images].some((img) =>
+        (img.src.startsWith('blob:') || img.src.includes('car-logos')) && img.complete && img.naturalWidth > 0), null, { timeout: 15000 });
+    await page.waitForTimeout(400);
 }

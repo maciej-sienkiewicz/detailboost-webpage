@@ -32,16 +32,22 @@ npm run build      # typecheck + build do dist/
 ## Nagrania z aplikacji
 
 `public/scenes/` to prawdziwe nagrania działającego CRM na koncie demonstracyjnym
-(`POST /api/v1/demo`), a nie makiety ani animowane zrzuty:
+(`POST /api/v1/demo`), a nie makiety ani animowane zrzuty. Nad nagraniem leży warstwa
+„motion" (`SceneOverlay`): podpis kroku, złota ramka na tym, o czym mowa, i kamera,
+która przybliża kadr. Czasy kroków i obszary ramek zapisuje skrypt nagrania
+(`src/scenes/*.timing.json`) z prawdziwego położenia elementów, podpisy są
+w `src/scenes/index.tsx`.
 
 | Scena | Co widać |
 |---|---|
-| `reservation` | zapytanie od stałego klienta: jego wizyty, obrót i ostatnia wizyta, usługi podsunięte z cennika, rezerwacja wypełniona sama (klient, auto z kartoteki, ceny), SMS-y potwierdzenia i przypomnienia |
-| `ksef` | „Oznacz jako gotowe" z powiadomieniem klienta, wydanie auta z fakturą VAT i „Wyślij fakturę do KSeF", faktura w Finansach ze statusem „W KSeF", numerem KSeF i kodem QR |
-| `instagram` | alert na Tablicy o nowej kampanii w okolicy, reklamy konkurencji (plakietka „Nowa kampania", kalendarz kampanii), szczegóły kampanii i tydzień u obserwowanych profili |
+| `lead` | mail klienta z pytaniem o usługę i termin, usługi podsunięte z cennika, nasza odpowiedź z wyceną, zgoda klienta, historia klienta; termin zaznaczony w kalendarzu, rezerwacja wypełniona z leada, SMS-y potwierdzenia i przypomnienia |
+| `handover` | „Oznacz jako gotowe" z SMS-em, protokół wydania wysłany do podpisu, strona podpisu na telefonie klienta (dokument, oświadczenie, podpis palcem), podpis wraca do wydania, faktura VAT z „Wyślij fakturę do KSeF", faktura „W KSeF" z numerem i kodem QR |
+| `costs` | animacja (`InvoiceJourney`): kontrahent wystawia fakturę → KSeF → CRM → reguła po NIP; potem nagranie: faktura w „Dokumentach kosztowych", reguły dopasowania, przypisanie silnikiem reguł, koszty 12 miesięcy w kategoriach |
+| `instagram` | alert na Tablicy o nowej kampanii w okolicy, reklamodawcy w okolicy, kalendarz reklam, szczegóły kampanii i treść reklamy, tydzień u obserwowanych profili |
 
-Każda scena to VP9/WebM i H.264/MP4 (ok. 0,7–1,1 MB, przeglądarka pobiera jeden),
-plakat WebP i odtwarzanie dopiero, gdy przyjdzie jej kolej.
+Logo marki w nagłówku wizyty i leada to prawdziwe logo z CDN, z którego korzysta CRM
+(`car-logos-dataset` na jsDelivr). Podpis protokołu wymaga S3 - lokalnie stoi moto
+(`moto_server -p 9000`, kubeł `detailboost-crm`).
 
 ### Co jest dosiewane do bazy i dlaczego
 
@@ -49,28 +55,27 @@ Lokalny backend nie ma kluczy do usług zewnętrznych, więc część danych, kt
 w produkcji przychodzą z zewnątrz, wpisuje `capture/seed.mjs`. Interfejs, który je
 rysuje, jest w każdym kadrze prawdziwy.
 
-- **Sugestie usług na leadzie**: w produkcji dobiera je model językowy z treści
-  zapytania, wybierając pozycje cennika. Wpisujemy dokładnie takie wiersze: dwie
-  pozycje z cennika z ceną z cennika. Sekcję „Klient" liczy backend z prawdziwych wizyt.
-- **Przyjęcie faktury przez KSeF**: backend chodzi z zaślepką SDK KSeF
-  (`-PksefStub`), która odkłada fakturę do kolejki offline24. Po wydaniu auta
-  nagranie robi cięcie, status `ACCEPTED` i numer KSeF wpisujemy w bazie, a dalej
-  Finanse pokazują je same.
-- **Instagram i reklamy konkurencji**: w produkcji przychodzą ze scrapera (RapidAPI)
-  i z Biblioteki Reklam Meta. Wpisujemy konkurenta, jego posty (jeden z promocją
-  −30%), kampanię i reklamodawcę z okolicy.
-- **Konfiguracja studia**: plan FULL (konto demo ma BASIC bez SMS), reguły SMS,
-  kredyty SMS, dane firmy, token KSeF, kilka zadań na Tablicy. To jest to, co
-  właściciel ustawia sam w Ustawieniach. Reguły SMS, dane firmy, token i zadania
-  idą przez API, tą samą drogą co ekrany ustawień.
-- **Tytuł jednej wizyty demo** jest poprawiony („Porsche Cayenne" na Toyocie Camry,
-  błąd w `DemoDataInitializer.kt`).
+- **Wątek mailowy leada** (pytanie, odpowiedź, zgoda): w produkcji przychodzi z IMAP.
+  Zapisujemy go tam, gdzie zapisuje go synchronizacja skrzynki.
+- **Sugestie usług na leadzie**: w produkcji dobiera je model językowy z treści maila,
+  wybierając pozycje cennika. Wpisujemy dokładnie takie wiersze.
+- **Przyjęcie faktury przez KSeF**: zaślepka SDK KSeF (`-PksefStub`) odkłada fakturę do
+  kolejki offline24; status `ACCEPTED` i numer KSeF wpisujemy w bazie.
+- **Faktury kosztowe**: w produkcji pobiera je z KSeF synchronizacja co 15 minut.
+  Wpisujemy pół roku faktur od FIKCYJNYCH dostawców (NIP-y przechodzą tylko test sumy
+  kontrolnej). Kategorie przypisuje prawdziwy silnik reguł (`auto-rules/apply`).
+- **Instagram i reklamy konkurencji**: w produkcji ze scrapera i Biblioteki Reklam Meta.
+- **Konfiguracja studia**: plan FULL, reguły i kredyty SMS, dane firmy, token KSeF,
+  zadania na Tablicy - to, co właściciel ustawia sam w Ustawieniach.
 
 ### Ponowne nagranie
 
 1. Backend: `./gradlew bootRun -PksefStub` w `automotive-crm-v2-backend`. Wymaga
    Postgresa z `pgvector` i Redisa. Bez klucza OpenAI trzeba podać dowolny
    `SPRING_AI_OPENAI_API_KEY`, a do zakładki Reklamy dowolny `META_ADS_LIBRARY_TOKEN`.
+   Do podpisu protokołu: `S3_ENDPOINT=http://localhost:9000` (moto), dowolne
+   `S3_ACCESS_KEY`/`S3_SECRET_KEY`, `COMMUNICATION_WHITELIST_ENABLED=false`
+   i `--smsapi.enabled=false` (SMS z linkiem trafia tylko do logu).
    Synchronizacje Instagrama i Mety wyłącz flagami
    `--instagram.sync.enabled=false --instagram.daily-sync.enabled=false
    --meta.ads.sync.enabled=false --meta.ads.discovery.enabled=false`.
@@ -79,11 +84,13 @@ rysuje, jest w każdym kadrze prawdziwy.
 3. Tutaj (potrzebne `ffmpeg` z libx264 i libvpx oraz `psql` przez `sudo -u postgres`):
 
 ```sh
-node capture/run.mjs reservation    # albo ksef, instagram
-ENCODE_ONLY=1 node capture/run.mjs reservation   # tylko kodowanie z zapisanych klatek
+node capture/run.mjs lead    # albo handover, costs, instagram
+ENCODE_ONLY=1 node capture/run.mjs lead   # tylko kodowanie z zapisanych klatek
 ```
 
 Nagrywanie idzie przez screencast Chrome (CDP), nie `recordVideo` Playwrighta, które
 koduje VP8 z bitrate ok. 1 Mbit/s i rozmywa drobny tekst. Kursor to pierścień
 rysowany w stronie (Chrome bez okna nie ma kursora). Białe klatki ładowania widoków
-recorder wycina, a scena jest przyspieszana (`speed`), żeby zmieścić się w 17–22 s.
+recorder wycina, a scena jest przyspieszana (`speed`), żeby zmieścić się w ok. 30 s.
+Strona podpisu jest nagrywana w oknie telefonu (390 × 844) i wstawiana w ramkę telefonu
+na rozmytym ekranie studia.

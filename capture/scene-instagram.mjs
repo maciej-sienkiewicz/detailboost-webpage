@@ -2,7 +2,7 @@
 // Widać: alert na Tablicy („w Twoim rejonie… nowa kampania"), przejście do reklam
 // konkurencji (plakietka „Nowa kampania", kalendarz kampanii), szczegóły kampanii
 // z treścią reklamy i tydzień u obserwowanych profili z postem-promocją.
-import { BASE, click, moveTo, showCursorAt, wait } from './lib.mjs';
+import { BASE, beat, click, moveTo, showCursorAt, wait } from './lib.mjs';
 import { enableFullPlan, fixDemoTitles, seedCampaignHistory, seedCompetitorCampaign, seedTasks } from './seed.mjs';
 
 export default {
@@ -43,25 +43,31 @@ export default {
         await wait(page, 900);
         await showCursorAt(page, 760, 520);
     },
-    async play({ page }) {
+    async play({ page, rec }) {
         await wait(page, 500);
+        await beat(page, rec, 'alert', page.getByText(/W Twoim rejonie/).first().locator('xpath=ancestor::*[2]'));
         await moveTo(page, page.getByText(/W Twoim rejonie/).first(), 900);
         await wait(page, 1300);
         await click(page, page.getByRole('button', { name: /Zobacz, kto/ }).first(), { ms: 800, settle: 200 });
         await page.getByText('Reklamodawcy w okolicy').waitFor({ timeout: 20000 });
         await wait(page, 900);
+        await beat(page, rec, 'area', page.getByText('Reklamodawcy w okolicy').first().locator('xpath=ancestor::*[3]'));
         await moveTo(page, page.getByText('Nowa kampania', { exact: true }).first(), 900);
         await wait(page, 1300);
+        await beat(page, rec, 'calendar', page.getByText(/Kalendarz reklam/).first().locator('xpath=ancestor::*[2]'));
         await click(page, page.getByLabel(/shinestudio_waw: Jesienna promocja/).first(), { ms: 900, settle: 1500 });
+        await beat(page, rec, 'campaign', page.getByText('kont w Polsce').first().locator('xpath=ancestor::*[3]'));
         await moveTo(page, page.getByText('kont w Polsce').first(), 800);
         await wait(page, 900);
         await click(page, page.getByRole('button', { name: /Pokaż/ }).first(), { ms: 800, settle: 500 });
+        await beat(page, rec, 'creative', page.getByText(/Zabezpiecz lakier przed zimą/).first().locator('xpath=ancestor::*[2]'));
         await moveTo(page, page.getByText(/Zabezpiecz lakier przed zimą/).first(), 700);
         await wait(page, 1700);
         await page.keyboard.press('Escape');
         await wait(page, 500);
         await click(page, page.getByRole('tab', { name: /Tydzień/ }).or(page.getByText('Tydzień', { exact: true })).first(), { ms: 800, settle: 900 });
         await page.getByText(/shinestudio_waw/).first().waitFor({ timeout: 15000 });
+        await beat(page, rec, 'week', page.getByText(/Co się działo u obserwowanych profili/).first().locator('xpath=ancestor::*[1]'));
         await moveTo(page, page.getByText(/Uruchomił 1 kampanię/).first(), 900);
         await wait(page, 2600);
     },

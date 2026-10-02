@@ -5,7 +5,13 @@ import { execFileSync } from 'node:child_process';
 import { sql, rows, q } from './db.mjs';
 
 /**
- * Zapytanie od stałego klienta (Piotr Wiśniewski: 3 wizyty, 2 auta w danych demo).
+ * Zapytanie od stałego klienta (Piotr Wiśniewski: 3 wizyty, 2 auta w danych demo),
+ * prowadzone mailem: pytanie o usługę i termin, nasza odpowiedź z wyceną i jego zgoda.
+ *
+ * Wątek pocztowy lokalnie nie przyjdzie z IMAP, więc zapisujemy wiadomości tam, gdzie
+ * zapisałaby je synchronizacja skrzynki (mail_accounts / comm_threads / comm_messages,
+ * wątek podpięty pod lead). Skrzynka ma status DISABLED - aktywnej IMAP_SMTP
+ * synchronizacja próbowałaby się logować.
  *
  * Sugestie usług w produkcji dobiera model językowy z treści maila, wybierając
  * POZYCJE CENNIKA (LeadServiceSuggestionService). Lokalnie modelu nie ma, więc
@@ -18,40 +24,73 @@ export function seedReturningCustomerLead(studio) {
     const [[customerId, email, first, last]] = rows(
         `select id, email, first_name, last_name from customers where studio_id=${q(studio)} and first_name='Piotr' and last_name='Wiśniewski'`,
     );
-    const [[userId, userName]] = rows(
-        `select id, first_name || ' ' || last_name from users where studio_id=${q(studio)} limit 1`,
-    );
+    const name = `${first} ${last}`;
     const leadId = sql('select gen_random_uuid()');
-    const message =
+    const inbound =
         'Dzień dobry, po zimie chciałbym odświeżyć 911-kę: korekta lakieru i nowa powłoka ceramiczna. ' +
-        'Czy znajdzie się termin w przyszłym tygodniu? Pozdrawiam, Piotr Wiśniewski';
+        'Czy znajdzie się termin 14–15 października? Auto mogę podstawić rano. Pozdrawiam, Piotr Wiśniewski';
     sql(`insert into leads (id, contact_identifier, created_at, customer_id, customer_name, estimated_value,
             initial_message, requires_verification, source, status, studio_id, updated_at, vehicle_brand,
             vehicle_model, vehicle_detection_status)
-         values (${q(leadId)}, ${q(email)}, now() - interval '25 minutes', ${q(customerId)}, ${q(`${first} ${last}`)}, 0,
-            ${q(message)}, false, 'EMAIL', 'NEW', ${q(studio)}, now() - interval '25 minutes', 'Porsche',
+         values (${q(leadId)}, ${q(email)}, now() - interval '26 hours', ${q(customerId)}, ${q(name)}, 0,
+            ${q(inbound)}, false, 'EMAIL', 'IN_PROGRESS', ${q(studio)}, now() - interval '40 minutes', 'Porsche',
             '911 Carrera 4S', 'DONE')`);
+
     const services = [
         ['Korekta lakieru 2-etapowa', 'korekta lakieru'],
         ['Powłoka ceramiczna IGL Eclipse', 'nowa powłoka ceramiczna'],
     ];
     let total = 0;
-    for (const [name, quote] of services) {
+    for (const [service, quote] of services) {
         const [[serviceId, net, gross, vat]] = rows(
-            `select id, base_price_net, base_price_gross, vat_rate from services where studio_id=${q(studio)} and name=${q(name)}`,
+            `select id, base_price_net, base_price_gross, vat_rate from services where studio_id=${q(studio)} and name=${q(service)}`,
         );
         total += Number(gross);
         sql(`insert into lead_service_items (id, created_at, evidence_quote, lead_id, name, price_gross, price_net,
                 price_source, quantity, service_id, source, status, studio_id, vat_rate)
-             values (gen_random_uuid(), now(), ${q(quote)}, ${q(leadId)}, ${q(name)}, ${gross}, ${net},
+             values (gen_random_uuid(), now() - interval '26 hours', ${q(quote)}, ${q(leadId)}, ${q(service)}, ${gross}, ${net},
                 'CATALOG', 1, ${q(serviceId)}, 'AI', 'SUGGESTED', ${q(studio)}, ${vat})`);
     }
     sql(`update leads set estimated_value=${total} where id=${q(leadId)}`);
-    // Jedno zdarzenie w „Przebiegu sprawy" - bez niego lewa kolumna okna jest pusta.
-    // Wątku mailowego lokalnie nie odtworzymy (wymaga podłączonej skrzynki IMAP).
-    sql(`insert into lead_callbacks (id, called_by, called_by_name, created_at, lead_id, note, studio_id)
-         values (gen_random_uuid(), ${q(userId)}, ${q(userName)}, now() - interval '20 minutes', ${q(leadId)},
-            'Oddzwoniłem. Chce korektę i nową powłokę na 911, termin w przyszłym tygodniu.', ${q(studio)})`);
+    // Brutto wyceny w mailu = suma brutto pozycji z cennika (bez przeliczania z netto).
+    const totalPln = (total / 100).toLocaleString('pl-PL', { minimumFractionDigits: 2 });
+
+    const mailbox = 'kontakt@studiopolysk.pl';
+    sql(`insert into mail_accounts (id, studio_id, email_address, provider_type, auth_type, status, created_at, updated_at)
+         values (gen_random_uuid(), ${q(studio)}, ${q(mailbox)}, 'IMAP_SMTP', 'PASSWORD', 'DISABLED', now(), now())
+         on conflict (studio_id, email_address) do nothing`);
+    const account = sql(`select id from mail_accounts where studio_id=${q(studio)} and email_address=${q(mailbox)}`);
+    const thread = sql('select gen_random_uuid()');
+    const subject = 'Korekta i powłoka ceramiczna - Porsche 911';
+    const reply =
+        `Dzień dobry Panie Piotrze, 14–15 października mamy wolne stanowisko. Korekta lakieru 2-etapowa ` +
+        `i powłoka ceramiczna IGL Eclipse to łącznie ${totalPln} zł brutto. Auto przyjmujemy 14.10 o 9:00, ` +
+        `odbiór 15.10 po 17:00. Czy potwierdza Pan termin? Pozdrawiamy, Studio Połysk`;
+    const consent =
+        `Tak, potwierdzam termin 14–15.10 i wycenę ${totalPln} zł. Zgadzam się na wykonanie obu usług. ` +
+        `Podstawię auto o 9:00. Piotr Wiśniewski`;
+    sql(`insert into comm_threads (id, studio_id, account_id, subject_norm, subject, participant_email, participant_name,
+            last_message_at, last_direction, last_snippet, message_count, unread_count, inbound_count, outbound_count,
+            has_attachments, lead_id, archived, created_at, kind)
+         values (${q(thread)}, ${q(studio)}, ${q(account)}, ${q(subject.toLowerCase())}, ${q(subject)}, ${q(email)}, ${q(name)},
+            now() - interval '40 minutes', 'INBOUND', ${q(consent.slice(0, 120))}, 3, 0, 2, 1, false, ${q(leadId)}, false,
+            now() - interval '26 hours', 'DIRECT')`);
+    const msg = (id, dir, ago, from, fromName, to, subj, body, inReplyTo) =>
+        sql(`insert into comm_messages (id, studio_id, account_id, thread_id, direction, folder_kind, message_id_hdr,
+                in_reply_to, from_email, from_name, to_emails, subject, sent_at, body_text, body_text_clean,
+                has_attachments, is_read, read_source, read_at, send_status, created_at)
+             values (gen_random_uuid(), ${q(studio)}, ${q(account)}, ${q(thread)}, '${dir}', '${dir === 'INBOUND' ? 'INBOX' : 'SENT'}',
+                ${q(`<${id}.${leadId}@seed>`)}, ${inReplyTo ? q(`<${inReplyTo}.${leadId}@seed>`) : 'null'},
+                ${q(from)}, ${q(fromName)}, ${q(to)}, ${q(subj)}, now() - interval '${ago}', ${q(body)}, ${q(body)},
+                false, true, ${dir === 'INBOUND' ? "'CRM'" : 'null'}, ${dir === 'INBOUND' ? `now() - interval '${ago}'` : 'null'},
+                '${dir === 'INBOUND' ? 'RECEIVED' : 'SENT'}', now() - interval '${ago}')`);
+    msg('in1', 'INBOUND', '26 hours', email, name, mailbox, subject, inbound, null);
+    msg('out1', 'OUTBOUND', '25 hours', mailbox, 'Studio Połysk', email, `Re: ${subject}`, reply, 'in1');
+    msg('in2', 'INBOUND', '40 minutes', email, name, mailbox, `Re: ${subject}`, consent, 'out1');
+    // Ostatnie słowo należy do klienta, ale po jego zgodzie ruch jest po stronie
+    // studia w kalendarzu, nie w poczcie - first_response_at po zgodzie trzyma
+    // „Stwórz rezerwację" jako krok następny (leadUrgency.ts) zamiast „Odpisz klientowi".
+    sql(`update leads set thread_id=${q(thread)}, first_response_at = now() - interval '39 minutes' where id=${q(leadId)}`);
     return { leadId, customerId };
 }
 
@@ -74,7 +113,8 @@ export function enableFullPlan(studio) {
 
 /**
  * Reguły SMS włączone tak, jak włączyłby je właściciel w Ustawieniach → SMS:
- * potwierdzenie rezerwacji, przypomnienie 24 h przed wizytą i „pojazd gotowy".
+ * potwierdzenie rezerwacji, przypomnienie 24 h przed wizytą, „pojazd gotowy"
+ * i link do podpisu dokumentu (bez niego wydanie auta nie wyśle protokołu do podpisu).
  * Fabrycznie każda reguła jest wyłączona, a formularz rezerwacji pokazuje wtedy
  * „Wyłączone globalnie w konfiguracji SMS". Przez API, nie SQL - ta sama ścieżka
  * co ekran ustawień, z jego walidacją.
@@ -91,6 +131,7 @@ export async function enableSmsAutomation(page, base, studio) {
     config.preVisit.enabled = true;
     config.preVisit.offsetMinutes = 24 * 60;
     config.visitReadyForPickup.enabled = true;
+    config.signatureRequest.enabled = true;
     const res = await page.request.put(url, { data: config });
     if (!res.ok()) throw new Error(`PUT automation: ${res.status()} ${await res.text()}`);
 }
@@ -337,4 +378,120 @@ export async function seedTasks(page, base) {
 export function fixDemoTitles(studio) {
     sql(`update visits set title='2-etap + ceramika Toyota Camry'
          where studio_id=${q(studio)} and title='2-etap + ceramika Porsche Cayenne'`);
+}
+
+/** NIP z poprawną cyfrą kontrolną (wagi 6,5,7,2,3,4,5,6,7) dla fikcyjnych firm. */
+function nip(prefix9) {
+    const w = [6, 5, 7, 2, 3, 4, 5, 6, 7];
+    for (let k = 0; k < 1000; k++) {
+        const base = String((Number(prefix9) + k) % 1e9).padStart(9, '0');
+        const sum = [...base].reduce((acc, d, i) => acc + Number(d) * w[i], 0) % 11;
+        if (sum !== 10) return base + sum;
+    }
+    throw new Error('nip');
+}
+
+/*
+ * Dostawcy są FIKCYJNI, z NIP-ami przechodzącymi tylko test sumy kontrolnej. Strona jest
+ * publiczna, a faktury są zmyślone - nie przypisujemy ich prawdziwym firmom.
+ */
+export const SUPPLIERS = {
+    chemia: { name: 'Detailing Chemie Hurt Sp. z o.o.', nip: nip('598412736'), category: 'Chemia detailingowa', color: '#3B82F6', about: 'Szampony, pre-washe, woski, mikrofibry' },
+    paliwo: { name: 'Stacje Paliw Ekspres S.A.', nip: nip('641937205'), category: 'Paliwo', color: '#F97316', about: 'Auto serwisowe i odbiór door-to-door' },
+    ppf: { name: 'PPF Protect Dystrybucja Sp. z o.o.', nip: nip('712506384'), category: 'Folie PPF', color: '#8B5CF6', about: 'Rolki folii ochronnej i akcesoria montażowe' },
+    leasing: { name: 'AutoLease Finanse Sp. z o.o.', nip: nip('846210397'), category: 'Leasing', color: '#64748B', about: 'Raty leasingowe auta serwisowego i sprzętu' },
+    media: { name: 'Energia Miasto Sp. z o.o.', nip: nip('935874120'), category: 'Media', color: '#EAB308', about: 'Prąd, woda, ogrzewanie' },
+    narzedzia: { name: 'Narzędziownia Profi Sp. z o.o.', nip: nip('578203916'), category: 'Narzędzia i sprzęt', color: '#14B8A6', about: 'Polerki, narzędzia, materiały warsztatowe' },
+};
+
+/** Nowa faktura, która „przychodzi" z KSeF w nagraniu (i w animacji przed nim). */
+export const NEW_COST_INVOICE = {
+    supplier: 'ppf',
+    number: 'FV/PP/2026/0915',
+    items: [
+        ['Folia PPF bezbarwna 152 cm × 15,24 m', 'rolka', 1, 6890.0],
+        ['Płyn montażowy do folii 1 l', 'szt.', 2, 89.0],
+    ],
+};
+
+function insertCostInvoice(studio, buyer, { supplier, number, daysAgo, payForm, items, minutesAgo }) {
+    const s = SUPPLIERS[supplier];
+    const lines = items.map(([name, unit, qty, unitNet], i) => {
+        const net = Math.round(qty * unitNet * 100);
+        // Brutto pozycji z faktury dostawcy: netto × stawka, zaokrąglone raz na pozycję.
+        return { i: i + 1, name, unit, qty, unitNet: Math.round(unitNet * 100), net, gross: Math.round(net * 1.23) };
+    });
+    const net = lines.reduce((a, l) => a + l.net, 0);
+    const gross = lines.reduce((a, l) => a + l.gross, 0);
+    const when = minutesAgo != null ? `now() - interval '${minutesAgo} minutes'` : `((current_date - ${daysAgo})::timestamp + time '09:40') at time zone 'Europe/Warsaw'`;
+    const issue = minutesAgo != null ? 'current_date' : `current_date - ${daysAgo}`;
+    const hash = sql(`select upper(substr(md5(${q(number + studio)}), 1, 14))`);
+    const ksef = `${s.nip}-${sql(`select to_char(${issue}, 'YYYYMMDD')`)}-${hash.slice(0, 12)}-${hash.slice(12, 14)}`;
+    const id = sql('select gen_random_uuid()');
+    const paid = payForm === 'KARTA' || (daysAgo ?? 0) > 20;
+    sql(`insert into ksef_invoices (id, studio_id, source, ksef_number, invoice_number, invoicing_date, issue_date,
+            seller_nip, seller_name, buyer_name, net_amount, gross_amount, vat_amount, currency, invoice_type,
+            fetched_at, direction, is_correction, status, payment_status, payment_form, payment_due_date, details_synced)
+         values (${q(id)}, ${q(studio)}, 'KSEF', ${q(ksef)}, ${q(number)}, ${when}, ${issue}, ${q(s.nip)}, ${q(s.name)},
+            ${q(buyer)}, ${net}, ${gross}, ${gross - net}, 'PLN', 'FA', ${minutesAgo != null ? 'now()' : `${when} + interval '15 minutes'`},
+            'EXPENSE', false, 'ACTIVE', '${paid ? 'PAID' : 'PENDING'}', '${payForm}',
+            ${payForm === 'PRZELEW' ? `${issue} + 14` : 'null'}, true)`);
+    for (const l of lines) {
+        sql(`insert into ksef_invoice_items (id, invoice_id, line_number, name, unit, quantity, unit_price_net, net_value, gross_value, vat_rate)
+             values (gen_random_uuid(), ${q(id)}, ${l.i}, ${q(l.name)}, ${q(l.unit)}, ${l.qty}, ${l.unitNet}, ${l.net}, ${l.gross}, '23')`);
+    }
+    return { id, net, gross, ksef };
+}
+
+/**
+ * Kategorie kosztów, reguła na każdego dostawcę (dopasowanie po NIP sprzedawcy -
+ * tak działa SupplierAutoRuleService) i pół roku faktur kosztowych.
+ *
+ * Faktury kosztowe w produkcji pobiera z KSeF synchronizacja co 15 minut; lokalnie SDK
+ * KSeF jest zaślepką, więc wpisujemy je tam, gdzie zapisałaby je synchronizacja.
+ * Kategoryzację robi PRAWDZIWY silnik reguł: wołamy jego endpoint
+ * („Zastosuj wszystkie reguły teraz") - historię przed nagraniem, nową fakturę na nim.
+ */
+export async function seedCostData(page, base, studio) {
+    const [[owner, buyer]] = rows(`select u.id, coalesce(ss.name, s.name) from studios s
+        join users u on u.studio_id = s.id left join studio_settings ss on ss.studio_id = s.id
+        where s.id=${q(studio)} order by u.created_at limit 1`);
+    for (const s of Object.values(SUPPLIERS)) {
+        const cat = sql('select gen_random_uuid()');
+        sql(`insert into cost_categories (id, studio_id, name, description, color, is_active, exclude_from_stats, created_by, created_at, updated_at)
+             values (${q(cat)}, ${q(studio)}, ${q(s.category)}, ${q(s.about)}, ${q(s.color)}, true, false, ${q(owner)},
+                now() - interval '200 days', now() - interval '200 days')`);
+        sql(`insert into supplier_auto_rules (id, studio_id, seller_nip, seller_name, category_id, created_at, updated_at)
+             values (gen_random_uuid(), ${q(studio)}, ${q(s.nip)}, ${q(s.name)}, ${q(cat)}, now() - interval '200 days', now() - interval '200 days')`);
+    }
+    const history = [];
+    [170, 140, 110, 79, 48, 18].forEach((d, i) => history.push({ supplier: 'leasing', number: `AL/2026/${118734 + i * 3411}`, daysAgo: d, payForm: 'PRZELEW',
+        items: [[`Rata leasingowa ${9 + i}/48, umowa AL/25/01187 (auto serwisowe)`, 'szt.', 1, 2450]] }));
+    [[165, 92, 5.37], [133, 104, 5.41], [101, 88, 5.29], [70, 97, 5.33], [39, 110, 5.45], [9, 95, 5.49]].forEach(([d, l, p], i) =>
+        history.push({ supplier: 'paliwo', number: `FVS/0412/26/${118455 + i * 9731}`, daysAgo: d, payForm: 'KARTA',
+            items: [['Olej napędowy', 'l', l, p], ...(i === 2 ? [['AdBlue 10 l', 'szt.', 1, 39]] : [])] }));
+    [[150, 1840], [89, 1610], [28, 1725]].forEach(([d, kwh], i) => history.push({ supplier: 'media', number: `P/23518840/000${3 + i}/26`, daysAgo: d,
+        payForm: 'PRZELEW', items: [['Energia elektryczna, taryfa C12a', 'kWh', kwh, 0.62], ['Opłata handlowa', 'mies.', 2, 22.5]] }));
+    [[158, [['Szampon pH neutralny 5 l', 'szt.', 2, 119], ['Pre-wash alkaliczny 5 l', 'szt.', 2, 129], ['Wosk w sprayu 1 l', 'szt.', 4, 59]]],
+     [120, [['Środek do felg 5 l', 'szt.', 2, 145], ['Mikrofibra 40×40 cm', 'szt.', 20, 9.5]]],
+     [95, [['Szampon pH neutralny 5 l', 'szt.', 2, 119], ['Usuwacz smoły i kleju 1 l', 'szt.', 3, 49]]],
+     [75, [['Pre-wash alkaliczny 5 l', 'szt.', 3, 129], ['Wosk twardy 500 ml', 'szt.', 2, 89]]],
+     [33, [['Środek do felg 5 l', 'szt.', 2, 145], ['Wosk w sprayu 1 l', 'szt.', 6, 59]]]].forEach(([d, items], i) =>
+        history.push({ supplier: 'chemia', number: `FV/2026/0${4 + i}/0${412 + i * 137}`, daysAgo: d, payForm: 'PRZELEW', items }));
+    [[145, [['Folia PPF bezbarwna 152 cm × 15,24 m', 'rolka', 1, 6890], ['Płyn montażowy do folii 1 l', 'szt.', 2, 89]]],
+     [96, [['Folia PPF matowa 152 cm × 15,24 m', 'rolka', 1, 7420]]],
+     [41, [['Folia PPF bezbarwna 152 cm × 15,24 m', 'rolka', 1, 6890], ['Folia PPF bezbarwna 61 cm × 15,24 m', 'rolka', 1, 2790]]]].forEach(([d, items], i) =>
+        history.push({ supplier: 'ppf', number: `FV/PP/2026/0${388 + i * 133}`, daysAgo: d, payForm: 'PRZELEW', items }));
+    [[128, [['Polerka rotacyjna 1500 W', 'szt.', 1, 1290], ['Rękawice nitrylowe, op. 100 szt.', 'op.', 5, 34.9]]],
+     [55, [['Komplet nasadek 1/2", 24 elem.', 'kpl.', 1, 389], ['Taśma maskująca 48 mm', 'szt.', 12, 11.2]]]].forEach(([d, items], i) =>
+        history.push({ supplier: 'narzedzia', number: `NP/26/00${45118 + i * 16259}`, daysAgo: d, payForm: 'PRZELEW', items }));
+    for (const inv of history) insertCostInvoice(studio, buyer, inv);
+    const res = await page.request.post(`${base}/api/v1/cost-categories/auto-rules/apply`, { data: {} });
+    if (!res.ok()) throw new Error(`apply rules: ${res.status()} ${await res.text()}`);
+    return { buyer, assigned: await res.json() };
+}
+
+/** Faktura „przychodzi" z KSeF - wiersz w miejscu, w które zapisuje go synchronizacja. */
+export function insertNewCostInvoice(studio, buyer) {
+    return insertCostInvoice(studio, buyer, { ...NEW_COST_INVOICE, payForm: 'PRZELEW', minutesAgo: 2 });
 }
