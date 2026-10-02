@@ -115,7 +115,7 @@ export function Hero() {
                             <SceneTabs scenes={SCENES} player={player} />
                         </div>
                         <p className="mt-6 text-center font-mono text-[0.6875rem] tracking-[0.04em] text-dim">
-                            Nagrania z działającej aplikacji na koncie demonstracyjnym. Przyjęcie auta nagrane w oknie tabletu. Animacja przed nagraniem kosztów pokazuje drogę faktury przez KSeF.
+                            Nagrania z działającej aplikacji na koncie demonstracyjnym. Przyjęcie auta nagrane w oknie tabletu. Tankowanie w scenie kosztów to animacja, bo dzieje się na stacji, nie w CRM.
                         </p>
                     </div>
 
