@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { BeatCaption, FocusRing, SceneCamera, type Beat } from './SceneOverlay';
 
 export type Scene = {
@@ -298,8 +298,12 @@ export function SceneTabs({ scenes, player }: { scenes: readonly Scene[]; player
             <div
                 role="tablist"
                 aria-label="Nagrania z aplikacji"
-                className="grid gap-3 sm:gap-6"
-                style={{ gridTemplateColumns: `repeat(${scenes.length}, minmax(0, 1fr))` }}
+                // Na telefonie same numery mieszczą się w jednym rzędzie; z tytułami
+                // osiem kolumn łamałoby każdy tytuł na trzy linie, więc od sm są dwa rzędy.
+                className={`grid grid-cols-[repeat(var(--tabs),minmax(0,1fr))] gap-3 sm:gap-x-6 sm:gap-y-5 ${
+                    scenes.length > 5 ? 'sm:grid-cols-4' : ''
+                }`}
+                style={{ '--tabs': scenes.length } as CSSProperties}
             >
                 {scenes.map((scene, i) => {
                     const on = i === player.active;

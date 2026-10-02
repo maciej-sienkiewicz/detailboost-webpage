@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<title>Powiadomienia na telefonie właściciela</title>
+<!--
+  Scena „push" (capture/scene-push.mjs): telefon właściciela, na który wpadają
+  powiadomienia z CRM. Treści są z szablonów backendu (push/notify/PushMessages.kt)
+  w wariancie „personal" (właściciel widzi nazwisko klienta), ikony z public/icons
+  frontendu CRM - te same, które pokazuje service worker.
+
+  Wyjątek: „Klient nie przyjechał" - CRM ma status NO_SHOW, ale nie wysyła jeszcze
+  o nim powiadomienia. Ikona i forma jak przy rezerwacji.
+-->
+<style>
+@font-face { font-family: Geist; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2) format('woff2'); }
+@font-face { font-family: Geist; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist/files/geist-latin-ext-wght-normal.woff2) format('woff2'); unicode-range: U+0100-024F; }
+@font-face { font-family: GeistMono; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2) format('woff2'); }
+@font-face { font-family: GeistMono; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-ext-wght-normal.woff2) format('woff2'); unicode-range: U+0100-024F; }
+:root { --void: #0b0b0d; --paper: #f4f4f2; --mute: #a1a1aa; --gold: #ecd08f; --gold2: #dcae5c; --ease: cubic-bezier(.16,1,.3,1); }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: radial-gradient(ellipse at 62% 40%, #1d1d24, var(--void) 68%); color: var(--paper); font-family: Geist, system-ui, sans-serif; overflow: hidden; }
+.grain { position: absolute; inset: 0; background-image: radial-gradient(rgb(255 255 255 / .07) 1px, transparent 1px); background-size: 26px 26px; }
+
+/* Lewa kolumna: gdzie jest właściciel, kiedy przychodzi powiadomienie. */
+.story { position: absolute; left: 96px; top: 200px; width: 560px; }
+.eyebrow { font-family: GeistMono; font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold2); opacity: 0; transition: opacity .8s; }
+.head { font-size: 54px; line-height: 1.06; font-weight: 600; letter-spacing: -.04em; margin-top: 20px; opacity: 0; transform: translateY(14px); transition: opacity .9s var(--ease), transform .9s var(--ease); }
+.tail { position: relative; margin-top: 44px; height: 160px; }
+.where { position: absolute; inset: 0; }
+.where div { position: absolute; inset: 0; opacity: 0; transform: translateY(16px); transition: opacity .6s var(--ease), transform .7s var(--ease); }
+.where div.on { opacity: 1; transform: none; }
+.where div.gone { opacity: 0; transform: translateY(-14px); }
+.where time { font-family: GeistMono; font-size: 15px; color: var(--gold); letter-spacing: .06em; }
+.where p { margin: 8px 0 0; font-size: 28px; line-height: 1.25; letter-spacing: -.02em; color: #d4d4d8; }
+.end { position: absolute; left: 0; top: 0; font-size: 26px; color: #d4d4d8 !important; line-height: 1.45; color: var(--mute); opacity: 0; transition: opacity .9s; max-width: 470px; }
+.on { opacity: 1 !important; transform: none !important; }
+
+/* Telefon. */
+.phone { position: absolute; left: 790px; top: 34px; width: 412px; height: 832px; border-radius: 62px; padding: 12px;
+  background: linear-gradient(145deg, #3b3b42, #16161a 40%, #2a2a30); box-shadow: 0 0 0 1px #55555e inset, 0 60px 110px -30px #000, 0 0 120px -40px rgb(220 174 92 / .25);
+  opacity: 0; transform: translateY(30px) scale(.97); transition: opacity 1s, transform 1.1s var(--ease); }
+.phone.buzz { animation: buzz .32s linear; }
+@keyframes buzz { 0%,100% { translate: 0 } 20% { translate: -3px 0 } 40% { translate: 3px 0 } 60% { translate: -2px 0 } 80% { translate: 2px 0 } }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 51px; overflow: hidden;
+  background: radial-gradient(ellipse 120% 70% at 30% 0%, #2b3550 0%, transparent 60%), radial-gradient(ellipse 90% 60% at 90% 100%, #4a3a1c 0%, transparent 65%), linear-gradient(180deg, #121624, #0b0c12); }
+.island { position: absolute; left: 50%; top: 12px; width: 118px; height: 34px; margin-left: -59px; border-radius: 20px; background: #000; }
+.status { position: absolute; left: 34px; right: 30px; top: 20px; display: flex; justify-content: space-between; font-size: 15px; font-weight: 600; }
+.status .bars { display: flex; gap: 6px; align-items: center; }
+.status .bars i { display: inline-block; background: var(--paper); border-radius: 2px; }
+.clock { position: absolute; left: 0; right: 0; top: 74px; text-align: center; transition: transform .7s var(--ease); }
+.clock .date { font-size: 17px; font-weight: 500; color: #e4e4e7; }
+.clock .time { font-size: 84px; font-weight: 600; letter-spacing: -.04em; line-height: 1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.stack { position: absolute; left: 12px; right: 12px; top: 214px; display: flex; flex-direction: column; transition: top .8s var(--ease); }
+.compact .stack { top: 150px; }
+.clock { transform-origin: 50% 0; }
+.compact .clock { transform: translateY(-14px) scale(.62); }
+
+.note { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 12px 14px; border-radius: 22px; color: #fff;
+  background: rgb(46 48 60 / .78); backdrop-filter: blur(18px); box-shadow: 0 0 0 1px rgb(255 255 255 / .06) inset;
+  max-height: 0; margin-bottom: 0; opacity: 0; transform: translateY(-26px) scale(.94); overflow: hidden;
+  transition: max-height .7s var(--ease), margin .7s var(--ease), opacity .45s, transform .75s cubic-bezier(.2,1.25,.4,1), background 1.2s; }
+.note.in { max-height: 120px; margin-bottom: 9px; opacity: 1; transform: none; }
+.note.fresh { background: rgb(64 66 82 / .9); }
+.note img { width: 40px; height: 40px; border-radius: 10px; }
+.note .meta { display: flex; justify-content: space-between; font-size: 12.5px; color: #c4c4cc; letter-spacing: .02em; }
+.note .meta b { font-weight: 600; text-transform: uppercase; letter-spacing: .06em; font-size: 11.5px; }
+.note h4 { margin: 3px 0 2px; font-size: 15.5px; font-weight: 650; letter-spacing: -.01em; line-height: 1.25; }
+.note p { margin: 0; font-size: 14px; line-height: 1.32; color: #e4e4e7; }
+.home { position: absolute; left: 50%; bottom: 10px; width: 136px; height: 5px; margin-left: -68px; border-radius: 3px; background: rgb(255 255 255 / .8); }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="story">
+  <div class="eyebrow" id="eyebrow">Telefon właściciela, piątek</div>
+  <div class="head" id="head">Studio pod kontrolą z&nbsp;każdego miejsca.</div>
+  <div class="tail"><div class="where" id="where"></div>
+  <div class="end" id="end">Wiesz, co dzieje się w&nbsp;studiu, zanim ktokolwiek zadzwoni. Dotknięcie powiadomienia otwiera właściwe miejsce w&nbsp;CRM.</div></div>
+</div>
+
+<div class="phone" id="phone">
+  <div class="screen">
+    <div class="island"></div>
+    <div class="status"><span id="sbTime">9:12</span><span class="bars">
+      <i style="width:3px;height:6px"></i><i style="width:3px;height:9px"></i><i style="width:3px;height:12px"></i>
+      <i style="width:24px;height:12px;border-radius:4px;background:none;box-shadow:0 0 0 1.5px #f4f4f2 inset;position:relative"></i></span></div>
+    <div class="clock" id="clock"><div class="date">piątek, 2 października</div><div class="time" id="time">9:12</div></div>
+    <div class="stack" id="stack"></div>
+    <div class="home"></div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const at = (ms, fn) => setTimeout(fn, ms);
+// Treści z PushMessages.kt (wariant dla właściciela: z nazwiskiem klienta).
+const NOTES = [
+  { at: '9:12', icon: 'notification-earnings', title: 'Właśnie zarobiłeś 2 890,00 zł',
+    body: 'Pojazd wydany: Anna Kowalska, Porsche 911, WA 5X912.', where: 'Jesteś u księgowej.' },
+  { at: '10:15', icon: 'notification-reservation', title: 'Klient nie przyjechał',
+    body: 'Tomasz Nowak, rezerwacja na 10:00, Audi A6. Termin jest wolny.', where: 'Jedziesz po chemię do hurtowni.' },
+  { at: '10:41', icon: 'notification-campaign', title: 'Nowa kampania w Twoim rejonie',
+    body: 'Shine Studio Warszawa: 3 nowe reklamy na Facebooku i Instagramie.', where: 'Stoisz w korku na Puławskiej.' },
+  { at: '11:00', icon: 'icon-192', title: 'Dostępny nowy raport',
+    body: 'Miesiąc: 01.09–30.09.2026', where: 'Pijesz kawę z dostawcą folii.' },
+  { at: '11:23', icon: 'notification-lead', title: 'Nowy lead: Marta Zielińska',
+    body: 'Formularz na stronie, 601 284 773.', where: 'Jesteś na targach w Poznaniu.' },
+  { at: '12:02', icon: 'notification-checkin', title: 'Przyjęto pojazd: BMW X5',
+    body: 'Piotr Wiśniewski, WA 12345, wizyta nr 128.', where: 'Wciąż na targach. Studio pracuje.' },
+];
+const ago = (from, to) => {
+  const m = (h) => { const [a, b] = h.split(':').map(Number); return a * 60 + b; };
+  const d = m(to) - m(from);
+  return d < 60 ? `${d} min temu` : `${Math.floor(d / 60)} godz. temu`;
+};
+const notes = [];
+const wheres = NOTES.map((n) => {
+  const el = document.createElement('div');
+  el.innerHTML = `<time>${n.at}</time><p>${n.where}</p>`;
+  $('where').appendChild(el);
+  return el;
+});
+function push(i) {
+  const n = NOTES[i];
+  const el = document.createElement('div');
+  el.className = 'note fresh';
+  el.innerHTML = `<img src="icons/${n.icon}.png" alt=""><div><div class="meta"><b>DetailBoost</b><span>teraz</span></div>
+    <h4>${n.title}</h4><p>${n.body}</p></div>`;
+  $('stack').prepend(el);
+  notes.forEach(({ el: old, n: o }) => { old.classList.remove('fresh'); old.querySelector('.meta span').textContent = ago(o.at, n.at); });
+  notes.push({ el, n });
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+  $('time').textContent = n.at; $('sbTime').textContent = n.at;
+  $('phone').classList.remove('buzz'); void $('phone').offsetWidth; $('phone').classList.add('buzz');
+  wheres.forEach((w, k) => { w.classList.toggle('on', k === i); w.classList.toggle('gone', k < i); });
+  if (i === 3) document.querySelector('.screen').classList.add('compact');
+}
+// Oś czasu (ms). Te same chwile zna skrypt nagrania - znaczy po nich kroki filmu.
+const FIRST = 1600, STEP = 3300;
+window.TIMELINE = { notes: NOTES.map((_, i) => FIRST + i * STEP), end: FIRST + (NOTES.length - 1) * STEP + 5200 };
+window.start = () => {
+  at(0, () => { $('eyebrow').classList.add('on'); $('head').classList.add('on'); $('phone').classList.add('on'); });
+  window.TIMELINE.notes.forEach((t, i) => at(t, () => push(i)));
+  at(window.TIMELINE.notes.at(-1) + 2000, () => { wheres.at(-1).classList.remove('on'); wheres.at(-1).classList.add('gone'); at(400, () => $('end').classList.add('on')); });
+};
+</script>
+</body>
+</html>

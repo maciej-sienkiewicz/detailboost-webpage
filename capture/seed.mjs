@@ -113,8 +113,11 @@ function insertMessage({ studio, account, thread, leadId, email, name, mailbox }
 export function insertCustomerReply(ctx) {
     const body = `Tak, potwierdzam termin 14–15.10 i wycenę ${ctx.totalPln} zł. Zgadzam się na wykonanie obu usług. ` +
         'Podstawię auto o 9:00. Piotr Wiśniewski';
-    insertMessage(ctx, 'in2', 'INBOUND', '1 minute', `Re: ${ctx.subject}`, body, null);
-    sql(`update comm_threads set last_message_at=now() - interval '1 minute', last_direction='INBOUND',
+    // Czas „teraz", nie „minutę temu": naszą odpowiedź wysyła w nagraniu prawdziwa poczta
+    // CRM kilka sekund wcześniej, więc odpowiedź klienta cofnięta o minutę stawała w
+    // historii PRZED naszą (odpisaliśmy → klient odpisał → pierwszy kontakt).
+    insertMessage(ctx, 'in2', 'INBOUND', '0 seconds', `Re: ${ctx.subject}`, body, null);
+    sql(`update comm_threads set last_message_at=now(), last_direction='INBOUND',
             message_count=message_count+1, inbound_count=inbound_count+1, last_snippet=${q(body.slice(0, 120))}
          where id=${q(ctx.thread)}`);
     // Ostatnie słowo należy do klienta, ale po jego zgodzie ruch jest po stronie studia
@@ -161,6 +164,9 @@ export async function enableSmsAutomation(page, base, studio) {
     config.preVisit.offsetMinutes = 24 * 60;
     config.visitReadyForPickup.enabled = true;
     config.signatureRequest.enabled = true;
+    // Karta Wizyty: SMS z prośbą o „TAK" przy usługach dodatkowych i SMS z linkiem do karty.
+    if (config.upsellConsent) config.upsellConsent.enabled = true;
+    if (config.visitCardLink) config.visitCardLink.enabled = true;
     const res = await page.request.put(url, { data: config });
     if (!res.ok()) throw new Error(`PUT automation: ${res.status()} ${await res.text()}`);
 }
@@ -549,4 +555,100 @@ export async function seedCostData(page, base, studio, { without = [] } = {}) {
 export function insertNewFuelInvoice(studio, buyer) {
     return insertCostInvoice(studio, buyer, { ...NEW_FUEL_INVOICE, payForm: 'KARTA', minutesAgo: 6,
         ksefNumber: '7740001454-20261002-3F9A1C7E52B0-4D' });
+}
+
+/*
+ * Zespół studia: role i trzech pracowników z kontami, założonych prawdziwym API
+ * (te same wywołania co „Dodaj rolę" i „Dodaj pracownika"). Wrzesień mają wypełniony
+ * - w produkcji wpisują go sami w „Czasie pracy" i składają kartę do zatwierdzenia.
+ * Konta cofamy w czasie na sierpień, bo karta miesiąca liczy tylko osoby, które
+ * miały konto przed jego końcem.
+ */
+export const TEAM = [
+    { firstName: 'Marek', lastName: 'Zając', phone: '+48 600 410 221', email: 'marek.zajac@studio-polysk.pl', role: 'Detailer', status: 'SUBMITTED' },
+    { firstName: 'Paweł', lastName: 'Kamiński', phone: '+48 600 410 338', email: 'pawel.kaminski@studio-polysk.pl', role: 'Detailer', status: 'SUBMITTED' },
+    { firstName: 'Aleksandra', lastName: 'Wójcik', phone: '+48 600 410 517', email: 'ola.wojcik@studio-polysk.pl', role: 'Recepcja', status: 'APPROVED' },
+];
+
+export async function seedTeam(page, base, studio) {
+    const post = async (path, data) => {
+        const res = await page.request.post(`${base}${path}`, { data });
+        if (!res.ok()) throw new Error(`${path}: ${res.status()} ${await res.text()}`);
+        return res.json();
+    };
+    const roles = {
+        Detailer: await post('/api/v1/roles', { name: 'Detailer', description: 'Wizyty, klienci i zadania. Liczony czas pracy.',
+            permissions: ['VISITS_VIEW', 'CUSTOMERS_VIEW', 'VISITS_CREATE', 'TASKS_VIEW'], trackWorkTime: true }),
+        Recepcja: await post('/api/v1/roles', { name: 'Recepcja', description: 'Kalendarz, klienci, leady i komunikacja.',
+            permissions: ['VISITS_VIEW', 'CUSTOMERS_VIEW', 'VISITS_CREATE', 'TASKS_VIEW', 'LEADS_MANAGE', 'COMMUNICATION_SEND'], trackWorkTime: true }),
+    };
+    const roleId = (name) => Object.values(roles[name]).find((v) => /^[0-9a-f-]{36}$/.test(v));
+    const owner = sql(`select id from users where studio_id=${q(studio)} and is_owner order by created_at limit 1`);
+    // Login jest unikalny w całym CRM: konta z poprzednich nagrań (inne studia demo)
+    // dostają adres zastępczy, żeby te same osoby mogły dostać konto w nowym studiu.
+    const emails = [...TEAM.map((m) => m.email), 'kacper.lewandowski@studio-polysk.pl'].map(q).join(',');
+    sql(`update users set email = id || '@poprzednie-nagranie.invalid' where email in (${emails})`);
+    for (const [k, m] of TEAM.entries()) {
+        await post('/api/v1/employees', { firstName: m.firstName, lastName: m.lastName, phone: m.phone, email: m.email,
+            createAccount: true, roleId: roleId(m.role) });
+        const user = sql(`select id from users where studio_id=${q(studio)} and email=${q(m.email)}`);
+        // Zaproszenie przyjęte w sierpniu: konto aktywne, hasło ustawione.
+        sql(`update users set is_active=true, invitation_pending=false, created_at=now() - interval '${60 + k} days' where id=${q(user)}`);
+        sql(`update employees set created_at=now() - interval '${60 + k} days' where user_id=${q(user)}`);
+        // Wrzesień: dni robocze, 8 h z drobnymi odchyleniami, jak wpisuje człowiek.
+        // Sierpień jest już rozliczony (lista obecności za sierpień leży w tabeli).
+        sql(`insert into work_time_entries (id, user_id, studio_id, date, minutes, note, created_at, updated_at)
+             select gen_random_uuid(), ${q(user)}, ${q(studio)}, d::date,
+                    case when extract(day from d)::int % ${5 + k} = 0 then 540 when extract(day from d)::int % ${7 + k} = 0 then 450 else 480 end,
+                    null, d + interval '17 hours', d + interval '17 hours'
+             from generate_series(date '2026-08-01', date '2026-09-30', interval '1 day') d
+             where extract(isodow from d) < 6 ${k === 1 ? "and d::date not between date '2026-09-15' and date '2026-09-16'" : ''}`);
+        sql(`insert into work_time_periods (id, user_id, studio_id, period, status, submitted_at, approved_at, approved_by, created_at, updated_at)
+             values (gen_random_uuid(), ${q(user)}, ${q(studio)}, '2026-08', 'APPROVED', date '2026-09-01' + interval '9 hours',
+                date '2026-09-02' + interval '10 hours', ${q(owner)}, date '2026-09-01', date '2026-09-02')`);
+        sql(`insert into work_time_periods (id, user_id, studio_id, period, status, submitted_at, approved_at, approved_by, created_at, updated_at)
+             values (gen_random_uuid(), ${q(user)}, ${q(studio)}, '2026-09', ${q(m.status)}, now() - interval '${20 - k * 5} hours',
+                ${m.status === 'APPROVED' ? 'now() - interval \'3 hours\'' : 'null'}, ${m.status === 'APPROVED' ? q(owner) : 'null'}, now() - interval '2 days', now())`);
+    }
+    // Lista obecności za sierpień - wygenerowana tym samym endpointem co „Wygeneruj listę".
+    const employeeIds = rows(`select id from employees where studio_id=${q(studio)} order by last_name`).map(([id]) => id);
+    await post('/api/v1/worktime/team/attendance-sheet', { period: '2026-08', employeeIds });
+    sql(`update attendance_sheets set created_at = date '2026-09-02' + interval '10 hours' where studio_id=${q(studio)}`);
+    return roles;
+}
+
+/** Plik do lokalnego S3 (moto), tam gdzie CRM trzyma zdjęcia i protokoły. */
+function s3put(key, file, contentType) {
+    execFileSync('/opt/s3venv/bin/python', ['-c', `
+import boto3, sys
+s3 = boto3.client('s3', endpoint_url='http://localhost:9000', aws_access_key_id='x', aws_secret_access_key='x', region_name='eu-central-1')
+s3.upload_file(sys.argv[1], 'detailboost-crm', sys.argv[2], ExtraArgs={'ContentType': sys.argv[3]})`, file, key, contentType]);
+}
+
+/*
+ * Wizyta do Karty Wizyty: Mercedes klasy S w realizacji, przyjęty trzy dni temu.
+ * W produkcji zdjęcia i podpisany protokół przyjęcia powstają przy przyjęciu pojazdu
+ * (scena „checkin" pokazuje to na tablecie); tutaj wpisujemy ich wynik: pliki w S3
+ * i wiersze tam, gdzie zapisuje je przyjęcie.
+ */
+export function seedVisitCardVisit(studio) {
+    const [[visit, created]] = rows(`select id, to_char(created_at, 'YYYY-MM-DD HH24:MI:SSOF') from visits
+        where studio_id=${q(studio)} and title like 'Korekta lakieru Mercedes%'`);
+    const dir = new URL('./fixtures/', import.meta.url).pathname;
+    [['ms-front.jpg', 'Przód, stan przy przyjęciu'], ['ms-side.jpg', 'Bok, lakier przed korektą'], ['ms-star.jpg', 'Gwiazda na masce, mikrorysy']]
+        .forEach(([file, description], i) => {
+            const key = `visits/${visit}/photos/${file}`;
+            s3put(key, dir + file, 'image/jpeg');
+            sql(`insert into visit_photos (id, description, file_id, file_name, thumbnail_file_id, uploaded_at, uploaded_by_name, visit_id)
+                 values (gen_random_uuid(), ${q(description)}, ${q(key)}, ${q(file)}, null,
+                    timestamptz ${q(created)} + interval '${8 + i * 3} minutes', 'Marek Zając', ${q(visit)})`);
+        });
+    const template = sql(`select id from protocol_templates where studio_id=${q(studio)} and name='Protokół przyjęcia pojazdu' limit 1`);
+    const [[first, last]] = rows(`select c.first_name, c.last_name from visits v join customers c on c.id=v.customer_id where v.id=${q(visit)}`);
+    sql(`insert into visit_protocols (id, condition_match, created_at, filled_pdf_s3_key, signed_at, signed_by, signed_pdf_s3_key,
+            stage, status, studio_id, template_id, updated_at, version, visit_id)
+         values (gen_random_uuid(), true, timestamptz ${q(created)} + interval '5 minutes', ${q(`protocols/${visit}/przyjecie.pdf`)},
+            timestamptz ${q(created)} + interval '19 minutes', ${q(`${first} ${last}`)}, ${q(`protocols/${visit}/przyjecie-podpisany.pdf`)},
+            'CHECK_IN', 'SIGNED', ${q(studio)}, ${template ? q(template) : 'null'}, now(), 1, ${q(visit)})`);
+    return visit;
 }

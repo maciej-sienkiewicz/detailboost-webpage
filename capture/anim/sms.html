@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=390" />
+<title>SMS</title>
+<!--
+  Wiadomości na telefonie klienta (scena „visitcard"). Systemowej aplikacji SMS nie da
+  się nagrać, więc to jej prosty odpowiednik. Treść SMS-a NIE jest wymyślona: skrypt
+  nagrania bierze ją z logu backendu ([SMS DISABLED] … - to, co CRM wysłałby przez
+  SMSAPI) i podaje w parametrze `msg`. Odpowiedź „TAK" wraca do CRM webhookiem.
+-->
+<style>
+@font-face { font-family: Geist; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2) format('woff2'); }
+@font-face { font-family: Geist; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist/files/geist-latin-ext-wght-normal.woff2) format('woff2'); unicode-range: U+0100-024F; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #fff; font-family: Geist, system-ui, sans-serif; color: #111; overflow: hidden; }
+.top { padding: 54px 16px 12px; text-align: center; border-bottom: 1px solid #ececf0; background: #f7f7f9; }
+.avatar { width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 6px; background: linear-gradient(135deg, #9aa3b5, #6b7385); color: #fff; display: grid; place-items: center; font-weight: 600; font-size: 19px; }
+.name { font-size: 13px; font-weight: 600; }
+.sub { font-size: 11px; color: #8a8a93; margin-top: 2px; }
+.thread { position: absolute; top: 152px; bottom: 78px; left: 0; right: 0; padding: 14px 14px 0; display: flex; flex-direction: column; justify-content: flex-end; gap: 8px; }
+.day { text-align: center; font-size: 11.5px; color: #8a8a93; margin: 4px 0; }
+.b { max-width: 78%; padding: 9px 13px; border-radius: 19px; font-size: 15.5px; line-height: 1.32; word-wrap: break-word; transition: opacity .4s, transform .5s cubic-bezier(.2,1.3,.4,1); }
+.in { align-self: flex-start; background: #e9e9ee; border-bottom-left-radius: 6px; }
+.out { align-self: flex-end; background: #2f7cf6; color: #fff; border-bottom-right-radius: 6px; }
+.b a { color: inherit; text-decoration: underline; }
+.hidden { opacity: 0; transform: translateY(14px) scale(.96); }
+.status { align-self: flex-end; font-size: 11px; color: #8a8a93; margin-top: -4px; opacity: 0; transition: opacity .4s; }
+.bar { position: absolute; left: 0; right: 0; bottom: 0; height: 78px; padding: 10px 12px 28px; display: flex; gap: 8px; align-items: center; background: #fff; border-top: 1px solid #f0f0f3; }
+.field { flex: 1; height: 38px; border: 1px solid #d9d9df; border-radius: 19px; padding: 0 14px; display: flex; align-items: center; font-size: 15.5px; color: #111; }
+.field.empty::before { content: 'Wiadomość SMS'; color: #a1a1aa; }
+.caret { width: 1.5px; height: 19px; background: #2f7cf6; margin-left: 1px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.send { width: 34px; height: 34px; border-radius: 50%; background: #c9d8f7; transition: background .3s; position: relative; }
+.send.on { background: #2f7cf6; }
+.send::after { content: ''; position: absolute; left: 11px; top: 9px; border: solid #fff; border-width: 0 2.5px 2.5px 0; width: 8px; height: 8px; transform: rotate(-135deg); top: 13px; }
+</style>
+</head>
+<body>
+<div class="top"><div class="avatar" id="initials">SP</div><div class="name" id="from">Studio Połysk</div><div class="sub">SMS</div></div>
+<div class="thread" id="thread">
+  <div class="day" id="day1">Dziś 9:05</div>
+  <div class="b in" id="prev"></div>
+  <div class="day hidden" id="day2">Dziś 11:42</div>
+  <div class="b in hidden" id="msg"></div>
+  <div class="b out hidden" id="reply">TAK</div>
+  <div class="status" id="delivered">Dostarczono</div>
+</div>
+<div class="bar"><div class="field empty" id="field"></div><div class="send" id="send"></div></div>
+<script>
+const p = new URLSearchParams(location.search);
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const linkify = (s) => esc(s).replace(/(https?:\/\/\S+|detailboost\.pl\/\S+)/g, '<a>$1</a>');
+$('from').textContent = p.get('from') ?? 'Studio Połysk';
+$('initials').textContent = ($('from').textContent.match(/\b\p{L}/gu) ?? ['S']).slice(0, 2).join('').toUpperCase();
+$('prev').innerHTML = linkify(p.get('prev') ?? '');
+$('msg').innerHTML = linkify(p.get('msg') ?? '');
+const at = (ms, fn) => setTimeout(fn, ms);
+// Oś czasu (ms): SMS przychodzi, klient pisze „TAK", wysyła.
+window.TIMELINE = { arrive: 300, type: 2600, send: 3600, end: 5200 };
+window.start = () => {
+  const T = window.TIMELINE;
+  at(T.arrive, () => { $('day2').classList.remove('hidden'); $('msg').classList.remove('hidden'); });
+  at(T.type, () => { $('field').classList.remove('empty'); $('field').innerHTML = '<span id="typed"></span><span class="caret"></span>'; });
+  ['T', 'A', 'K'].forEach((ch, i) => at(T.type + 200 + i * 230, () => { $('typed').textContent += ch; $('send').classList.add('on'); }));
+  at(T.send, () => { $('field').classList.add('empty'); $('field').innerHTML = ''; $('send').classList.remove('on'); $('reply').classList.remove('hidden'); });
+  at(T.send + 900, () => { $('delivered').style.opacity = 1; });
+};
+</script>
+</body>
+</html>

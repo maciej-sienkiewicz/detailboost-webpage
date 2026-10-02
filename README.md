@@ -1,7 +1,7 @@
 # detailboost-webpage
 
 Strona główna DetailBoost, CRM dla studiów auto detailingu. Na razie jeden ekran:
-pasek nawigacji i sekcja Hero z oknem aplikacji, w którym lecą trzy nagrania z CRM.
+pasek nawigacji i sekcja Hero z oknem aplikacji, w którym lecą nagrania z CRM.
 
 React 19, Tailwind CSS 4, Vite 8, TypeScript. Kroje: Geist i Geist Mono (zmienne,
 hostowane lokalnie przez `@fontsource-variable`, z polskimi znakami).
@@ -42,9 +42,12 @@ w `src/scenes/index.tsx`.
 |---|---|
 | `lead` | lead tylko z pierwszym mailem klienta: podpowiedzi usług z cennika, historia klienta i ostrzeżenie „2 odwołane rezerwacje”, odpowiedź wysłana z poczty CRM (lokalny SMTP); potem klient odpisuje, wycena, termin w kalendarzu, rezerwacja wypełniona z leada, SMS-y |
 | `checkin` | przyjęcie na tablecie: kalendarz → rezerwacja → „ROZPOCZNIJ”, przebieg, depozyt, uwagi; zdjęcia telefonem przez kod QR wpadające na tablet jedno po drugim; mapa uszkodzeń; dokumenty wysłane na sparowany tablet i podpisane przez klienta (tablet pionowo); na koniec wizyta sekcja po sekcji |
+| `visitcard` | studio dodaje do Karty Wizyty propozycję „Impregnacja szyb nano” i wysyła kartę SMS-em; telefon klienta: status „W realizacji”, podpisany protokół, zdjęcia z przyjęcia, wybór usługi, SMS z prośbą o „TAK” (treść z backendu), odpowiedź „TAK”, usługa „Dodano do wizyty” i nowa kwota; w studiu usługa jest już w wizycie |
 | `handover` | „Oznacz jako gotowe" z SMS-em, protokół wydania wysłany do podpisu, strona podpisu na telefonie klienta (dokument, oświadczenie, podpis palcem), podpis wraca do wydania, faktura VAT z „Wyślij fakturę do KSeF", faktura „W KSeF" z numerem i kodem QR |
 | `costs` | koszty z 30 dni w kategoriach; właściciel zakłada kategorię „Paliwo” i regułę „NIP ORLEN → Paliwo” (z podpowiedzią dostawcy), reguła porządkuje stare faktury; cięcie na stację (`capture/anim/fuel.html`: terminal drukuje fakturę ORLEN, stempel KSeF); faktura przychodzi do „Dokumentów kosztowych”, sama dostaje „Paliwo”, rosną suma kategorii i wykres |
+| `team` | zespół z rolami, nowy pracownik z kontem i rolą „Detailer”, karta czasu pracy za wrzesień zatwierdzona, lista obecności za wrzesień (PDF), urlop zaznaczony przeciągnięciem w kalendarzu |
 | `instagram` | alert na Tablicy o nowej kampanii w okolicy, reklamodawcy w okolicy, kalendarz reklam, szczegóły kampanii i treść reklamy, tydzień u obserwowanych profili |
+| `push` | animacja (`capture/anim/push.html`): telefon właściciela i sześć powiadomień z szablonów backendu (`PushMessages.kt`) z ikonami service workera CRM |
 
 Pod oknem jest sterowanie: „Wstecz", „Pauza"/„Odtwórz", „Dalej" - krokiem jest fragment
 nagrania z jednym podpisem; na pierwszym i ostatnim kroku przyciski przechodzą do
@@ -85,6 +88,20 @@ rysuje, jest w każdym kadrze prawdziwy.
 - **Tankowanie na stacji** nie dzieje się w CRM, więc jest animacją HTML
   (`capture/anim/fuel.html`) nagrywaną tym samym screencastem - w filmie to zwykłe
   cięcie. Kwoty na wydruku są tymi samymi, które potem widać w CRM.
+- **Zespół** (`seedTeam`): role i trzech pracowników zakłada prawdziwe API („Dodaj rolę”,
+  „Dodaj pracownika”), godziny za sierpień i wrzesień oraz złożone karty wpisujemy tam,
+  gdzie zapisuje je „Czas pracy” pracownika. Lista obecności za sierpień powstaje tym
+  samym endpointem co „Wygeneruj listę”.
+- **Karta Wizyty** (`seedVisitCardVisit`): zdjęcia (Unsplash, `capture/fixtures/ms-*.jpg`)
+  i podpisany protokół przyjęcia, które w produkcji powstają przy przyjęciu auta. Studio
+  w nagraniu nazywa się „Studio Połysk”, bo nazwa stoi w nagłówku karty klienta. Pole
+  linku w oknie „Karta Wizyty” pokazuje adres z backendu zamiast `localhost`. SMS-y nie
+  wychodzą (SMSAPI wyłączone): ich treść bierzemy z logu backendu albo z kolejki
+  wysyłki, a odpowiedź „TAK” wysyłamy webhookiem SMSAPI (`/api/sms/inbound`,
+  `SMSAPI_INBOUND_WEBHOOK_SECRET=local-recording`).
+- **Powiadomienia push** pokazuje system telefonu, nie strona, więc scena `push` jest
+  animacją. „Klient nie przyjechał” CRM jeszcze NIE wysyła (jest tylko status NO_SHOW) -
+  to powiadomienie stoi w animacji na prośbę biznesu.
 - **Instagram i reklamy konkurencji**: w produkcji ze scrapera i Biblioteki Reklam Meta.
 - **Konfiguracja studia**: plan FULL, reguły i kredyty SMS, dane firmy, token KSeF,
   zadania na Tablicy - to, co właściciel ustawia sam w Ustawieniach.
@@ -105,7 +122,7 @@ rysuje, jest w każdym kadrze prawdziwy.
 3. Tutaj (potrzebne `ffmpeg` z libx264 i libvpx oraz `psql` przez `sudo -u postgres`):
 
 ```sh
-node capture/run.mjs lead    # albo checkin, handover, costs, instagram
+node capture/run.mjs lead    # albo checkin, visitcard, handover, costs, team, instagram, push
 ENCODE_ONLY=1 node capture/run.mjs lead   # tylko kodowanie z zapisanych klatek
 ```
 
