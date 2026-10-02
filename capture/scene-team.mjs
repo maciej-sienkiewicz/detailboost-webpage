@@ -10,7 +10,10 @@ const ancestor = (loc, n) => loc.locator(`xpath=ancestor::*[${n}]`);
 
 /** Panel okna modalnego (rola `dialog` bywa całym przyciemnionym tłem). */
 async function modal(page, title) {
-    await page.getByText(title, { exact: true }).first().evaluate((el) => {
+    // Najpierw w otwartym oknie: ten sam tekst (np. nazwisko) stoi zwykle też na liście pod nim.
+    const inDialog = page.getByRole('dialog').getByText(title, { exact: true });
+    const target = (await inDialog.count()) ? inDialog.last() : page.getByText(title, { exact: true }).first();
+    await target.evaluate((el) => {
         document.querySelectorAll('[data-modal-panel]').forEach((n) => n.removeAttribute('data-modal-panel'));
         let n = el;
         while (n.parentElement && n.getBoundingClientRect().width < 400) n = n.parentElement;
@@ -65,7 +68,7 @@ export default {
         await moveTo(page, option, 700);
         await wait(page, 900);
         await click(page, option, { ms: 300, settle: 600 });
-        await click(page, page.getByRole('dialog').getByRole('button', { name: 'Dodaj pracownika' }).last(), { ms: 800, settle: 300 });
+        await click(page, page.getByRole('dialog').getByRole('button', { name: 'Dodaj pracownika' }).last(), { ms: 800, settle: 300, end: true });
         await page.getByText('Pracownik dodany').first().waitFor({ timeout: 20000 });
         await wait(page, 600);
         const row = page.getByText('Kacper Lewandowski').first();
@@ -79,12 +82,12 @@ export default {
         await beat(page, rec, 'worktime', ancestor(page.getByText('Marek Zając').first(), 3));
         await moveTo(page, page.getByText('Do zatwierdzenia').last(), 800);
         await wait(page, 1800);
-        await click(page, page.getByText('Marek Zając').first(), { ms: 700, settle: 900 });
+        await click(page, page.getByText('Marek Zając').first(), { ms: 700, settle: 900, end: true });
         const approve = page.getByRole('button', { name: 'Zatwierdź kartę' });
         await approve.waitFor({ timeout: 15000 });
         await beat(page, rec, 'card', await modal(page, 'Marek Zając'));
         await wait(page, 2400);
-        await click(page, approve, { ms: 800, settle: 300 });
+        await click(page, approve, { ms: 800, settle: 300, end: true });
         await page.getByText('Karta zatwierdzona').first().waitFor({ timeout: 15000 });
         await page.keyboard.press('Escape').catch(() => {});
         await wait(page, 900);
@@ -101,7 +104,7 @@ export default {
         await beat(page, rec, 'sheet-new', await modal(page, 'Wygeneruj listę obecności'));
         await moveTo(page, page.getByText('Kto trafi na listę').first(), 700, { dy: 60 });
         await wait(page, 1800);
-        await click(page, page.getByRole('dialog').getByRole('button', { name: /^Wygeneruj listę/ }).last(), { ms: 800, settle: 300 });
+        await click(page, page.getByRole('dialog').getByRole('button', { name: /^Wygeneruj listę/ }).last(), { ms: 800, settle: 300, end: true });
         await page.getByText('Lista obecności wygenerowana').first().waitFor({ timeout: 30000 });
         await wait(page, 800);
         await click(page, page.getByRole('button', { name: 'Podgląd' }).first(), { ms: 800, settle: 300 });
@@ -109,6 +112,7 @@ export default {
         await wait(page, 1500);
         await beat(page, rec, 'sheet', await modal(page, 'Pobierz PDF'));
         await wait(page, 3200);
+        release();
         await page.keyboard.press('Escape');
         await wait(page, 500);
 
@@ -129,7 +133,7 @@ export default {
         await wait(page, 700);
         await moveTo(page, page.locator('#leave-type'), 600);
         await wait(page, 900);
-        await click(page, page.getByRole('button', { name: 'Dalej: zaznacz dni' }), { ms: 700, settle: 700 });
+        await click(page, page.getByRole('button', { name: 'Dalej: zaznacz dni' }), { ms: 700, settle: 700, end: true });
         const from = page.locator('.fc-daygrid-day[data-date="2026-10-19"]');
         const to = page.locator('.fc-daygrid-day[data-date="2026-10-23"]');
         const a = await from.boundingBox();
@@ -147,6 +151,7 @@ export default {
         }
         await page.mouse.up();
         await page.evaluate(() => window.__cursor.release());
+        release();
         await wait(page, 900);
         const confirm = page.getByRole('button', { name: 'Zapisz urlop' });
         if (!(await confirm.isVisible().catch(() => false))) await click(page, page.getByRole('button', { name: 'Zakończ' }).first(), { ms: 700, settle: 600 });
@@ -154,7 +159,7 @@ export default {
         await beat(page, rec, 'leave-confirm', await modal(page, 'Potwierdź urlop'));
         await click(page, page.locator('#leave-note'), { ms: 600, settle: 100 });
         await type(page, 'Wyjazd rodzinny, zgłoszony we wrześniu', 35);
-        await click(page, confirm, { ms: 700, settle: 300 });
+        await click(page, confirm, { ms: 700, settle: 300, end: true });
         await page.getByText('Urlop zapisany').first().waitFor({ timeout: 15000 });
         await wait(page, 900);
         await beat(page, rec, 'leave-saved', ancestor(page.locator('.fc-daygrid-day[data-date="2026-10-19"]'), 1));

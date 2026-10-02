@@ -6,8 +6,9 @@
 <!--
   Scena „push" (capture/scene-push.mjs): telefon właściciela, na który wpadają
   powiadomienia z CRM. Treści są z szablonów backendu (push/notify/PushMessages.kt)
-  w wariancie „personal" (właściciel widzi nazwisko klienta), ikony z public/icons
-  frontendu CRM - te same, które pokazuje service worker.
+  w wariancie „personal" (właściciel widzi nazwisko klienta). Ikona przy każdym
+  powiadomieniu to logo DetailBoost (public/icons/icon-192.png) - tak pokazuje je
+  ekran blokady (iOS zawsze bierze ikonę aplikacji), a znak marki ma być przy każdym.
 
   Wyjątek: „Klient nie przyjechał" - CRM ma status NO_SHOW, ale nie wysyła jeszcze
   o nim powiadomienia. Ikona i forma jak przy rezerwacji.
@@ -97,17 +98,17 @@ const $ = (id) => document.getElementById(id);
 const at = (ms, fn) => setTimeout(fn, ms);
 // Treści z PushMessages.kt (wariant dla właściciela: z nazwiskiem klienta).
 const NOTES = [
-  { at: '9:12', icon: 'notification-earnings', title: 'Właśnie zarobiłeś 2 890,00 zł',
+  { at: '9:12', icon: 'icon-192', title: 'Właśnie zarobiłeś 2 890,00 zł',
     body: 'Pojazd wydany: Anna Kowalska, Porsche 911, WA 5X912.', where: 'Jesteś u księgowej.' },
-  { at: '10:15', icon: 'notification-reservation', title: 'Klient nie przyjechał',
+  { at: '10:15', icon: 'icon-192', title: 'Klient nie przyjechał',
     body: 'Tomasz Nowak, rezerwacja na 10:00, Audi A6. Termin jest wolny.', where: 'Jedziesz po chemię do hurtowni.' },
-  { at: '10:41', icon: 'notification-campaign', title: 'Nowa kampania w Twoim rejonie',
+  { at: '10:41', icon: 'icon-192', title: 'Nowa kampania w Twoim rejonie',
     body: 'Shine Studio Warszawa: 3 nowe reklamy na Facebooku i Instagramie.', where: 'Stoisz w korku na Puławskiej.' },
   { at: '11:00', icon: 'icon-192', title: 'Dostępny nowy raport',
     body: 'Miesiąc: 01.09–30.09.2026', where: 'Pijesz kawę z dostawcą folii.' },
-  { at: '11:23', icon: 'notification-lead', title: 'Nowy lead: Marta Zielińska',
+  { at: '11:23', icon: 'icon-192', title: 'Nowy lead: Marta Zielińska',
     body: 'Formularz na stronie, 601 284 773.', where: 'Jesteś na targach w Poznaniu.' },
-  { at: '12:02', icon: 'notification-checkin', title: 'Przyjęto pojazd: BMW X5',
+  { at: '12:02', icon: 'icon-192', title: 'Przyjęto pojazd: BMW X5',
     body: 'Piotr Wiśniewski, WA 12345, wizyta nr 128.', where: 'Wciąż na targach. Studio pracuje.' },
 ];
 const ago = (from, to) => {

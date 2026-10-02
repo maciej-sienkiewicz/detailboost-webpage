@@ -115,12 +115,12 @@ export default {
         await click(page, page.getByRole('button', { name: /^Zapisz sugesti/ }).first(), { ms: 700, settle: 900 });
         await moveTo(page, page.getByText('Widoczna na karcie').first(), 700);
         await wait(page, 1200);
-        await click(page, page.getByRole('button', { name: /Wyślij kartę/ }).first(), { ms: 800, settle: 700 });
+        await click(page, page.getByRole('button', { name: /Wyślij kartę/ }).first(), { ms: 800, settle: 700, end: true });
         const sms = page.getByRole('button', { name: /^SMS/ }).or(page.getByText('SMS', { exact: true })).first();
         if (await sms.isVisible().catch(() => false)) {
             await beat(page, rec, 'send', await modal(page, 'Wyślij Kartę Wizyty'));
             // Wybór kanału od razu wysyła kartę.
-            await click(page, sms, { ms: 700, settle: 500 });
+            await click(page, sms, { ms: 700, settle: 500, end: true });
         }
         const sent = page.getByText(/wysłana SMS/).first();
         await sent.waitFor({ timeout: 15000 });

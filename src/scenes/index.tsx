@@ -21,7 +21,7 @@ type Caption = { step: string; text: string; zoom?: number; wide?: boolean };
  * o produkcie (patrz README, „Co jest dosiewane do bazy").
  */
 /** Najdłużej trzymana ramka - dłużej oko i tak już jest gdzie indziej. */
-const MAX_FOCUS = 3.6;
+const MAX_FOCUS = 3;
 
 function beats(timing: Timing, captions: Record<string, Caption>): Beat[] {
     const list = Object.entries(timing)
@@ -216,12 +216,12 @@ export const SCENES: readonly SiteScene[] = [
         features: [],
         beats: beats(push, {
             intro: { step: 'Telefon właściciela', text: 'Powiadomienia z CRM przychodzą także przy zamkniętej aplikacji.', wide: true },
-            earned: { step: 'Zarobek', text: 'Auto wydane: kwota stoi w tytule powiadomienia.' },
-            'no-show': { step: 'Klient nie przyjechał', text: 'Wiesz od razu, że termin się zwolnił.' },
-            campaign: { step: 'Konkurencja', text: 'Firma z okolicy puściła nowe reklamy na Facebooku i Instagramie.' },
-            report: { step: 'Raport', text: 'Raport za wrzesień czeka rano po zamknięciu miesiąca.' },
-            lead: { step: 'Nowy lead', text: 'Ktoś pyta o usługę przez formularz na stronie.' },
-            checkin: { step: 'Przyjęcie auta', text: 'Pracownik przyjął BMW X5, wizyta ruszyła.' },
+            earned: { step: 'Zarobek', text: 'Auto wydane: kwota stoi w tytule powiadomienia.', wide: true },
+            'no-show': { step: 'Klient nie przyjechał', text: 'Wiesz od razu, że termin się zwolnił.', wide: true },
+            campaign: { step: 'Konkurencja', text: 'Firma z okolicy puściła nowe reklamy na Facebooku i Instagramie.', wide: true },
+            report: { step: 'Raport', text: 'Raport za wrzesień czeka rano po zamknięciu miesiąca.', wide: true },
+            lead: { step: 'Nowy lead', text: 'Ktoś pyta o usługę przez formularz na stronie.', wide: true },
+            checkin: { step: 'Przyjęcie auta', text: 'Pracownik przyjął BMW X5, wizyta ruszyła.', wide: true },
             control: { step: 'Z każdego miejsca', text: 'Wiesz, co dzieje się w studiu, zanim ktokolwiek zadzwoni.', wide: true },
         }),
     },

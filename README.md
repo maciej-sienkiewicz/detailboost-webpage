@@ -52,7 +52,7 @@ w `src/scenes/index.tsx`.
 Pod oknem jest sterowanie: „Wstecz", „Pauza"/„Odtwórz", „Dalej" - krokiem jest fragment
 nagrania z jednym podpisem; na pierwszym i ostatnim kroku przyciski przechodzą do
 poprzedniego i następnego nagrania. Ramka kroku gaśnie przy pierwszym kliknięciu poza nią,
-przewinięciu albo cięciu (czas z nagrania), najpóźniej po 3,6 s.
+przewinięciu albo cięciu (czas z nagrania), najpóźniej po 3 s.
 
 Aplikacja tabletowa do podpisu („DetailBoost Tablet") nie jest w repozytoriach CRM, więc
 w scenie `checkin` klient podpisuje dokumenty na stronie podpisu (`/sign/:token`) otwartej

@@ -104,7 +104,7 @@ export default {
         await dialog.evaluate((d) => [...d.querySelectorAll('button')]
             .find((b) => getComputedStyle(b).backgroundColor === 'rgb(249, 115, 22)')?.setAttribute('data-swatch', 'orange'));
         await click(page, dialog.locator('[data-swatch=orange]'), { ms: 600, settle: 400 });
-        await click(page, dialog.getByRole('button', { name: 'Zapisz' }), { ms: 700, settle: 900 });
+        await click(page, dialog.getByRole('button', { name: 'Zapisz' }), { ms: 700, settle: 900, end: true });
         await beat(page, rec, 'category-added', catRow(page, 'Paliwo'), 8);
         await moveTo(page, catName(page, 'Paliwo'), 700, { dx: 80 });
         await wait(page, 1800);
@@ -124,12 +124,12 @@ export default {
         await click(page, ruleDlg.getByRole('button', { name: 'Paliwo', exact: true }), { ms: 700, settle: 500 });
         await moveTo(page, ruleDlg.getByText('Zastosuj teraz do już istniejących faktur od tego dostawcy'), 700);
         await wait(page, 900);
-        await click(page, ruleDlg.getByRole('button', { name: 'Dodaj regułę' }), { ms: 700, settle: 300 });
+        await click(page, ruleDlg.getByRole('button', { name: 'Dodaj regułę' }), { ms: 700, settle: 300, end: true });
         await page.getByText(/Przypisano \d+/).first().waitFor({ timeout: 15000 });
         await wait(page, 300);
         await beat(page, rec, 'rule-added', await modal(page, 'Reguła dodana'));
         await wait(page, 2000);
-        await click(page, page.getByRole('dialog').getByRole('button', { name: 'Zamknij', exact: true }).last(), { ms: 700, settle: 700 });
+        await click(page, page.getByRole('dialog').getByRole('button', { name: 'Zamknij', exact: true }).last(), { ms: 700, settle: 700, end: true });
         await beat(page, rec, 'rule-row', ancestor(page.getByText('7740001454').first(), 1), 8);
         await wait(page, 1600);
 
