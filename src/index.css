@@ -1,42 +1,127 @@
 @import 'tailwindcss';
 
 /*
- * Cała paleta to pięć wartości. Strona nie ma ani jednego koloru akcentu:
- * hierarchię niesie wyłącznie stopień szarości, grubość pisma i odstęp.
- * Dokładając odcień, dokładasz drugi system znaczeń - a tu jest miejsce na jeden.
+ * Scena jest ciemna, a jedynym kolorem jest złoto z logo DetailBoost (szampańskie
+ * → bursztynowe). Złoto niesie wyłącznie światło i postęp: poświatę za oknem
+ * aplikacji, drugą linię nagłówka i paski rozdziałów. Wszystko inne to stopnie
+ * szarości - dokładając drugi odcień, dokładasz drugi system znaczeń.
  */
 @theme {
-    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
 
-    --color-paper: #f9fafb;
-    --color-ink: #0a0a0a;
-    --color-graphite: #3f3f46;
-    --color-mute: #71717a;
-    --color-rule: #e4e4e7;
+    --color-void: #08080a;
+    --color-surface: #0f0f12;
+    --color-paper: #f4f4f2;
+    --color-mute: #a1a1aa;
+    --color-dim: #71717a;
+    --color-line: rgb(255 255 255 / 0.08);
+    --color-line-strong: rgb(255 255 255 / 0.16);
+
+    --color-gold-50: #f6efd2;
+    --color-gold-200: #ecd08f;
+    --color-gold-400: #dcae5c;
+    --color-gold-600: #b8873a;
+
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+    --animate-drift-a: drift-a 26s ease-in-out infinite alternate;
+    --animate-drift-b: drift-b 34s ease-in-out infinite alternate;
+    --animate-sheen: sheen 7s ease-in-out infinite;
+
+    @keyframes drift-a {
+        from { transform: translate3d(-6%, -4%, 0) scale(1); }
+        to { transform: translate3d(5%, 3%, 0) scale(1.12); }
+    }
+    @keyframes drift-b {
+        from { transform: translate3d(4%, 2%, 0) scale(1.08); }
+        to { transform: translate3d(-5%, -3%, 0) scale(0.94); }
+    }
+    /* Odblask przesuwający się po krawędzi ramki - jak światło po świeżej powłoce. */
+    @keyframes sheen {
+        0%, 55% { background-position: 200% 0; }
+        100% { background-position: -100% 0; }
+    }
 }
 
 @layer base {
     html {
-        background: var(--color-paper);
-        color: var(--color-ink);
+        background: var(--color-void);
+        color: var(--color-paper);
+        color-scheme: dark;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
-        /* Oś opsz Intera: duże stopnie dostają krój „Display" (węższe
-           odstępy, ostrzejsze kontrasty), drobne - krój tekstowy. */
-        font-optical-sizing: auto;
-        /* cv11: jednopiętrowe „a" bez ogonka; ss03: zaokrąglone przecinki.
-           tnum ustawiamy lokalnie, tylko tam, gdzie liczby stoją w kolumnie. */
-        font-feature-settings: 'cv11', 'ss03';
     }
 
     ::selection {
-        background: var(--color-ink);
-        color: var(--color-paper);
+        background: var(--color-gold-200);
+        color: var(--color-void);
     }
 
     :focus-visible {
-        outline: 1px solid var(--color-ink);
+        outline: 1px solid var(--color-gold-200);
         outline-offset: 3px;
+    }
+}
+
+@layer utilities {
+    /* Wypełnienie tekstu gradientem. `text-transparent` + `bg-clip-text` z Tailwinda
+       gubi się na polskich ogonkach w Safari, gdy element łamie linię - stąd
+       `box-decoration-break: clone`, który kopiuje tło na każdą linię osobno. */
+    .text-fill-silver {
+        background: linear-gradient(180deg, #ffffff 25%, #c9c9cf 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+    }
+    .text-fill-gold {
+        background: linear-gradient(100deg, var(--color-gold-50) 0%, var(--color-gold-200) 38%, var(--color-gold-400) 70%, var(--color-gold-600) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+    }
+}
+
+/*
+ * „Promień" obiegający główny przycisk - jedyny ruchomy element nad zgięciem poza
+ * tłem. Stożkowy gradient w złocie obraca się pod przyciskiem, a widać go tylko
+ * w 1-pikselowej szczelinie wokół krawędzi (maska). Kąt jako @property, żeby
+ * przeglądarka mogła go animować płynnie, a nie skokami co klatkę.
+ */
+@property --beam-angle {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+
+.beam::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: conic-gradient(from var(--beam-angle), transparent 0deg, transparent 250deg,
+        var(--color-gold-200) 300deg, #fff 330deg, var(--color-gold-400) 350deg, transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    animation: beam-spin 4.5s linear infinite;
+    pointer-events: none;
+}
+
+@keyframes beam-spin {
+    to { --beam-angle: 360deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }

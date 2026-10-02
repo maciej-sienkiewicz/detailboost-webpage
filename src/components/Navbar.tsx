@@ -8,12 +8,23 @@ const LINKS = ['Funkcje', 'Cennik', 'Integracje', 'Kontakt'] as const;
  * o różnicę szerokości logo i przycisków. Siatka trzyma je na osi strony -
  * tej samej, na której stoi nagłówek i okno aplikacji.
  *
+ * Nad samą górą strony pasek jest przezroczysty i leży na ruchomym tle; tło
+ * z rozmyciem i linia pod spodem pojawiają się dopiero po przewinięciu, gdy
+ * pod paskiem zaczyna przesuwać się treść.
+ *
  * Na telefonie menu otwiera słowo „Menu", nie hamburger: strona nie używa ikon.
- * Rozwija się pod paskiem i przesuwa treść, więc nie blokuje przewijania tła.
  */
 export function Navbar() {
     const [open, setOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
     const panelId = useId();
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 8);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
 
     useEffect(() => {
         if (!open) return;
@@ -27,16 +38,19 @@ export function Navbar() {
         };
     }, [open]);
 
+    const solid = scrolled || open;
+
     return (
-        <header className="sticky top-0 z-50 border-b border-rule bg-paper/85 backdrop-blur-md backdrop-saturate-150">
+        <header
+            className={`sticky top-0 z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-300 ${
+                solid ? 'border-line bg-void/75 backdrop-blur-xl backdrop-saturate-150' : 'border-transparent bg-transparent'
+            }`}
+        >
             <nav
                 aria-label="Główna"
                 className="mx-auto grid h-16 max-w-[100rem] grid-cols-[1fr_auto] items-center px-5 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:px-12"
             >
-                <a
-                    href="#"
-                    className="justify-self-start text-[1.0625rem] font-[750] tracking-[-0.035em] text-ink"
-                >
+                <a href="#" className="justify-self-start text-[1.0625rem] font-[680] tracking-[-0.04em] text-paper">
                     DetailBoost
                 </a>
 
@@ -45,7 +59,7 @@ export function Navbar() {
                         <li key={label}>
                             <a
                                 href="#"
-                                className="text-[0.8125rem] font-medium tracking-[-0.005em] text-graphite transition-colors duration-150 hover:text-ink"
+                                className="text-[0.8125rem] font-[450] tracking-[-0.01em] text-mute transition-colors duration-150 hover:text-paper"
                             >
                                 {label}
                             </a>
@@ -56,13 +70,13 @@ export function Navbar() {
                 <div className="flex items-center gap-2 justify-self-end sm:gap-3">
                     <a
                         href="#"
-                        className="hidden h-9 items-center rounded-[2px] border border-rule px-3.5 text-[0.8125rem] font-medium text-ink transition-colors duration-150 hover:border-ink lg:inline-flex"
+                        className="hidden h-9 items-center rounded-[3px] border border-line-strong px-3.5 text-[0.8125rem] font-medium text-paper transition-colors duration-150 hover:border-paper/40 hover:bg-white/[0.04] lg:inline-flex"
                     >
                         Zaloguj
                     </a>
                     <a
                         href="#"
-                        className="inline-flex h-9 items-center rounded-[2px] bg-ink px-4 text-[0.8125rem] font-medium tracking-[-0.005em] whitespace-nowrap text-paper transition-colors duration-150 hover:bg-graphite"
+                        className="inline-flex h-9 items-center rounded-[3px] bg-paper px-4 text-[0.8125rem] font-medium tracking-[-0.01em] whitespace-nowrap text-void transition-colors duration-150 hover:bg-gold-50"
                     >
                         {/* Poniżej 400 px pełna etykieta wypycha „Menu" poza ekran; pełną
                             obietnicę i tak niesie przycisk na całą szerokość tuż pod paskiem. */}
@@ -73,35 +87,28 @@ export function Navbar() {
                         aria-expanded={open}
                         aria-controls={panelId}
                         onClick={() => setOpen((v) => !v)}
-                        className="inline-flex h-9 w-[4.25rem] items-center justify-center rounded-[2px] border border-rule text-[0.8125rem] font-medium text-ink transition-colors duration-150 hover:border-ink lg:hidden"
+                        className="inline-flex h-9 w-[4.25rem] items-center justify-center rounded-[3px] border border-line-strong text-[0.8125rem] font-medium text-paper transition-colors duration-150 hover:border-paper/40 lg:hidden"
                     >
                         {open ? 'Zamknij' : 'Menu'}
                     </button>
                 </div>
             </nav>
 
-            <div id={panelId} hidden={!open} className="border-t border-rule lg:hidden">
+            <div id={panelId} hidden={!open} className="border-t border-line lg:hidden">
                 <ul className="mx-auto max-w-[100rem] px-5 sm:px-8">
-                    {LINKS.map((label) => (
-                        <li key={label} className="border-b border-rule">
+                    {[...LINKS, 'Zaloguj'].map((label) => (
+                        <li key={label} className="border-b border-line last:border-b-0">
                             <a
                                 href="#"
                                 onClick={() => setOpen(false)}
-                                className="flex h-14 items-center text-[1.0625rem] font-[560] tracking-[-0.02em] text-ink"
+                                className={`flex h-14 items-center text-[1.0625rem] font-[520] tracking-[-0.02em] ${
+                                    label === 'Zaloguj' ? 'text-mute' : 'text-paper'
+                                }`}
                             >
                                 {label}
                             </a>
                         </li>
                     ))}
-                    <li>
-                        <a
-                            href="#"
-                            onClick={() => setOpen(false)}
-                            className="flex h-14 items-center text-[1.0625rem] font-[560] tracking-[-0.02em] text-graphite"
-                        >
-                            Zaloguj
-                        </a>
-                    </li>
                 </ul>
             </div>
         </header>
