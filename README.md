@@ -27,8 +27,10 @@ npm run build      # typecheck + build do dist/
   kliknięcie przewija okno do tego kroku (i zdejmuje pauzę), a gdy nikt nie klika,
   złotem świeci napis kroku, który właśnie leci. Napisy tego samego nagrania jaśnieją
   o stopień. Mapa napis → nagranie i krok jest w `Hero.tsx` (`FEATURES`).
-- **Ruchome tło** (`DotField`): stała siatka kropek, przez którą wędrują dwie fale
-  światła. Rusza się jasność, nie kropki. 30 kl./s, staje poza ekranem i w tle karty.
+- **Ruchome tło** (`DotField`): siatka kropek z wędrującą poświatą. Co 6,5 s spod
+  okna rozchodzi się fala: kropki na jej grzbiecie rosną, jaśnieją i odsuwają się
+  o parę pikseli. Kursor rozsuwa kropki wokół siebie, a kliknięcie puszcza falę spod
+  palca. 60 kl./s przy myszy, 30 na dotyku. Staje poza ekranem i w tle karty.
 - **Okno 3D** (`Stage3D`): pochylone o 17° (10° na telefonie) z osią na górnej
   krawędzi, prostuje się w trakcie przewijania. Parametry wzięte z fotohub.app.
 - **Siatka margines / okno / margines** od 1280 px. Napisy stoją w marginesach
