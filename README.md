@@ -3,9 +3,9 @@
 Strona główna DetailBoost, CRM dla studiów auto detailingu. Na razie jeden ekran:
 pasek nawigacji i sekcja Hero z oknem aplikacji, w którym lecą trzy nagrania z CRM.
 
-React 19, Tailwind CSS 4, Vite 8, TypeScript. Kroje: Geist i Geist Mono, a do napisów
-wokół okna Archivo ze zmienną szerokością (wszystkie zmienne, hostowane lokalnie przez
-`@fontsource-variable`, z polskimi znakami).
+React 19, Tailwind CSS 4, Vite 8, TypeScript. Kroje: Geist i Geist Mono, w pasku
+nawigacji Inter, a do napisów wokół okna i znaku słownego Archivo ze zmienną szerokością
+(wszystkie zmienne, hostowane lokalnie przez `@fontsource-variable`, z polskimi znakami).
 
 ```sh
 npm install
@@ -27,6 +27,10 @@ npm run build      # typecheck + build do dist/
   kliknięcie przewija okno do tego kroku (i zdejmuje pauzę), a gdy nikt nie klika,
   złotem świeci napis kroku, który właśnie leci. Napisy tego samego nagrania jaśnieją
   o stopień. Mapa napis → nagranie i krok jest w `Hero.tsx` (`FEATURES`).
+- **Pasek nawigacji** (`Navbar`) w stylu fotohub.app: Inter 14 px, narożniki 6–8 px,
+  dwa białe przyciski (główny z jasną krawędzią i złotą poświatą), znak słowny
+  „DETAIL BOOST" w rozszerzonym Archivo. Nad górą strony przezroczysty, po przewinięciu
+  niższy, z ciemnym gradientem, rozmyciem i cieniem; nad nim pasek postępu przewijania.
 - **Ruchome tło** (`DotField`): siatka kropek z wędrującą poświatą. Co 6,5 s spod
   okna rozchodzi się fala: kropki na jej grzbiecie rosną, jaśnieją i odsuwają się
   o parę pikseli. Kursor rozsuwa kropki wokół siebie, a kliknięcie puszcza falę spod

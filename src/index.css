@@ -11,6 +11,8 @@
     --font-mono: 'Geist Mono Variable', ui-monospace, monospace;
     /* Tylko napisy rozsypane wokół okna: Archivo ze zmienną szerokością, ściśnięte
        i ciężkie, jak plakat. Wszystko inne zostaje w Geist. */
+    /* Pasek nawigacji: Inter, jak na fotohub.app, z którego wzięty jest jego styl. */
+    --font-ui: 'Inter Variable', 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
     --font-display: 'Archivo Variable', 'Geist Variable', ui-sans-serif, sans-serif;
 
     --color-void: #08080a;

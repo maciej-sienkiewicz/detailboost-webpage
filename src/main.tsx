@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import '@fontsource-variable/geist/wght.css';
 import '@fontsource-variable/geist-mono/wght.css';
 import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/inter/wght.css';
 import './index.css';
 import App from './App';
 

@@ -106,13 +106,13 @@ export function Hero() {
                     <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
                         <a
                             href="#"
-                            className="beam relative inline-flex h-12 w-full items-center justify-center rounded-[4px] bg-paper px-7 text-[0.9375rem] font-medium tracking-[-0.01em] text-void shadow-[0_10px_40px_-10px_rgb(220_174_92/0.55)] transition-[background-color,transform] duration-200 hover:bg-gold-50 active:translate-y-px sm:w-auto"
+                            className="beam relative inline-flex h-12 w-full items-center justify-center rounded-lg bg-paper px-7 text-[0.9375rem] font-medium tracking-[-0.01em] text-void shadow-[0_10px_40px_-10px_rgb(220_174_92/0.55)] transition-[background-color,transform] duration-200 hover:bg-gold-50 active:translate-y-px sm:w-auto"
                         >
                             Rozpocznij za darmo
                         </a>
                         <a
                             href="#"
-                            className="inline-flex h-12 w-full items-center justify-center rounded-[4px] border border-line-strong bg-white/[0.02] px-7 text-[0.9375rem] font-medium tracking-[-0.01em] text-paper backdrop-blur-sm transition-colors duration-200 hover:border-paper/40 hover:bg-white/[0.05] sm:w-auto"
+                            className="inline-flex h-12 w-full items-center justify-center rounded-lg border border-line-strong bg-white/[0.02] px-7 text-[0.9375rem] font-medium tracking-[-0.01em] text-paper backdrop-blur-sm transition-colors duration-200 hover:border-paper/40 hover:bg-white/[0.05] sm:w-auto"
                         >
                             Otwórz konto demo
                         </a>
