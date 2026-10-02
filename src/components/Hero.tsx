@@ -48,6 +48,10 @@ const FEATURES: readonly Feature[] = [
     },
 ];
 
+// Względem `base` Vite, nie od korzenia serwera: strona bywa podawana z podkatalogu
+// (podgląd, artefakt), a ścieżka „/scenes/…" celowałaby wtedy w cudzy katalog.
+const SCENE_DIR = `${import.meta.env.BASE_URL}scenes/`;
+
 /**
  * Trzy nagrania z działającego CRM (capture/). `features` mówi, które bloki korzyści
  * nagranie właśnie pokazuje - te dostają złotą linię, więc oko łączy obraz z tekstem.
@@ -57,24 +61,24 @@ const SCENES: readonly (Scene & { features: readonly number[] })[] = [
         id: 'reservation',
         title: 'Rezerwacja z historii klienta',
         summary: 'Stały klient pyta o termin. CRM pokazuje jego wizyty i obrót, podsuwa usługi z cennika i sam wypełnia rezerwację.',
-        poster: '/scenes/reservation-poster.webp',
-        video: '/scenes/reservation',
+        poster: `${SCENE_DIR}reservation-poster.webp`,
+        video: `${SCENE_DIR}reservation`,
         features: [0, 1, 3],
     },
     {
         id: 'ksef',
         title: 'Faktura w KSeF przy wydaniu auta',
         summary: 'Auto gotowe, klient dostaje SMS. Przy wydaniu faktura VAT idzie do KSeF i wraca z numerem KSeF i kodem QR.',
-        poster: '/scenes/ksef-poster.webp',
-        video: '/scenes/ksef',
+        poster: `${SCENE_DIR}ksef-poster.webp`,
+        video: `${SCENE_DIR}ksef`,
         features: [2],
     },
     {
         id: 'instagram',
         title: 'Nowa kampania u konkurencji',
         summary: 'Konkurent z okolicy ogłasza promocję i puszcza reklamę. Widzisz zasięg, odbiorców i treść, zanim zadzwoni klient.',
-        poster: '/scenes/instagram-poster.webp',
-        video: '/scenes/instagram',
+        poster: `${SCENE_DIR}instagram-poster.webp`,
+        video: `${SCENE_DIR}instagram`,
         features: [],
     },
 ];

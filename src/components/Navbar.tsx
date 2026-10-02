@@ -42,7 +42,7 @@ export function Navbar() {
 
     return (
         <header
-            className={`sticky top-0 z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-300 ${
+            className={`sticky top-[env(safe-area-inset-top,0px)] z-50 border-b transition-[background-color,border-color,backdrop-filter] duration-300 ${
                 solid ? 'border-line bg-void/75 backdrop-blur-xl backdrop-saturate-150' : 'border-transparent bg-transparent'
             }`}
         >

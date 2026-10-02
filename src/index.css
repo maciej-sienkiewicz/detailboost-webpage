@@ -54,6 +54,17 @@
         text-rendering: optimizeLegibility;
     }
 
+    /* Tło i krój jawnie na <body>: strona bywa osadzana w szablonie, który ustawia
+       na <body> własny jasny kolor i systemowy krój 14 px - bez tego przebiłyby się
+       spod przezroczystego tła. */
+    body {
+        background: var(--color-void);
+        color: var(--color-paper);
+        font-family: var(--font-sans);
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
     ::selection {
         background: var(--color-gold-200);
         color: var(--color-void);
