@@ -33,22 +33,19 @@ function beats(timing: Timing, captions: Record<string, Caption>): Beat[] {
         const zoom = c.wide || !focus ? 1 : Math.max(1, Math.min(c.zoom ?? 1.35, fit));
         const next = list[i + 1]?.[1].at ?? Infinity;
         const end = Math.min(until ?? Infinity, next - 0.15, at + MAX_FOCUS);
-        return { at, until: end, step: c.step, text: c.text, focus, zoom };
+        return { id, at, until: end, step: c.step, text: c.text, focus, zoom };
     });
 }
 
 const DIR = `${import.meta.env.BASE_URL}scenes/`;
 
-export type SiteScene = Scene & { features: readonly number[] };
-
-export const SCENES: readonly SiteScene[] = [
+export const SCENES: readonly Scene[] = [
     {
         id: 'lead',
         title: 'Zapytanie od klienta i termin',
         summary: 'Mail od klienta: podpowiedzi usług z cennika, jego historia i dwie porzucone rezerwacje, odpowiedź z poczty CRM. Klient się zgadza, termin w kalendarzu, rezerwacja wypełnia się sama.',
         poster: `${DIR}lead-poster.webp`,
         video: `${DIR}lead`,
-        features: [0, 1, 3],
         beats: beats(lead, {
             inbox: { step: 'Zapytanie', text: 'Klient pisze mailem o korektę lakieru i powłokę ceramiczną.', wide: true },
             question: { step: 'Pierwszy kontakt', text: 'Pyta o dwie usługi i o termin 14–15 października.' },
@@ -73,7 +70,6 @@ export const SCENES: readonly SiteScene[] = [
         summary: 'Z kalendarza do przyjęcia: depozyt i uwagi na tablecie, zdjęcia telefonem przez kod QR, mapa uszkodzeń, podpis protokołu i zgód marketingowych na tablecie, a potem cała wizyta.',
         poster: `${DIR}checkin-poster.webp`,
         video: `${DIR}checkin`,
-        features: [3],
         beats: beats(checkin, {
             calendar: { step: 'Dzień wizyty', text: 'Klient przyjechał. Rezerwacja czeka w kalendarzu.' },
             popover: { step: 'Rezerwacja', text: 'Jedno stuknięcie: „Rozpocznij" i zaczyna się przyjęcie auta.', zoom: 1.2 },
@@ -102,7 +98,6 @@ export const SCENES: readonly SiteScene[] = [
         summary: 'Klient podpisuje protokół wydania na swoim telefonie. Faktura VAT idzie do KSeF i wraca z numerem i kodem QR.',
         poster: `${DIR}handover-poster.webp`,
         video: `${DIR}handover`,
-        features: [0, 2],
         beats: beats(handover, {
             ready: { step: 'Auto gotowe', text: 'Jedno kliknięcie oznacza wizytę jako gotową do odbioru.', wide: true },
             notify: { step: 'Powiadomienie', text: 'Klient dostaje SMS i e-mail, że może odebrać auto.', zoom: 1.2 },
@@ -122,7 +117,6 @@ export const SCENES: readonly SiteScene[] = [
         summary: 'Faktura od dostawcy przychodzi z KSeF, reguła po NIP przypisuje ją do kategorii, a statystyki pokazują, ile idzie na chemię, paliwo, folie i leasing.',
         poster: `${DIR}costs-poster.webp`,
         video: `${DIR}costs`,
-        features: [2],
         intro: { seconds: 7.5, render: (progress) => <InvoiceJourney progress={progress} /> },
         beats: beats(costs, {
             refresh: { step: 'Pobranie z KSeF', text: 'Faktury kosztowe przychodzą z KSeF same, co 15 minut.', wide: true },
@@ -141,7 +135,6 @@ export const SCENES: readonly SiteScene[] = [
         summary: 'Konkurent z okolicy ogłasza promocję i puszcza reklamę. Widzisz zasięg, odbiorców i treść, zanim zadzwoni klient.',
         poster: `${DIR}instagram-poster.webp`,
         video: `${DIR}instagram`,
-        features: [],
         beats: beats(instagram, {
             alert: { step: 'Alert', text: 'Konkurencja z okolicy uruchomiła nową kampanię. Widać to na Tablicy.' },
             area: { step: 'Reklamodawcy w okolicy', text: 'Nowa firma i nowa kampania z Biblioteki Reklam Meta.' },

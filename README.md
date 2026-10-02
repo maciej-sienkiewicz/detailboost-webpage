@@ -3,8 +3,9 @@
 Strona główna DetailBoost, CRM dla studiów auto detailingu. Na razie jeden ekran:
 pasek nawigacji i sekcja Hero z oknem aplikacji, w którym lecą trzy nagrania z CRM.
 
-React 19, Tailwind CSS 4, Vite 8, TypeScript. Kroje: Geist i Geist Mono (zmienne,
-hostowane lokalnie przez `@fontsource-variable`, z polskimi znakami).
+React 19, Tailwind CSS 4, Vite 8, TypeScript. Kroje: Geist i Geist Mono, a do napisów
+wokół okna Archivo ze zmienną szerokością (wszystkie zmienne, hostowane lokalnie przez
+`@fontsource-variable`, z polskimi znakami).
 
 ```sh
 npm install
@@ -16,18 +17,24 @@ npm run build      # typecheck + build do dist/
 
 - **Ciemna scena, jeden kolor.** Czerń, grafit, szarości i złoto z logo DetailBoost.
   Złoto niesie wyłącznie światło i postęp: poświatę pod oknem, drugą linię nagłówka,
-  paski rozdziałów i linię nad korzyścią, o której jest bieżące nagranie.
-- **Zero ikon.** Hierarchię niesie krój, grubość, interlinia i siatka. Numeracja
-  `01.`–`04.` stoi w osobnej kolumnie przed tekstem, dane techniczne w Geist Mono,
-  menu na telefonie otwiera słowo „Menu".
+  paski rozdziałów i napis kroku, który właśnie leci w oknie.
+- **Zero ikon.** Hierarchię niesie krój, grubość, interlinia i siatka. Dane techniczne
+  w Geist Mono, menu na telefonie otwiera słowo „Menu".
+- **Napisy wysypane wokół okna** (`FeatureSpill`): same nazwy funkcji, wersalikami
+  w ściśniętym Archivo, część z obrysem. Wylatują z punktu nad oknem jak z wiaderka
+  (parabola, obrót wytracany w locie, odbicie) i lądują krzywo na marginesach przy
+  oknie, a poniżej 1280 px - na stosie pod oknem. Każdy napis to krok jednego nagrania:
+  kliknięcie przewija okno do tego kroku (i zdejmuje pauzę), a gdy nikt nie klika,
+  złotem świeci napis kroku, który właśnie leci. Napisy tego samego nagrania jaśnieją
+  o stopień. Mapa napis → nagranie i krok jest w `Hero.tsx` (`FEATURES`).
 - **Ruchome tło** (`DotField`): stała siatka kropek, przez którą wędrują dwie fale
   światła. Rusza się jasność, nie kropki. 30 kl./s, staje poza ekranem i w tle karty.
 - **Okno 3D** (`Stage3D`): pochylone o 17° (10° na telefonie) z osią na górnej
   krawędzi, prostuje się w trakcie przewijania. Parametry wzięte z fotohub.app.
-- **Siatka 1 / okno / 1** od 1280 px. Kolumny boczne dzielą wiersze z siatką
-  (subgrid), więc bloki po obu stronach zaczynają się na tej samej wysokości.
-- **`prefers-reduced-motion`**: tło stoi, okno jest płaskie, nagrania nie ruszają same.
-  Kliknięcie rozdziału uruchamia nagranie.
+- **Siatka margines / okno / margines** od 1280 px. Napisy stoją w marginesach
+  w procentach kolumny, część celowo zachodzi na krawędź okna.
+- **`prefers-reduced-motion`**: tło stoi, okno jest płaskie, napisy leżą od razu na
+  miejscu, nagrania nie ruszają same. Kliknięcie rozdziału albo napisu uruchamia nagranie.
 
 ## Nagrania z aplikacji
 

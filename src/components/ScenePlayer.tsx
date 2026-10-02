@@ -235,6 +235,15 @@ export function useScenePlayer(scenes: readonly Scene[]) {
             consent();
             select(index);
         },
+        /**
+         * Skok do chwili w nagraniu (napis wokół okna). Bez `at` - nagranie od początku,
+         * razem z animacją wstępną. Kliknięcie to prośba o ruch, więc zdejmuje pauzę.
+         */
+        jump: (index: number, at?: number) => {
+            consent();
+            setPaused(false);
+            select(index, { seek: at ?? null });
+        },
         root,
         started,
         videoRef: (i: number) => (el: HTMLVideoElement | null) => {

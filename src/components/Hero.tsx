@@ -1,57 +1,84 @@
+import { useRef } from 'react';
 import { DeviceFrame, Stage3D } from './Stage3D';
 import { SceneControls, SceneTabs, SceneVideos, useScenePlayer } from './ScenePlayer';
+import { FeatureSpill, type SpillWord, type WordState } from './FeatureSpill';
 import { SCENES } from '../scenes';
 
-type Feature = {
-    title: string;
-    body: string;
-    specs: ReadonlyArray<readonly [label: string, value: string]>;
+type Feature = SpillWord & {
+    /** Nagranie (`Scene.id`) i krok w nim (`Beat.id`); bez kroku - nagranie od początku. */
+    scene: string;
+    beat?: string;
 };
 
 /*
- * Każde zdanie poniżej da się sprawdzić w kodzie CRM. Strona sprzedaje system, którego
- * klient zaraz dotknie - obietnica bez pokrycia wraca tu jako zgłoszenie, nie jako
- * sprzedaż. Czego system NIE robi (np. przeciągania wizyt w kalendarzu, synchronizacji
- * z Kalendarzem Google, eksportu CSV klientów), tego tu nie ma.
+ * Same nazwy funkcji, bez opisów: opis jest na nagraniu, do którego napis prowadzi.
+ * Każdy napis to krok, który widać w oknie, więc da się go sprawdzić w CRM - strona
+ * sprzedaje system, którego klient zaraz dotknie. Czego system NIE robi (np.
+ * przeciągania wizyt w kalendarzu, synchronizacji z Kalendarzem Google, eksportu CSV
+ * klientów), tego tu nie ma.
+ *
+ * Kolejność = kolejność kroków w nagraniach (i czytania); miejsce na stronie jest
+ * celowo inne - sąsiedzi na marginesie nie są sąsiadami w nagraniu.
  */
 const FEATURES: readonly Feature[] = [
-    {
-        title: 'Automatyczne przypomnienia SMS',
-        body: 'Przypomnienie wychodzi samo, z wyprzedzeniem w minutach, godzinach lub dniach. Imię, datę i godzinę wstawia szablon.',
-        specs: [
-            ['Bramka', 'SMSAPI.pl'],
-            ['Okno wysyłki', '12:00–18:00'],
-        ],
-    },
-    {
-        title: 'Zarządzanie kalendarzem',
-        body: 'Rezerwacje i wizyty w widoku dnia, tygodnia, miesiąca lub listy. Terminy cykliczne co tydzień albo co miesiąc.',
-        specs: [
-            ['Siatka dnia', '06:00–20:00'],
-            ['Krok', '30 min'],
-        ],
-    },
-    {
-        title: 'Integracja z KSeF',
-        body: 'Faktura powstaje przy wydaniu pojazdu, UPO pobiera się samo. Faktury kosztowe synchronizują się co 15 minut.',
-        specs: [
-            ['Schemat', 'FA(3)'],
-            ['Awaria KSeF', 'offline24'],
-        ],
-    },
-    {
-        title: 'Baza klientów',
-        body: 'Pojazdy, historia wizyt, zgody marketingowe i przychód z każdego klienta. Duplikaty wykrywane po telefonie i e-mailu.',
-        specs: [
-            ['Dane firmy', 'z GUS po NIP'],
-            ['Import', 'vCard (.vcf)'],
-        ],
-    },
+    { text: 'Poczta', scene: 'lead', beat: 'thread', size: 2, outline: true, r: 21, spot: { side: 'l', x: 80, y: 62 }, pile: 7 },
+    { text: 'Historia klienta', scene: 'lead', beat: 'history', size: 2, r: 6, spot: { side: 'l', x: 58, y: 16 }, pile: 14 },
+    { text: 'Wycena', scene: 'lead', beat: 'accept', size: 3, outline: true, r: -24, spot: { side: 'r', x: 30, y: 75 }, pile: 2 },
+    { text: 'Kalendarz', scene: 'lead', beat: 'calendar', size: 3, r: -90, spot: { side: 'l', x: 10, y: 37 }, pile: 11 },
+    { text: 'Rezerwacje', scene: 'lead', beat: 'form', size: 3, r: 12, spot: { side: 'r', x: 44, y: 31 }, pile: 5 },
+    { text: 'SMS', scene: 'lead', beat: 'sms', size: 4, r: -12, spot: { side: 'l', x: 34, y: 5 }, pile: 17 },
+    { text: 'Przyjęcie auta', scene: 'checkin', beat: 'reservation', size: 2, r: -9, spot: { side: 'r', x: 46, y: 18 }, pile: 9 },
+    { text: 'Depozyt', scene: 'checkin', beat: 'deposit', size: 3, outline: true, r: -7, spot: { side: 'l', x: 52, y: 41 }, pile: 0 },
+    { text: 'Zdjęcia przez QR', scene: 'checkin', beat: 'qr', size: 2, r: -21, spot: { side: 'r', x: 50, y: 43 }, pile: 13 },
+    { text: 'Mapa uszkodzeń', scene: 'checkin', beat: 'damage', size: 2, r: -13, spot: { side: 'l', x: 72, y: 28 }, pile: 4 },
+    { text: 'Podpis na tablecie', scene: 'checkin', beat: 'sign-protocol', size: 2, r: 4, spot: { side: 'r', x: 50, y: 83 }, pile: 16 },
+    { text: 'Zgody marketingowe', scene: 'checkin', beat: 'sign-consent', size: 1, r: -7, spot: { side: 'l', x: 52, y: 91 }, pile: 8 },
+    { text: 'Protokół wydania', scene: 'handover', beat: 'protocol', size: 1, r: 8, spot: { side: 'r', x: 42, y: 65 }, pile: 1 },
+    { text: 'Faktura VAT', scene: 'handover', beat: 'invoice', size: 3, r: -9, spot: { side: 'l', x: 46, y: 53 }, pile: 15 },
+    { text: 'KSeF', scene: 'handover', beat: 'ksef', size: 4, keepCase: true, r: 10, spot: { side: 'r', x: 58, y: 7 }, pile: 6 },
+    { text: 'Koszty', scene: 'costs', size: 4, outline: true, r: 3, spot: { side: 'r', x: 42, y: 55 }, pile: 12 },
+    { text: 'Reguły po NIP', scene: 'costs', beat: 'rules', size: 1, r: 19, spot: { side: 'l', x: 32, y: 70 }, pile: 3 },
+    { text: 'Statystyki', scene: 'costs', beat: 'year', size: 2, r: 90, spot: { side: 'r', x: 93, y: 72 }, pile: 19 },
+    { text: 'Konkurencja', scene: 'instagram', beat: 'alert', size: 3, r: 9, spot: { side: 'l', x: 54, y: 80 }, pile: 10 },
+    { text: 'Biblioteka reklam', scene: 'instagram', beat: 'area', size: 1, r: -10, spot: { side: 'r', x: 54, y: 93 }, pile: 18 },
 ];
+
+/** Napis → indeks nagrania, indeks kroku (-1 = początek) i sekunda, od której krok leci. */
+const TARGETS = FEATURES.map((f) => {
+    const scene = SCENES.findIndex((s) => s.id === f.scene);
+    const beats = SCENES[scene]?.beats ?? [];
+    const beat = f.beat ? beats.findIndex((b) => b.id === f.beat) : -1;
+    if (scene < 0 || (f.beat && beat < 0)) throw new Error(`Napis „${f.text}" wskazuje krok, którego nie ma w nagraniu.`);
+    return { scene, beat, at: beat >= 0 ? beats[beat]?.at : undefined };
+});
+
+/**
+ * Który napis świeci: ostatni krok sceny, który już minął. Zanim nagranie dojdzie
+ * do pierwszego napisanego kroku (np. kalendarz przed przyjęciem auta), świeci
+ * pierwszy napis sceny - to on zaraz nastąpi.
+ */
+function currentFeature(scene: number, beat: number) {
+    let best = -1;
+    let first = -1;
+    TARGETS.forEach((t, i) => {
+        if (t.scene !== scene) return;
+        if (first < 0 || t.beat < (TARGETS[first]?.beat ?? Infinity)) first = i;
+        if (t.beat <= beat && (best < 0 || t.beat >= (TARGETS[best]?.beat ?? -Infinity))) best = i;
+    });
+    return best >= 0 ? best : first;
+}
 
 export function Hero() {
     const player = useScenePlayer(SCENES);
-    const lit = new Set(SCENES[player.active]?.features ?? []);
+    const stage = useRef<HTMLDivElement>(null);
+    const current = currentFeature(player.active, player.phase === 'intro' ? -1 : player.beat);
+    const states: WordState[] = TARGETS.map((t, i) =>
+        i === current ? 'current' : t.scene === player.active ? 'scene' : 'idle',
+    );
+    const pick = (i: number) => {
+        const t = TARGETS[i];
+        if (t) player.jump(t.scene, t.at);
+    };
 
     return (
         <section aria-labelledby="hero-title" className="relative">
@@ -96,19 +123,28 @@ export function Hero() {
                 </header>
 
                 {/*
-                 * Kolejność w DOM = kolejność czytania na telefonie: najpierw okno aplikacji,
-                 * potem korzyści. Od xl siatka 1 / okno / 1 ustawia je symetrycznie. Kolumny
-                 * boczne dzielą wiersze z siatką (subgrid), więc drugi blok po lewej i po
-                 * prawej zaczyna się na tej samej wysokości, niezależnie od długości opisów.
+                 * Kolejność w DOM = kolejność czytania na telefonie: okno aplikacji, stos
+                 * napisów tuż pod nim (stuknięcie zmienia to, co widać nad palcem), potem
+                 * sterowanie. Od 1280 px napisy wysypują się na marginesy przy oknie.
                  */}
-                <div className="mt-16 grid grid-cols-1 gap-x-10 gap-y-14 sm:mt-20 md:grid-cols-2 xl:mt-16 xl:grid-cols-[14rem_minmax(0,1fr)_14rem] xl:grid-rows-[auto_auto] xl:gap-x-12 xl:gap-y-10 2xl:grid-cols-[16rem_minmax(0,1fr)_16rem] 2xl:gap-x-16">
-                    <div className="md:col-span-2 xl:col-span-1 xl:col-start-2 xl:row-span-2 xl:row-start-1">
-                        <Stage3D>
-                            <DeviceFrame>
-                                <SceneVideos scenes={SCENES} player={player} />
-                            </DeviceFrame>
-                        </Stage3D>
-                        <div className="mt-8 sm:mt-10">
+                <div className="mt-16 grid grid-cols-1 sm:mt-20 xl:mt-16 xl:grid-cols-[14rem_minmax(0,1fr)_14rem] xl:gap-x-10 2xl:grid-cols-[16rem_minmax(0,1fr)_16rem] 2xl:gap-x-14">
+                    <div className="xl:col-start-2 xl:row-start-1">
+                        <div ref={stage}>
+                            <Stage3D>
+                                <DeviceFrame>
+                                    <SceneVideos scenes={SCENES} player={player} />
+                                </DeviceFrame>
+                            </Stage3D>
+                        </div>
+                        <FeatureSpill
+                            words={FEATURES}
+                            states={states}
+                            onPick={pick}
+                            origin={stage}
+                            layout="pile"
+                            className="mt-10 sm:mt-14 xl:hidden"
+                        />
+                        <div className="mt-10 sm:mt-14 xl:mt-10">
                             <SceneControls scenes={SCENES} player={player} />
                         </div>
                         <div className="mt-8 sm:mt-10">
@@ -119,82 +155,26 @@ export function Hero() {
                         </p>
                     </div>
 
-                    <FeatureColumn features={FEATURES.slice(0, 2)} start={0} lit={lit} className="xl:col-start-1 xl:row-start-1" />
-                    <FeatureColumn features={FEATURES.slice(2)} start={2} lit={lit} className="xl:col-start-3 xl:row-start-1" />
+                    {/* Marginesy po obu stronach okna, na wysokość całego bloku. Napisy
+                        stoją w nich w procentach, część celowo zachodzi na krawędź okna. */}
+                    <FeatureSpill
+                        words={FEATURES}
+                        states={states}
+                        onPick={pick}
+                        origin={stage}
+                        layout="l"
+                        className="hidden xl:col-start-1 xl:row-start-1 xl:block"
+                    />
+                    <FeatureSpill
+                        words={FEATURES}
+                        states={states}
+                        onPick={pick}
+                        origin={stage}
+                        layout="r"
+                        className="hidden xl:col-start-3 xl:row-start-1 xl:block"
+                    />
                 </div>
             </div>
         </section>
-    );
-}
-
-function FeatureColumn({
-    features,
-    start,
-    lit,
-    className = '',
-}: {
-    features: readonly Feature[];
-    start: number;
-    lit: ReadonlySet<number>;
-    className?: string;
-}) {
-    return (
-        <ol
-            start={start + 1}
-            className={`flex flex-col gap-12 xl:row-span-2 xl:grid xl:grid-rows-subgrid xl:gap-y-10 ${className}`}
-        >
-            {features.map((feature, i) => (
-                <FeatureBlock key={feature.title} feature={feature} index={start + i} lit={lit.has(start + i)} />
-            ))}
-        </ol>
-    );
-}
-
-/**
- * Numer stoi w osobnej kolumnie siatki, przed krawędzią tekstu - tytuł i opis
- * zaczynają się w jednej pionie, a numer „wisi" na lewym marginesie bloku.
- * Linia nad blokiem zastępuje ikonę: mówi „tu zaczyna się rzecz", nie udając
- * obrazka. Złota linia = o tym jest nagranie, które właśnie leci.
- */
-function FeatureBlock({ feature, index, lit }: { feature: Feature; index: number; lit: boolean }) {
-    return (
-        <li className="relative grid grid-cols-[2.25rem_minmax(0,1fr)] content-start pt-5">
-            <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-line-strong" />
-            <span
-                aria-hidden
-                className={`absolute inset-x-0 top-0 h-px origin-left bg-[linear-gradient(90deg,var(--color-gold-200),var(--color-gold-600))] transition-transform duration-700 ease-out-expo ${
-                    lit ? 'scale-x-100' : 'scale-x-0'
-                }`}
-            />
-            <span
-                aria-hidden
-                className={`pt-[0.1875rem] font-mono text-[0.6875rem] tracking-[0.04em] tabular-nums transition-colors duration-500 ${
-                    lit ? 'text-gold-200' : 'text-dim'
-                }`}
-            >
-                {String(index + 1).padStart(2, '0')}.
-            </span>
-            <div>
-                <h3 className="text-[1.0625rem] leading-[1.3] font-[560] tracking-[-0.025em] text-balance text-paper">
-                    {feature.title}
-                </h3>
-                <p className="mt-3 text-[0.875rem] leading-[1.6] tracking-[-0.006em] text-pretty text-mute xl:text-[0.8125rem]">
-                    {feature.body}
-                </p>
-                <dl className="mt-4 border-t border-line">
-                    {feature.specs.map(([label, value]) => (
-                        <div
-                            key={label}
-                            className="flex items-baseline justify-between gap-4 border-b border-line py-1.5 text-[0.75rem] leading-[1.4]"
-                        >
-                            <dt className="shrink-0 text-dim">{label}</dt>
-                            <dd className="text-right font-mono text-[0.6875rem] whitespace-nowrap text-paper tabular-nums">
-                                {value}
-                            </dd>
-                        </div>
-                    ))}
-                </dl>
-            </div>
-        </li>
     );
 }

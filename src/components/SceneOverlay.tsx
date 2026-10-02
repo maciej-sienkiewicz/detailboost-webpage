@@ -5,6 +5,8 @@ import type { ReactNode } from 'react';
 export type Focus = { x: number; y: number; w: number; h: number };
 
 export type Beat = {
+    /** Klucz kroku z capture/*.timing.json - po nim napisy wokół okna wskazują krok. */
+    id: string;
     /** Sekunda nagrania, od której beat obowiązuje (z capture/*.timing.json). */
     at: number;
     /** Krótka etykieta kroku, wersalikami w Geist Mono. */
