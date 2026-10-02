@@ -40,8 +40,8 @@ w `src/scenes/index.tsx`.
 
 | Scena | Co widać |
 |---|---|
-| `lead` | mail klienta z pytaniem o usługę i termin, usługi podsunięte z cennika, nasza odpowiedź z wyceną, zgoda klienta, historia klienta; termin zaznaczony w kalendarzu, rezerwacja wypełniona z leada, SMS-y potwierdzenia i przypomnienia |
-| `checkin` | przyjęcie auta na tablecie (nagranie w oknie 1180 × 820, w ramce tabletu): przyjęcie z rezerwacji, przebieg, depozyt, uwagi do protokołu, zdjęcia, mapa uszkodzeń na schemacie 911, podpis protokołu przyjęcia i zgód marketingowych przez klienta, start wizyty |
+| `lead` | lead tylko z pierwszym mailem klienta: podpowiedzi usług z cennika, historia klienta i ostrzeżenie „2 odwołane rezerwacje”, odpowiedź wysłana z poczty CRM (lokalny SMTP); potem klient odpisuje, wycena, termin w kalendarzu, rezerwacja wypełniona z leada, SMS-y |
+| `checkin` | przyjęcie na tablecie: kalendarz → rezerwacja → „ROZPOCZNIJ”, przebieg, depozyt, uwagi; zdjęcia telefonem przez kod QR wpadające na tablet jedno po drugim; mapa uszkodzeń; dokumenty wysłane na sparowany tablet i podpisane przez klienta (tablet pionowo); na koniec wizyta sekcja po sekcji |
 | `handover` | „Oznacz jako gotowe" z SMS-em, protokół wydania wysłany do podpisu, strona podpisu na telefonie klienta (dokument, oświadczenie, podpis palcem), podpis wraca do wydania, faktura VAT z „Wyślij fakturę do KSeF", faktura „W KSeF" z numerem i kodem QR |
 | `costs` | animacja (`InvoiceJourney`): kontrahent wystawia fakturę → KSeF → CRM → reguła po NIP; potem nagranie: faktura w „Dokumentach kosztowych", reguły dopasowania, przypisanie silnikiem reguł, koszty 12 miesięcy w kategoriach |
 | `instagram` | alert na Tablicy o nowej kampanii w okolicy, reklamodawcy w okolicy, kalendarz reklam, szczegóły kampanii i treść reklamy, tydzień u obserwowanych profili |
@@ -65,8 +65,13 @@ Lokalny backend nie ma kluczy do usług zewnętrznych, więc część danych, kt
 w produkcji przychodzą z zewnątrz, wpisuje `capture/seed.mjs`. Interfejs, który je
 rysuje, jest w każdym kadrze prawdziwy.
 
-- **Wątek mailowy leada** (pytanie, odpowiedź, zgoda): w produkcji przychodzi z IMAP.
-  Zapisujemy go tam, gdzie zapisuje go synchronizacja skrzynki.
+- **Maile klienta w leadzie** (pytanie i zgoda): w produkcji przychodzą z IMAP. Zapisujemy
+  je tam, gdzie zapisuje je synchronizacja. Naszą odpowiedź wysyła w nagraniu prawdziwa
+  poczta CRM przez lokalny serwer SMTP (`python -m aiosmtpd -n -l localhost:1025`).
+- **Dwie porzucone rezerwacje klienta** (wiosna, lato) - z nich CRM liczy ostrzeżenie na leadzie.
+- **Podpis na tablecie**: dokumenty idą na sparowany tablet przyciskiem CRM; aplikacji
+  tabletu nie ma w repozytoriach, więc te same prośby (kanał przestawiony na link,
+  bez przypięcia do urządzenia) podpisujemy na stronie podpisu otwartej pionowo.
 - **Sugestie usług na leadzie**: w produkcji dobiera je model językowy z treści maila,
   wybierając pozycje cennika. Wpisujemy dokładnie takie wiersze.
 - **Przyjęcie faktury przez KSeF**: zaślepka SDK KSeF (`-PksefStub`) odkłada fakturę do

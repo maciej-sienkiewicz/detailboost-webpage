@@ -151,6 +151,8 @@ async function composeDeviceFrames(frames) {
         <stop offset="0" stop-color="#1b1b21"/><stop offset="1" stop-color="#09090b"/></radialGradient></defs>
         <rect width="${W}" height="${H}" fill="url(#g)"/></svg>`)).png().toBuffer();
     const bezels = new Map();
+    // Tło urządzenia „podanego klientowi" (telefon, tablet pionowo) to ostatnia klatka
+    // ekranu pod nim - już złożona, więc tablet w recepcji też trafia na rozmyte tło.
     let lastScreen = null;
     for (const f of frames) {
         if (f.kind === 'screen') {
@@ -159,7 +161,8 @@ async function composeDeviceFrames(frames) {
         }
         const L = deviceLayout(f.kind, f.vp);
         let back = plain;
-        if (f.kind === 'phone' && lastScreen) {
+        if (!L.overlay) lastScreen = f.file;
+        if (L.overlay && lastScreen) {
             if (!backdrops.has(lastScreen)) {
                 backdrops.set(lastScreen, await sharp(lastScreen).resize(W, H).blur(14).modulate({ brightness: 0.42 }).toBuffer());
             }
@@ -169,7 +172,10 @@ async function composeDeviceFrames(frames) {
         if (!bezels.has(key)) {
             bezels.set(key, Buffer.from(`<svg width="${L.ow}" height="${L.oh}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0" stop-color="#2a2a30"/><stop offset="1" stop-color="#111115"/></linearGradient></defs>
-                <rect x="0.5" y="0.5" width="${L.ow - 1}" height="${L.oh - 1}" rx="${L.radius}" ry="${L.radius}" fill="url(#g)" stroke="#3a3a42"/></svg>`));
+                <rect x="0.5" y="0.5" width="${L.ow - 1}" height="${L.oh - 1}" rx="${L.radius}" ry="${L.radius}" fill="url(#g)" stroke="#3a3a42"/>
+                ${f.kind.startsWith('tablet') ? (L.ow > L.oh
+                    ? `<circle cx="${L.bezel / 2}" cy="${L.oh / 2}" r="2.6" fill="#3d3d46"/>`
+                    : `<circle cx="${L.ow / 2}" cy="${L.bezel / 2}" r="2.6" fill="#3d3d46"/>`) : ''}</svg>`));
         }
         const r = Math.max(6, L.radius - L.bezel + 4);
         const screen = await sharp(f.file).resize(L.sw, L.sh).toBuffer();

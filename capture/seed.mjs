@@ -5,20 +5,24 @@ import { execFileSync } from 'node:child_process';
 import { sql, rows, q } from './db.mjs';
 
 /**
- * Zapytanie od stałego klienta (Piotr Wiśniewski: 3 wizyty, 2 auta w danych demo),
- * prowadzone mailem: pytanie o usługę i termin, nasza odpowiedź z wyceną i jego zgoda.
+ * Zapytanie od klienta z historią (Piotr Wiśniewski: wizyty i dwa auta w danych demo),
+ * prowadzone mailem. Na start jest tylko jego pierwszy mail; naszą odpowiedź wysyła
+ * w nagraniu prawdziwy formularz CRM, a jego zgodę dopisuje `insertCustomerReply`.
  *
- * Wątek pocztowy lokalnie nie przyjdzie z IMAP, więc zapisujemy wiadomości tam, gdzie
- * zapisałaby je synchronizacja skrzynki (mail_accounts / comm_threads / comm_messages,
- * wątek podpięty pod lead). Skrzynka ma status DISABLED - aktywnej IMAP_SMTP
- * synchronizacja próbowałaby się logować.
+ * Wątek pocztowy lokalnie nie przyjdzie z IMAP, więc pierwszą wiadomość zapisujemy tam,
+ * gdzie zapisałaby ją synchronizacja skrzynki. Skrzynka jest ACTIVE i wysyła przez
+ * lokalny serwer SMTP (aiosmtpd na localhost:1025) - odpowiedź z nagrania to prawdziwa
+ * wysyłka przez SendMailHandler, zapisana przez CRM w wątku. Synchronizacja IMAP do
+ * localhost:1143 się nie łączy i tylko odnotowuje błąd; `last_sync_at` mówi CRM, że pierwsza
+ * synchronizacja już była (inaczej zamiast leadów stoi ekran „Trwa synchronizacja").
+ *
+ * Dwie porzucone rezerwacje sprzed miesięcy: CRM liczy je w kartotece kontaktu
+ * i pokazuje na leadzie ostrzeżenie „2 odwołane rezerwacje w historii tego kontaktu".
  *
  * Sugestie usług w produkcji dobiera model językowy z treści maila, wybierając
  * POZYCJE CENNIKA (LeadServiceSuggestionService). Lokalnie modelu nie ma, więc
- * wpisujemy dokładnie to, co ta usługa zapisałaby dla tego maila: dwie pozycje
- * z cennika, z ceną z cennika i cytatem z treści jako uzasadnieniem.
- * Sekcja „Klient" (wizyty, obrót, ostatnia wizyta) NIE jest dosiewana - liczy ją
- * backend z prawdziwych wizyt klienta.
+ * wpisujemy dokładnie to, co ta usługa zapisałaby dla tego maila. Sekcję „Klient"
+ * (wizyty, obrót, ostatnia wizyta) liczy backend z prawdziwych wizyt.
  */
 export function seedReturningCustomerLead(studio) {
     const [[customerId, email, first, last]] = rows(
@@ -32,9 +36,21 @@ export function seedReturningCustomerLead(studio) {
     sql(`insert into leads (id, contact_identifier, created_at, customer_id, customer_name, estimated_value,
             initial_message, requires_verification, source, status, studio_id, updated_at, vehicle_brand,
             vehicle_model, vehicle_detection_status)
-         values (${q(leadId)}, ${q(email)}, now() - interval '26 hours', ${q(customerId)}, ${q(name)}, 0,
-            ${q(inbound)}, false, 'EMAIL', 'IN_PROGRESS', ${q(studio)}, now() - interval '40 minutes', 'Porsche',
+         values (${q(leadId)}, ${q(email)}, now() - interval '35 minutes', ${q(customerId)}, ${q(name)}, 0,
+            ${q(inbound)}, false, 'EMAIL', 'NEW', ${q(studio)}, now() - interval '35 minutes', 'Porsche',
             '911 Carrera 4S', 'DONE')`);
+
+    // Dwie porzucone rezerwacje (klient nie przyjechał) - wiosną i latem.
+    sql(`insert into appointments (id, studio_id, customer_id, vehicle_id, appointment_title, appointment_color_id,
+            is_all_day, start_date_time, end_date_time, status, send_reminder_sms, created_by, updated_by,
+            created_at, updated_at, is_detached)
+         select gen_random_uuid(), a.studio_id, a.customer_id, a.vehicle_id, t.title, a.appointment_color_id, false,
+            t.ts, t.ts + interval '4 hours', 'ABANDONED', false, a.created_by, a.created_by,
+            t.ts - interval '7 days', t.ts, false
+         from (select * from appointments where studio_id=${q(studio)} and customer_id=${q(customerId)}
+               and deleted_at is null order by created_at desc limit 1) a
+         cross join (values ('Korekta lakieru Porsche 911', timestamptz '2026-04-14 09:00+02'),
+                            ('Mycie detailingowe Porsche 911', timestamptz '2026-06-09 10:00+02')) t(title, ts)`);
 
     const services = [
         ['Korekta lakieru 2-etapowa', 'korekta lakieru'],
@@ -48,7 +64,7 @@ export function seedReturningCustomerLead(studio) {
         total += Number(gross);
         sql(`insert into lead_service_items (id, created_at, evidence_quote, lead_id, name, price_gross, price_net,
                 price_source, quantity, service_id, source, status, studio_id, vat_rate)
-             values (gen_random_uuid(), now() - interval '26 hours', ${q(quote)}, ${q(leadId)}, ${q(service)}, ${gross}, ${net},
+             values (gen_random_uuid(), now() - interval '35 minutes', ${q(quote)}, ${q(leadId)}, ${q(service)}, ${gross}, ${net},
                 'CATALOG', 1, ${q(serviceId)}, 'AI', 'SUGGESTED', ${q(studio)}, ${vat})`);
     }
     sql(`update leads set estimated_value=${total} where id=${q(leadId)}`);
@@ -56,42 +72,55 @@ export function seedReturningCustomerLead(studio) {
     const totalPln = (total / 100).toLocaleString('pl-PL', { minimumFractionDigits: 2 });
 
     const mailbox = 'kontakt@studiopolysk.pl';
-    sql(`insert into mail_accounts (id, studio_id, email_address, provider_type, auth_type, status, created_at, updated_at)
-         values (gen_random_uuid(), ${q(studio)}, ${q(mailbox)}, 'IMAP_SMTP', 'PASSWORD', 'DISABLED', now(), now())
+    sql(`insert into mail_accounts (id, studio_id, email_address, provider_type, auth_type, status, smtp_host, smtp_port,
+            imap_host, imap_port, encrypted_password, last_sync_at, created_at, updated_at)
+         values (gen_random_uuid(), ${q(studio)}, ${q(mailbox)}, 'IMAP_SMTP', 'PASSWORD', 'ACTIVE', 'localhost', 1025,
+            'localhost', 1143, 'x', now() - interval '2 minutes', now(), now())
          on conflict (studio_id, email_address) do nothing`);
     const account = sql(`select id from mail_accounts where studio_id=${q(studio)} and email_address=${q(mailbox)}`);
     const thread = sql('select gen_random_uuid()');
     const subject = 'Korekta i powłoka ceramiczna - Porsche 911';
-    const reply =
-        `Dzień dobry Panie Piotrze, 14–15 października mamy wolne stanowisko. Korekta lakieru 2-etapowa ` +
-        `i powłoka ceramiczna IGL Eclipse to łącznie ${totalPln} zł brutto. Auto przyjmujemy 14.10 o 9:00, ` +
-        `odbiór 15.10 po 17:00. Czy potwierdza Pan termin? Pozdrawiamy, Studio Połysk`;
-    const consent =
-        `Tak, potwierdzam termin 14–15.10 i wycenę ${totalPln} zł. Zgadzam się na wykonanie obu usług. ` +
-        `Podstawię auto o 9:00. Piotr Wiśniewski`;
     sql(`insert into comm_threads (id, studio_id, account_id, subject_norm, subject, participant_email, participant_name,
             last_message_at, last_direction, last_snippet, message_count, unread_count, inbound_count, outbound_count,
             has_attachments, lead_id, archived, created_at, kind)
          values (${q(thread)}, ${q(studio)}, ${q(account)}, ${q(subject.toLowerCase())}, ${q(subject)}, ${q(email)}, ${q(name)},
-            now() - interval '40 minutes', 'INBOUND', ${q(consent.slice(0, 120))}, 3, 0, 2, 1, false, ${q(leadId)}, false,
-            now() - interval '26 hours', 'DIRECT')`);
-    const msg = (id, dir, ago, from, fromName, to, subj, body, inReplyTo) =>
-        sql(`insert into comm_messages (id, studio_id, account_id, thread_id, direction, folder_kind, message_id_hdr,
-                in_reply_to, from_email, from_name, to_emails, subject, sent_at, body_text, body_text_clean,
-                has_attachments, is_read, read_source, read_at, send_status, created_at)
-             values (gen_random_uuid(), ${q(studio)}, ${q(account)}, ${q(thread)}, '${dir}', '${dir === 'INBOUND' ? 'INBOX' : 'SENT'}',
-                ${q(`<${id}.${leadId}@seed>`)}, ${inReplyTo ? q(`<${inReplyTo}.${leadId}@seed>`) : 'null'},
-                ${q(from)}, ${q(fromName)}, ${q(to)}, ${q(subj)}, now() - interval '${ago}', ${q(body)}, ${q(body)},
-                false, true, ${dir === 'INBOUND' ? "'CRM'" : 'null'}, ${dir === 'INBOUND' ? `now() - interval '${ago}'` : 'null'},
-                '${dir === 'INBOUND' ? 'RECEIVED' : 'SENT'}', now() - interval '${ago}')`);
-    msg('in1', 'INBOUND', '26 hours', email, name, mailbox, subject, inbound, null);
-    msg('out1', 'OUTBOUND', '25 hours', mailbox, 'Studio Połysk', email, `Re: ${subject}`, reply, 'in1');
-    msg('in2', 'INBOUND', '40 minutes', email, name, mailbox, `Re: ${subject}`, consent, 'out1');
-    // Ostatnie słowo należy do klienta, ale po jego zgodzie ruch jest po stronie
-    // studia w kalendarzu, nie w poczcie - first_response_at po zgodzie trzyma
-    // „Stwórz rezerwację" jako krok następny (leadUrgency.ts) zamiast „Odpisz klientowi".
-    sql(`update leads set thread_id=${q(thread)}, first_response_at = now() - interval '39 minutes' where id=${q(leadId)}`);
-    return { leadId, customerId };
+            now() - interval '35 minutes', 'INBOUND', ${q(inbound.slice(0, 120))}, 1, 1, 1, 0, false, ${q(leadId)}, false,
+            now() - interval '35 minutes', 'DIRECT')`);
+    const ctx = { studio, leadId, customerId, account, thread, email, name, mailbox, subject, totalPln };
+    insertMessage(ctx, 'in1', 'INBOUND', '35 minutes', subject, inbound, null);
+    sql(`update leads set thread_id=${q(thread)} where id=${q(leadId)}`);
+    return ctx;
+}
+
+function insertMessage({ studio, account, thread, leadId, email, name, mailbox }, id, dir, ago, subj, body, inReplyTo) {
+    const inbound = dir === 'INBOUND';
+    // Poczta CRM pokazuje treść z wersji HTML (body_html_safe), lead - z tekstowej.
+    const html = `<p>${body.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</p>`;
+    sql(`insert into comm_messages (id, studio_id, account_id, thread_id, direction, folder_kind, message_id_hdr,
+            in_reply_to, from_email, from_name, to_emails, subject, sent_at, body_text, body_text_clean, body_html_safe,
+            has_attachments, is_read, read_source, read_at, send_status, created_at)
+         values (gen_random_uuid(), ${q(studio)}, ${q(account)}, ${q(thread)}, '${dir}', '${inbound ? 'INBOX' : 'SENT'}',
+            ${q(`<${id}.${leadId}@seed>`)}, ${inReplyTo ? q(`<${inReplyTo}.${leadId}@seed>`) : 'null'},
+            ${q(inbound ? email : mailbox)}, ${q(inbound ? name : 'Studio Połysk')}, ${q(inbound ? mailbox : email)}, ${q(subj)},
+            now() - interval '${ago}', ${q(body)}, ${q(body)}, ${q(html)}, false, ${inbound ? 'false' : 'true'}, null, null,
+            '${inbound ? 'RECEIVED' : 'SENT'}', now() - interval '${ago}')`);
+}
+
+/**
+ * Klient odpisuje: zgoda na termin i wycenę. Jak przy pierwszym mailu - w miejscu,
+ * w które zapisałaby ją synchronizacja skrzynki.
+ */
+export function insertCustomerReply(ctx) {
+    const body = `Tak, potwierdzam termin 14–15.10 i wycenę ${ctx.totalPln} zł. Zgadzam się na wykonanie obu usług. ` +
+        'Podstawię auto o 9:00. Piotr Wiśniewski';
+    insertMessage(ctx, 'in2', 'INBOUND', '1 minute', `Re: ${ctx.subject}`, body, null);
+    sql(`update comm_threads set last_message_at=now() - interval '1 minute', last_direction='INBOUND',
+            message_count=message_count+1, inbound_count=inbound_count+1, last_snippet=${q(body.slice(0, 120))}
+         where id=${q(ctx.thread)}`);
+    // Ostatnie słowo należy do klienta, ale po jego zgodzie ruch jest po stronie studia
+    // w kalendarzu, nie w poczcie - first_response_at po zgodzie trzyma „Stwórz
+    // rezerwację" jako krok następny (leadUrgency.ts) zamiast „Odpisz klientowi".
+    sql(`update leads set first_response_at = now(), updated_at = now() where id=${q(ctx.leadId)}`);
 }
 
 /**

@@ -5,9 +5,12 @@ export const FRAME = { width: 1440, height: 900 };
 
 export const DEVICES = {
     // Telefon klienta na rozmytym ekranie studia (strona podpisu z linku SMS).
-    phone: { heightShare: 0.9, bezel: 12, radius: 38 },
+    phone: { heightShare: 0.9, bezel: 12, radius: 38, overlay: true },
     // Tablet w recepcji (przyjęcie pojazdu), poziomo.
     tablet: { heightShare: 0.9, bezel: 18, radius: 30 },
+    // Ten sam tablet obrócony pionowo i podany klientowi do podpisu - na rozmytym
+    // ekranie przyjęcia, jak telefon przy wydaniu.
+    'tablet-portrait': { heightShare: 0.95, bezel: 16, radius: 30, overlay: true },
 };
 
 /** Położenie ekranu urządzenia w kadrze dla okna strony `vp`. */
