@@ -1,0 +1,42 @@
+@import 'tailwindcss';
+
+/*
+ * Cała paleta to pięć wartości. Strona nie ma ani jednego koloru akcentu:
+ * hierarchię niesie wyłącznie stopień szarości, grubość pisma i odstęp.
+ * Dokładając odcień, dokładasz drugi system znaczeń - a tu jest miejsce na jeden.
+ */
+@theme {
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+    --color-paper: #f9fafb;
+    --color-ink: #0a0a0a;
+    --color-graphite: #3f3f46;
+    --color-mute: #71717a;
+    --color-rule: #e4e4e7;
+}
+
+@layer base {
+    html {
+        background: var(--color-paper);
+        color: var(--color-ink);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        /* Oś opsz Intera: duże stopnie dostają krój „Display" (węższe
+           odstępy, ostrzejsze kontrasty), drobne - krój tekstowy. */
+        font-optical-sizing: auto;
+        /* cv11: jednopiętrowe „a" bez ogonka; ss03: zaokrąglone przecinki.
+           tnum ustawiamy lokalnie, tylko tam, gdzie liczby stoją w kolumnie. */
+        font-feature-settings: 'cv11', 'ss03';
+    }
+
+    ::selection {
+        background: var(--color-ink);
+        color: var(--color-paper);
+    }
+
+    :focus-visible {
+        outline: 1px solid var(--color-ink);
+        outline-offset: 3px;
+    }
+}
