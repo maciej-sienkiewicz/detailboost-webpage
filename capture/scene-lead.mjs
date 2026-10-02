@@ -2,7 +2,7 @@
 // Widać od razu: mail klienta z pytaniem o usługę i termin, usługi podsunięte z cennika,
 // naszą odpowiedź z wyceną i zgodę klienta - a potem ustalenie terminu w kalendarzu
 // i rezerwację wypełnioną z leada, z SMS-ami potwierdzenia i przypomnienia.
-import { BASE, beat, click, moveTo, showCursorAt, type, wait, waitForLogo } from './lib.mjs';
+import { BASE, beat, release, click, moveTo, showCursorAt, type, wait, waitForLogo } from './lib.mjs';
 import { enableFullPlan, enableSmsAutomation, seedReturningCustomerLead } from './seed.mjs';
 
 export default {

@@ -2,11 +2,12 @@ import type { Beat, Focus } from '../components/SceneOverlay';
 import type { Scene } from '../components/ScenePlayer';
 import { InvoiceJourney } from '../components/InvoiceJourney';
 import lead from './lead.timing.json';
+import checkin from './checkin.timing.json';
 import handover from './handover.timing.json';
 import costs from './costs.timing.json';
 import instagram from './instagram.timing.json';
 
-type Timing = Record<string, { at: number; focus?: Focus }>;
+type Timing = Record<string, { at: number; until?: number; focus?: Focus }>;
 type Caption = { step: string; text: string; zoom?: number; wide?: boolean };
 
 /**
@@ -17,18 +18,23 @@ type Caption = { step: string; text: string; zoom?: number; wide?: boolean };
  * Każde zdanie opisuje to, co widać na ekranie w tej chwili - i jest prawdą
  * o produkcie (patrz README, „Co jest dosiewane do bazy").
  */
+/** Najdłużej trzymana ramka - dłużej oko i tak już jest gdzie indziej. */
+const MAX_FOCUS = 3.6;
+
 function beats(timing: Timing, captions: Record<string, Caption>): Beat[] {
-    return Object.entries(timing)
+    const list = Object.entries(timing)
         .filter(([id]) => captions[id])
-        .map(([id, { at, focus }]) => {
-            const c = captions[id]!;
-            // Przybliżenie z wielkości obszaru: ma się zmieścić w kadrze z oddechem,
-            // i nie więcej niż 1,35× - nagranie ma 1440 px, dalej tekst się rozmywa.
-            const fit = focus ? Math.min(90 / focus.w, 90 / focus.h) : 1;
-            const zoom = c.wide || !focus ? 1 : Math.max(1, Math.min(c.zoom ?? 1.35, fit));
-            return { at, step: c.step, text: c.text, focus, zoom };
-        })
-        .sort((a, b) => a.at - b.at);
+        .sort(([, a], [, b]) => a.at - b.at);
+    return list.map(([id, { at, until, focus }], i) => {
+        const c = captions[id]!;
+        // Przybliżenie z wielkości obszaru: ma się zmieścić w kadrze z oddechem,
+        // i nie więcej niż 1,35× - nagranie ma 1440 px, dalej tekst się rozmywa.
+        const fit = focus ? Math.min(90 / focus.w, 90 / focus.h) : 1;
+        const zoom = c.wide || !focus ? 1 : Math.max(1, Math.min(c.zoom ?? 1.35, fit));
+        const next = list[i + 1]?.[1].at ?? Infinity;
+        const end = Math.min(until ?? Infinity, next - 0.15, at + MAX_FOCUS);
+        return { at, until: end, step: c.step, text: c.text, focus, zoom };
+    });
 }
 
 const DIR = `${import.meta.env.BASE_URL}scenes/`;
@@ -55,6 +61,29 @@ export const SCENES: readonly SiteScene[] = [
             form: { step: 'Rezerwacja', text: 'Klient, auto z kartoteki i usługi z cenami są już wpisane.', zoom: 1.2 },
             sms: { step: 'SMS', text: 'Potwierdzenie od razu, przypomnienie 24 godziny przed wizytą.' },
             done: { step: 'Gotowe', text: 'Rezerwacja zapisana i widoczna przy zapytaniu klienta.' },
+        }),
+    },
+    {
+        id: 'checkin',
+        title: 'Przyjęcie auta na tablecie',
+        summary: 'Klient przyjeżdża: formularz, depozyt, zdjęcia i mapa uszkodzeń na tablecie, a na koniec podpis protokołu i zgód marketingowych.',
+        poster: `${DIR}checkin-poster.webp`,
+        video: `${DIR}checkin`,
+        features: [3],
+        beats: beats(checkin, {
+            reservation: { step: 'Klient przyjechał', text: 'Przyjęcie startuje z rezerwacji: klient, auto i usługi są już wpisane.' },
+            vehicle: { step: 'Pojazd', text: 'Przebieg z licznika wpisany na tablecie.' },
+            deposit: { step: 'Depozyt', text: 'Kluczyki i dowód rejestracyjny odnotowane w protokole.' },
+            notes: { step: 'Uwagi do protokołu', text: 'Uwagi o stanie auta trafią do protokołu przyjęcia.' },
+            photos: { step: 'Zdjęcia', text: 'Zdjęcia auta prosto z tabletu, albo telefonem przez kod QR.' },
+            uploaded: { step: 'Dokumentacja zdjęciowa', text: 'Cztery zdjęcia przypięte do wizyty.' },
+            damage: { step: 'Mapa uszkodzeń', text: 'Każde uszkodzenie to punkt na schemacie auta.', wide: true },
+            'damage-notes': { step: 'Opis uszkodzeń', text: 'Do każdego punktu krótki opis: odprysk, rysa, otarcie.' },
+            documents: { step: 'Dokumenty do podpisu', text: 'Protokół przyjęcia i zgody marketingowe czekają na podpis klienta.', zoom: 1.2 },
+            'sign-protocol': { step: 'Podpis protokołu', text: 'Klient czyta protokół na tablecie i podpisuje się palcem.', wide: true },
+            'sign-consent': { step: 'Zgody marketingowe', text: 'Zgody na SMS i e-mail podpisane i zapisane w kartotece klienta.', wide: true },
+            signed: { step: 'Podpisane', text: 'Oba dokumenty podpisane, wizyta może się zacząć.', zoom: 1.2 },
+            visit: { step: 'Wizyta w toku', text: 'Przebieg, depozyt i zdjęcia są w wizycie od pierwszej minuty.' },
         }),
     },
     {

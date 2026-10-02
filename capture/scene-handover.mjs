@@ -3,7 +3,7 @@
 // stronę podpisu na telefonie klienta (dokument, oświadczenie, podpis palcem), powrót
 // do wydania z potwierdzeniem podpisu, fakturę VAT z „Wyślij fakturę do KSeF",
 // a po cięciu - fakturę w Finansach ze statusem „W KSeF" i kodem QR.
-import { BASE, beat, click, drawSignature, moveTo, showCursorAt, wait, waitForLogo } from './lib.mjs';
+import { BASE, beat, release, click, drawSignature, moveTo, showCursorAt, wait, waitForLogo } from './lib.mjs';
 import { sql, q } from './db.mjs';
 import {
     enableFullPlan, enableSmsAutomation, markInvoiceAccepted, markKsefSynced, setupInvoicing, visitIdByTitle,
@@ -57,11 +57,14 @@ export default {
         await phone.locator('canvas').first().waitFor({ timeout: 30000 });
         await wait(phone, 2500);
         await showCursorAt(phone, 300, 520);
-        await rec.switchTo(phone, 0.25, { phone: true });
+        phone.__device = 'phone';
+        await rec.switchTo(phone, 0.25, { device: 'phone' });
         await wait(phone, 400);
         await beat(phone, rec, 'document', phone.getByText('Dokument', { exact: true }).first().locator('xpath=ancestor::*[2]'));
         await wait(phone, 1300);
         const pad = phone.getByLabel('Pole podpisu');
+        release();
+        release();
         await phone.evaluate(() => {
             const el = document.querySelector('[aria-label="Pole podpisu"]');
             el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -113,6 +116,7 @@ export default {
         await beat(page, rec, 'ksef', page.getByText(/^KSeF: /).first().locator('xpath=ancestor::*[2]'));
         await moveTo(page, page.getByText('W KSeF', { exact: true }).first(), 900, { dx: 70, dy: 6 });
         await wait(page, 1600);
+        release();
         await page.evaluate(() => {
             const qr = [...document.querySelectorAll('*')].find((el) => el.childElementCount === 0 && /Weryfikacja w KSeF/.test(el.textContent ?? ''));
             qr?.scrollIntoView({ behavior: 'smooth', block: 'center' });

@@ -9,6 +9,7 @@
 import { chromium } from 'playwright-core';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { FRAME, deviceLayout } from './device.mjs';
 
 export const BASE = process.env.CRM_URL ?? 'http://localhost:5173';
 const CHROME = process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
@@ -153,9 +154,13 @@ export async function moveTo(page, locator, ms = 650, { dx = 0, dy = 0 } = {}) {
 }
 
 export async function click(page, locator, { ms = 650, settle = 250 } = {}) {
-    await moveTo(page, locator, ms);
+    const at = await moveTo(page, locator, ms);
     await wait(page, 120);
     await page.evaluate(() => window.__cursor.press());
+    // Kliknięcie poza obrysowanym obszarem zmienia ekran gdzie indziej - ramka
+    // poprzedniego kroku nie może tam zostać.
+    if (open && (open.page !== page || at.x < open.box.x || at.x > open.box.x + open.box.width
+        || at.y < open.box.y || at.y > open.box.y + open.box.height)) release();
     await locator.click();
     await page.evaluate(() => window.__cursor.release());
     await wait(page, settle);
@@ -179,28 +184,35 @@ export async function showCursorAt(page, x, y) {
  * którym ma spocząć kamera i złota ramka. Obszar brany z prawdziwego położenia
  * elementu, nie wpisywany ręcznie - zmiana układu CRM nie rozjedzie ramki z treścią.
  */
+/** Krok z ramką, który trwa: jego obszar na stronie, żeby kliknięcie obok go kończyło. */
+let open = null;
+
+/** Koniec ramki bieżącego kroku (przed przewinięciem, zamknięciem okna itp.). */
+export function release() {
+    open?.rec.release();
+    open = null;
+}
+
 export async function beat(page, rec, id, locator, pad = 10) {
+    open = null;
     if (!locator) return rec.mark(id);
     const box = await locator.boundingBox();
     const vp = page.viewportSize();
     if (!box) return rec.mark(id);
+    open = { rec, page, box };
     let x = Math.max(0, box.x - pad);
     let y = Math.max(0, box.y - pad);
     let w = Math.min(vp.width - x, box.width + pad * 2);
     let h = Math.min(vp.height - y, box.height + pad * 2);
     let W = vp.width;
     let H = vp.height;
-    if (vp.width < 600) {
-        // Telefon: kadr ma 1440 × 900, a ekran telefonu stoi w nim w ramce (patrz
-        // composePhoneFrames: wysokość 90% kadru, 12 px ramki, wyśrodkowany).
-        W = 1440;
-        H = 900;
-        const ph = Math.round(H * 0.9);
-        const scale = (ph - 24) / vp.height;
-        const pw = Math.round(vp.width * scale) + 24;
-        const ox = Math.round((W - pw) / 2) + 12;
-        const oy = Math.round((H - ph) / 2) + 12;
-        [x, y, w, h] = [ox + x * scale, oy + y * scale, w * scale, h * scale];
+    const device = page.__device;
+    if (device) {
+        // Ekran urządzenia stoi w kadrze 1440 × 900 w ramce (capture/device.mjs).
+        const L = deviceLayout(device, vp);
+        W = FRAME.width;
+        H = FRAME.height;
+        [x, y, w, h] = [L.sx + x * L.scale, L.sy + y * L.scale, w * L.scale, h * L.scale];
     }
     const r = (v) => Math.round(v * 10) / 10;
     rec.mark(id, { x: r((x / W) * 100), y: r((y / H) * 100), w: r((w / W) * 100), h: r((h / H) * 100) });

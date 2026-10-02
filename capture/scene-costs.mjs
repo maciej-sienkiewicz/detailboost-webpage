@@ -4,7 +4,7 @@
 // miesiąca jako „Nieprzypisane", reguły dopasowania po NIP dostawcy, przypisanie
 // silnikiem reguł („Zastosuj wszystkie reguły teraz") i koszty z 12 miesięcy
 // w podziale na kategorie: chemia, paliwo, folie PPF, leasing, media, narzędzia.
-import { BASE, beat, click, moveTo, showCursorAt, wait } from './lib.mjs';
+import { BASE, beat, release, click, moveTo, showCursorAt, wait } from './lib.mjs';
 import { enableFullPlan, insertNewCostInvoice, markKsefSynced, seedCostData } from './seed.mjs';
 
 const ancestor = (loc, n) => loc.locator(`xpath=ancestor::*[${n}]`);
@@ -53,6 +53,7 @@ export default {
 
         const rulesHeader = page.getByText('Automatyczne przypisywanie faktur wg dostawcy').first();
         await click(page, rulesHeader, { ms: 800, settle: 700 });
+        release();
         await page.evaluate(() => {
             const el = [...document.querySelectorAll('*')].find((n) => n.childElementCount === 0 && n.textContent === 'Automatyczne przypisywanie faktur wg dostawcy');
             el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -67,6 +68,8 @@ export default {
         await beat(page, rec, 'applied', ancestor(apply, 3));
         await wait(page, 1600);
 
+        release();
+
         await page.evaluate(() => {
             const el = [...document.querySelectorAll('*')].find((n) => n.childElementCount === 0 && n.textContent === 'Pozycje kosztowe');
             el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -77,6 +80,7 @@ export default {
         await moveTo(page, item, 700, { dx: 380 });
         await wait(page, 2200);
 
+        release();
         await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'smooth' }));
         await wait(page, 900);
         await click(page, page.getByRole('button', { name: /Bieżący miesiąc/ }).first(), { ms: 800, settle: 500 });
@@ -84,6 +88,7 @@ export default {
         await beat(page, rec, 'year', ancestor(page.getByText('Struktura kosztów wg kategorii').first(), 2));
         await moveTo(page, donut, 800);
         await wait(page, 2400);
+        release();
         await page.evaluate(() => {
             const el = [...document.querySelectorAll('*')].find((n) => n.childElementCount === 0 && n.textContent === 'Kategorie kosztów');
             el?.scrollIntoView({ behavior: 'smooth', block: 'start' });

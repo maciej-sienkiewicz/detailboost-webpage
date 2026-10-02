@@ -16,10 +16,11 @@ const OUT = 'public/scenes';
 mkdirSync(OUT, { recursive: true });
 
 if (!process.env.ENCODE_ONLY) {
-    const demo = await openDemo();
+    const demo = await openDemo(scene.viewport ?? {});
     try {
         await scene.prepare(demo);
-        const rec = await startRecording(demo.page, RAW);
+        if (scene.device) demo.page.__device = scene.device;
+        const rec = await startRecording(demo.page, RAW, { device: scene.device ?? 'screen' });
         await scene.play({ ...demo, rec });
         const frames = await rec.stop();
         console.log(`[${name}] klatek: ${frames}`);
@@ -37,7 +38,11 @@ encode(RAW, `${OUT}/${name}`, { width: 1440, speed });
 const marks = JSON.parse(readFileSync(`${RAW}/marks.json`, 'utf8'));
 mkdirSync('src/scenes', { recursive: true });
 writeFileSync(`src/scenes/${name}.timing.json`, `${JSON.stringify(
-    Object.fromEntries(marks.map(({ id, t, focus }) => [id, { at: Math.round((t / speed) * 100) / 100, ...(focus ? { focus } : {}) }])),
+    Object.fromEntries(marks.map(({ id, t, until, focus }) => [id, {
+        at: Math.round((t / speed) * 100) / 100,
+        ...(until != null ? { until: Math.round((until / speed) * 100) / 100 } : {}),
+        ...(focus ? { focus } : {}),
+    }])),
     null, 4)}\n`);
 // Plakat: kadr, który sam opowiada scenę (podaje go scena), w dwóch szerokościach.
 execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-ss', String(scene.posterAt), '-i', `${OUT}/${name}.mp4`,

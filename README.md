@@ -41,9 +41,19 @@ w `src/scenes/index.tsx`.
 | Scena | Co widać |
 |---|---|
 | `lead` | mail klienta z pytaniem o usługę i termin, usługi podsunięte z cennika, nasza odpowiedź z wyceną, zgoda klienta, historia klienta; termin zaznaczony w kalendarzu, rezerwacja wypełniona z leada, SMS-y potwierdzenia i przypomnienia |
+| `checkin` | przyjęcie auta na tablecie (nagranie w oknie 1180 × 820, w ramce tabletu): przyjęcie z rezerwacji, przebieg, depozyt, uwagi do protokołu, zdjęcia, mapa uszkodzeń na schemacie 911, podpis protokołu przyjęcia i zgód marketingowych przez klienta, start wizyty |
 | `handover` | „Oznacz jako gotowe" z SMS-em, protokół wydania wysłany do podpisu, strona podpisu na telefonie klienta (dokument, oświadczenie, podpis palcem), podpis wraca do wydania, faktura VAT z „Wyślij fakturę do KSeF", faktura „W KSeF" z numerem i kodem QR |
 | `costs` | animacja (`InvoiceJourney`): kontrahent wystawia fakturę → KSeF → CRM → reguła po NIP; potem nagranie: faktura w „Dokumentach kosztowych", reguły dopasowania, przypisanie silnikiem reguł, koszty 12 miesięcy w kategoriach |
 | `instagram` | alert na Tablicy o nowej kampanii w okolicy, reklamodawcy w okolicy, kalendarz reklam, szczegóły kampanii i treść reklamy, tydzień u obserwowanych profili |
+
+Pod oknem jest sterowanie: „Wstecz", „Pauza"/„Odtwórz", „Dalej" - krokiem jest fragment
+nagrania z jednym podpisem; na pierwszym i ostatnim kroku przyciski przechodzą do
+poprzedniego i następnego nagrania. Ramka kroku gaśnie przy pierwszym kliknięciu poza nią,
+przewinięciu albo cięciu (czas z nagrania), najpóźniej po 3,6 s.
+
+Aplikacja tabletowa do podpisu („DetailBoost Tablet") nie jest w repozytoriach CRM, więc
+w scenie `checkin` klient podpisuje dokumenty na stronie podpisu (`/sign/:token`) otwartej
+na tym samym tablecie - z tą samą treścią dokumentów.
 
 Logo marki w nagłówku wizyty i leada to prawdziwe logo z CDN, z którego korzysta CRM
 (`car-logos-dataset` na jsDelivr). Podpis protokołu wymaga S3 - lokalnie stoi moto
@@ -84,7 +94,7 @@ rysuje, jest w każdym kadrze prawdziwy.
 3. Tutaj (potrzebne `ffmpeg` z libx264 i libvpx oraz `psql` przez `sudo -u postgres`):
 
 ```sh
-node capture/run.mjs lead    # albo handover, costs, instagram
+node capture/run.mjs lead    # albo checkin, handover, costs, instagram
 ENCODE_ONLY=1 node capture/run.mjs lead   # tylko kodowanie z zapisanych klatek
 ```
 

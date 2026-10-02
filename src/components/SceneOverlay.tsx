@@ -15,6 +15,13 @@ export type Beat = {
     focus?: Focus;
     /** Przybliżenie kamery na `focus`; 1 = bez przybliżenia. */
     zoom?: number;
+    /**
+     * Do kiedy ramka i przybliżenie mają sens. Podpis trwa do następnego kroku, ale
+     * ramka nie może: gdy okno się zamknie albo treść się przewinie, złota ramka
+     * obrysowywałaby puste miejsce. Czas z nagrania (pierwsze kliknięcie poza
+     * obszarem, przewinięcie, cięcie), przycięty do kilku sekund.
+     */
+    until: number;
 };
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -62,7 +69,7 @@ export function FocusRing({ focus, beatKey }: { focus?: Focus; beatKey: string }
                     style={{ left: `${focus.x}%`, top: `${focus.y}%`, width: `${focus.w}%`, height: `${focus.h}%` }}
                     initial={{ opacity: 0, scale: 1.06 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
+                    exit={{ opacity: 0, scale: 0.98, transition: { duration: 0.25, delay: 0 } }}
                     transition={{ duration: 0.6, ease: EASE, delay: 0.35 }}
                 />
             )}

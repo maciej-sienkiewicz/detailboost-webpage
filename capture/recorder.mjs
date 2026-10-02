@@ -6,8 +6,9 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import sharp from 'sharp';
+import { FRAME, deviceLayout } from './device.mjs';
 
-export async function startRecording(page, dir) {
+export async function startRecording(page, dir, { device = 'screen' } = {}) {
     rmSync(dir, { recursive: true, force: true });
     mkdirSync(dir, { recursive: true });
     const frames = [];
@@ -23,6 +24,7 @@ export async function startRecording(page, dir) {
     let hold = 0.15;
     let cdp = null;
     let kind = 'screen';
+    let kindVp = null;
     let pausedAt = null;
     // Chrome wysyła klatkę tylko przy zmianie obrazu, więc „teraz" w czasie filmu
     // to ostatnia klatka + czas zegarowy, który od niej minął. Bez tego nieruchome
@@ -46,7 +48,7 @@ export async function startRecording(page, dir) {
             }
             const file = `${dir}/${String(n++).padStart(5, '0')}.jpg`;
             writeFileSync(file, Buffer.from(data, 'base64'));
-            frames.push({ file, t: metadata.timestamp - offset, kind, wall: Date.now() / 1000 });
+            frames.push({ file, t: metadata.timestamp - offset, kind, vp: kindVp, wall: Date.now() / 1000 });
         });
         const vp = target.viewportSize();
         const dpr = await target.evaluate(() => devicePixelRatio);
@@ -55,6 +57,8 @@ export async function startRecording(page, dir) {
             maxWidth: Math.round(vp.width * dpr), maxHeight: Math.round(vp.height * dpr),
         });
     };
+    kind = device;
+    kindVp = page.viewportSize();
     await attach(page);
 
     const marks = [];
@@ -67,12 +71,26 @@ export async function startRecording(page, dir) {
          * zgadza się z tym, co wyjdzie z ffmpeg.
          */
         mark(id, focus) {
+            this.release();
             const first = frames[0]?.t ?? 0;
             marks.push({ id, t: Math.max(0, (pausedAt ?? now()) - first), ...(focus ? { focus } : {}) });
         },
+        /**
+         * Koniec ramki bieżącego kroku: od tej chwili obrysowany obszar przestaje
+         * pokazywać to, o czym mowa (kliknięcie gdzie indziej, przewinięcie, cięcie).
+         * Podpis kroku zostaje do następnego znacznika.
+         */
+        release(lag = 0.1) {
+            const m = marks.at(-1);
+            if (!m || m.until != null) return;
+            const first = frames[0]?.t ?? 0;
+            m.until = Math.max(m.t, (pausedAt ?? now()) - first + lag);
+        },
         /** Zatrzymuje zapis klatek; ostatnia klatka przed przerwą trwa `holdFor` sekund. */
         pause(holdFor = 0.15) {
-            pausedAt = now();
+            this.release(0);
+            // Druga pauza bez wznowienia nie przesuwa chwili cięcia.
+            pausedAt = pausedAt ?? now();
             paused = true;
             hold = holdFor;
         },
@@ -84,14 +102,16 @@ export async function startRecording(page, dir) {
          * Przełącza nagrywanie na inną kartę (np. telefon klienta otwierający link do
          * podpisu) - w filmie to cięcie. Obie karty muszą mieć ten sam rozmiar okna.
          */
-        async switchTo(target, holdFor = 0.15, { phone = false } = {}) {
+        async switchTo(target, holdFor = 0.15, { device = 'screen' } = {}) {
+            this.release(0);
             const prev = cdp;
             pausedAt = pausedAt ?? now();
             paused = true;
             await prev.send('Page.stopScreencast').catch(() => {});
             hold = holdFor;
             rebase = true;
-            kind = phone ? 'phone' : 'screen';
+            kind = device;
+            kindVp = target.viewportSize();
             paused = false;
             await attach(target);
         },
@@ -100,7 +120,7 @@ export async function startRecording(page, dir) {
             await cdp.send('Page.stopScreencast').catch(() => {});
             await new Promise((r) => setTimeout(r, 300));
             await dropBlankFrames(frames);
-            await composePhoneFrames(frames);
+            await composeDeviceFrames(frames);
             // Chrome wysyła klatkę tylko, gdy obraz się zmienił - na nieruchomym
             // ekranie przerwa między klatkami bywa długa. Plik concat odtwarza te
             // przerwy co do milisekundy, więc tempo nagrania = tempo przebiegu.
@@ -116,39 +136,47 @@ export async function startRecording(page, dir) {
 }
 
 /**
- * Klatki z telefonu klienta (strona podpisu nagrana w oknie 390 × 844) stawiamy
- * w ramce telefonu na przyciemnionym, rozmytym ekranie studia - tym, który był
- * ostatni przed cięciem. Widz ma zobaczyć, że to klient podpisuje u siebie, a nie
- * studio na swoim komputerze.
+ * Klatki z urządzeń stawiamy w ramce urządzenia:
+ *  - telefon klienta (strona podpisu z linku SMS) - na przyciemnionym, rozmytym
+ *    ekranie studia, tym ostatnim przed cięciem: widz ma zobaczyć, że to klient
+ *    podpisuje u siebie, a nie studio na swoim komputerze;
+ *  - tablet w recepcji (przyjęcie pojazdu) - na ciemnym tle strony.
  */
-async function composePhoneFrames(frames) {
-    const first = frames.find((f) => f.kind === 'screen');
-    if (!first || !frames.some((f) => f.kind === 'phone')) return;
-    const { width: W, height: H } = await sharp(first.file).metadata();
+async function composeDeviceFrames(frames) {
+    const devices = frames.filter((f) => f.kind !== 'screen');
+    if (!devices.length) return;
+    const { width: W, height: H } = FRAME;
     const backdrops = new Map();
-    let lastScreen = first.file;
+    const plain = await sharp(Buffer.from(`<svg width="${W}" height="${H}"><defs><radialGradient id="g" cx="50%" cy="42%" r="75%">
+        <stop offset="0" stop-color="#1b1b21"/><stop offset="1" stop-color="#09090b"/></radialGradient></defs>
+        <rect width="${W}" height="${H}" fill="url(#g)"/></svg>`)).png().toBuffer();
+    const bezels = new Map();
+    let lastScreen = null;
     for (const f of frames) {
         if (f.kind === 'screen') {
             lastScreen = f.file;
             continue;
         }
-        if (!backdrops.has(lastScreen)) {
-            backdrops.set(lastScreen, await sharp(lastScreen).resize(W, H).blur(14).modulate({ brightness: 0.42 }).toBuffer());
+        const L = deviceLayout(f.kind, f.vp);
+        let back = plain;
+        if (f.kind === 'phone' && lastScreen) {
+            if (!backdrops.has(lastScreen)) {
+                backdrops.set(lastScreen, await sharp(lastScreen).resize(W, H).blur(14).modulate({ brightness: 0.42 }).toBuffer());
+            }
+            back = backdrops.get(lastScreen);
         }
-        const ph = Math.round(H * 0.9);
-        const screen = await sharp(f.file).resize({ height: ph - 24 }).toBuffer();
-        const { width: sw, height: sh } = await sharp(screen).metadata();
-        const pw = sw + 24;
-        const r = 38;
-        const round = Buffer.from(`<svg width="${sw}" height="${sh}"><rect width="${sw}" height="${sh}" rx="${r - 10}" ry="${r - 10}"/></svg>`);
+        const key = `${f.kind}-${L.ow}x${L.oh}`;
+        if (!bezels.has(key)) {
+            bezels.set(key, Buffer.from(`<svg width="${L.ow}" height="${L.oh}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2a2a30"/><stop offset="1" stop-color="#111115"/></linearGradient></defs>
+                <rect x="0.5" y="0.5" width="${L.ow - 1}" height="${L.oh - 1}" rx="${L.radius}" ry="${L.radius}" fill="url(#g)" stroke="#3a3a42"/></svg>`));
+        }
+        const r = Math.max(6, L.radius - L.bezel + 4);
+        const screen = await sharp(f.file).resize(L.sw, L.sh).toBuffer();
+        const round = Buffer.from(`<svg width="${L.sw}" height="${L.sh}"><rect width="${L.sw}" height="${L.sh}" rx="${r}" ry="${r}"/></svg>`);
         const masked = await sharp(screen).composite([{ input: round, blend: 'dest-in' }]).png().toBuffer();
-        const bezel = Buffer.from(`<svg width="${pw}" height="${ph}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#2a2a30"/><stop offset="1" stop-color="#121216"/></linearGradient></defs>
-            <rect x="0.5" y="0.5" width="${pw - 1}" height="${ph - 1}" rx="${r}" ry="${r}" fill="url(#g)" stroke="#3a3a42"/></svg>`);
-        const x = Math.round((W - pw) / 2);
-        const y = Math.round((H - ph) / 2);
-        const out = await sharp(backdrops.get(lastScreen))
-            .composite([{ input: bezel, left: x, top: y }, { input: masked, left: x + 12, top: y + 12 }])
+        const out = await sharp(back)
+            .composite([{ input: bezels.get(key), left: L.ox, top: L.oy }, { input: masked, left: L.sx, top: L.sy }])
             .jpeg({ quality: 94 })
             .toBuffer();
         writeFileSync(f.file, out);

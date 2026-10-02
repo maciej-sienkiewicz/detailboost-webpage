@@ -2,7 +2,7 @@
 // Widać: alert na Tablicy („w Twoim rejonie… nowa kampania"), przejście do reklam
 // konkurencji (plakietka „Nowa kampania", kalendarz kampanii), szczegóły kampanii
 // z treścią reklamy i tydzień u obserwowanych profili z postem-promocją.
-import { BASE, beat, click, moveTo, showCursorAt, wait } from './lib.mjs';
+import { BASE, beat, release, click, moveTo, showCursorAt, wait } from './lib.mjs';
 import { enableFullPlan, fixDemoTitles, seedCampaignHistory, seedCompetitorCampaign, seedTasks } from './seed.mjs';
 
 export default {
@@ -63,6 +63,7 @@ export default {
         await beat(page, rec, 'creative', page.getByText(/Zabezpiecz lakier przed zimą/).first().locator('xpath=ancestor::*[2]'));
         await moveTo(page, page.getByText(/Zabezpiecz lakier przed zimą/).first(), 700);
         await wait(page, 1700);
+        release();
         await page.keyboard.press('Escape');
         await wait(page, 500);
         await click(page, page.getByRole('tab', { name: /Tydzień/ }).or(page.getByText('Tydzień', { exact: true })).first(), { ms: 800, settle: 900 });

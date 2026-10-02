@@ -1,5 +1,5 @@
 import { DeviceFrame, Stage3D } from './Stage3D';
-import { SceneTabs, SceneVideos, useScenePlayer } from './ScenePlayer';
+import { SceneControls, SceneTabs, SceneVideos, useScenePlayer } from './ScenePlayer';
 import { SCENES } from '../scenes';
 
 type Feature = {
@@ -108,11 +108,14 @@ export function Hero() {
                                 <SceneVideos scenes={SCENES} player={player} />
                             </DeviceFrame>
                         </Stage3D>
-                        <div className="mt-10 sm:mt-12">
+                        <div className="mt-8 sm:mt-10">
+                            <SceneControls scenes={SCENES} player={player} />
+                        </div>
+                        <div className="mt-8 sm:mt-10">
                             <SceneTabs scenes={SCENES} player={player} />
                         </div>
                         <p className="mt-6 text-center font-mono text-[0.6875rem] tracking-[0.04em] text-dim">
-                            Nagrania z działającej aplikacji na koncie demonstracyjnym. Animacja przed nagraniem kosztów pokazuje drogę faktury przez KSeF.
+                            Nagrania z działającej aplikacji na koncie demonstracyjnym. Przyjęcie auta nagrane w oknie tabletu. Animacja przed nagraniem kosztów pokazuje drogę faktury przez KSeF.
                         </p>
                     </div>
 
