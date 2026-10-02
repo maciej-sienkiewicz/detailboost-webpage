@@ -50,7 +50,7 @@ w `src/scenes/index.tsx`.
 | `lead` | lead tylko z pierwszym mailem klienta: podpowiedzi usług z cennika, historia klienta i ostrzeżenie „2 odwołane rezerwacje”, odpowiedź wysłana z poczty CRM (lokalny SMTP); potem klient odpisuje, wycena, termin w kalendarzu, rezerwacja wypełniona z leada, SMS-y |
 | `checkin` | przyjęcie na tablecie: kalendarz → rezerwacja → „ROZPOCZNIJ”, przebieg, depozyt, uwagi; zdjęcia telefonem przez kod QR wpadające na tablet jedno po drugim; mapa uszkodzeń; dokumenty wysłane na sparowany tablet i podpisane przez klienta (tablet pionowo); na koniec wizyta sekcja po sekcji |
 | `handover` | „Oznacz jako gotowe" z SMS-em, protokół wydania wysłany do podpisu, strona podpisu na telefonie klienta (dokument, oświadczenie, podpis palcem), podpis wraca do wydania, faktura VAT z „Wyślij fakturę do KSeF", faktura „W KSeF" z numerem i kodem QR |
-| `costs` | animacja (`InvoiceJourney`): kontrahent wystawia fakturę → KSeF → CRM → reguła po NIP; potem nagranie: faktura w „Dokumentach kosztowych", reguły dopasowania, przypisanie silnikiem reguł, koszty 12 miesięcy w kategoriach |
+| `costs` | koszty z 30 dni w kategoriach; właściciel zakłada kategorię „Paliwo” i regułę „NIP ORLEN → Paliwo” (z podpowiedzią dostawcy), reguła porządkuje stare faktury; cięcie na stację (`capture/anim/fuel.html`: terminal drukuje fakturę ORLEN, stempel KSeF); faktura przychodzi do „Dokumentów kosztowych”, sama dostaje „Paliwo”, rosną suma kategorii i wykres |
 | `instagram` | alert na Tablicy o nowej kampanii w okolicy, reklamodawcy w okolicy, kalendarz reklam, szczegóły kampanii i treść reklamy, tydzień u obserwowanych profili |
 
 Pod oknem jest sterowanie: „Wstecz", „Pauza"/„Odtwórz", „Dalej" - krokiem jest fragment
@@ -85,7 +85,13 @@ rysuje, jest w każdym kadrze prawdziwy.
   kolejki offline24; status `ACCEPTED` i numer KSeF wpisujemy w bazie.
 - **Faktury kosztowe**: w produkcji pobiera je z KSeF synchronizacja co 15 minut.
   Wpisujemy pół roku faktur od FIKCYJNYCH dostawców (NIP-y przechodzą tylko test sumy
-  kontrolnej). Kategorie przypisuje prawdziwy silnik reguł (`auto-rules/apply`).
+  kontrolnej), gęsto w ostatnich 30 dniach. Wyjątek to paliwo: ORLEN S.A. z publicznym
+  NIP-em, bo o tankowaniu na ORLEN jest scena; numery faktur są zmyślone. Kategorie
+  przypisuje prawdziwy silnik reguł (`auto-rules/apply`) - przy pobraniu z KSeF robi to
+  `FetchKsefInvoicesHandler`, lokalnie wołamy endpoint zaraz po wpisaniu faktury.
+- **Tankowanie na stacji** nie dzieje się w CRM, więc jest animacją HTML
+  (`capture/anim/fuel.html`) nagrywaną tym samym screencastem - w filmie to zwykłe
+  cięcie. Kwoty na wydruku są tymi samymi, które potem widać w CRM.
 - **Instagram i reklamy konkurencji**: w produkcji ze scrapera i Biblioteki Reklam Meta.
 - **Konfiguracja studia**: plan FULL, reguły i kredyty SMS, dane firmy, token KSeF,
   zadania na Tablicy - to, co właściciel ustawia sam w Ustawieniach.

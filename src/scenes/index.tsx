@@ -1,6 +1,5 @@
 import type { Beat, Focus } from '../components/SceneOverlay';
 import type { Scene } from '../components/ScenePlayer';
-import { InvoiceJourney } from '../components/InvoiceJourney';
 import lead from './lead.timing.json';
 import checkin from './checkin.timing.json';
 import handover from './handover.timing.json';
@@ -114,19 +113,25 @@ export const SCENES: readonly Scene[] = [
     {
         id: 'costs',
         title: 'Koszty z KSeF w kategoriach',
-        summary: 'Faktura od dostawcy przychodzi z KSeF, reguła po NIP przypisuje ją do kategorii, a statystyki pokazują, ile idzie na chemię, paliwo, folie i leasing.',
+        summary: 'Sam zakładasz kategorie i reguły po NIP dostawcy. Faktura z tankowania przychodzi z KSeF, od razu trafia do „Paliwa" i statystyki rosną bez przepisywania.',
         poster: `${DIR}costs-poster.webp`,
         video: `${DIR}costs`,
-        intro: { seconds: 7.5, render: (progress) => <InvoiceJourney progress={progress} /> },
         beats: beats(costs, {
-            refresh: { step: 'Pobranie z KSeF', text: 'Faktury kosztowe przychodzą z KSeF same, co 15 minut.', wide: true },
-            arrived: { step: 'Nowa faktura', text: 'Folia PPF za 8 693,64 zł, bez przepisywania z papieru.' },
-            unassigned: { step: 'Koszty miesiąca', text: 'Faktura jest jeszcze nieprzypisana do kategorii.' },
-            rules: { step: 'Reguły', text: 'Każdy dostawca ma regułę: jego NIP wskazuje kategorię kosztu.' },
-            applied: { step: 'Dopasowanie', text: 'Reguła przypisuje fakturę do kategorii Folie PPF. Przy pobraniu z KSeF dzieje się to samo.' },
-            category: { step: 'Kategoria', text: 'Pozycje faktury mają już swoją kategorię.' },
-            year: { step: 'Ostatnie 12 miesięcy', text: 'Struktura kosztów: chemia, paliwo, folie PPF, leasing, media, narzędzia.', wide: true },
-            totals: { step: 'Suma kategorii', text: 'Ile poszło na każdą kategorię w wybranym okresie.' },
+            overview: { step: 'Ostatnie 30 dni', text: 'Koszty studia w kategoriach: folie, leasing, chemia, media, narzędzia.', wide: true },
+            'new-category': { step: 'Nowa kategoria', text: 'Kategorie zakładasz sam. Tu: Paliwo, z własnym kolorem.', zoom: 1.2 },
+            'category-added': { step: 'Kategoria gotowa', text: 'Paliwo jest na liście, jeszcze puste.' },
+            'new-rule': { step: 'Reguła po NIP', text: 'NIP ORLEN S.A. ma zawsze oznaczać paliwo. CRM podpowiada dostawców z Twoich faktur.', zoom: 1.2 },
+            'rule-added': { step: 'Reguła dodana', text: 'Reguła od razu porządkuje faktury z ORLEN, które już są w CRM.', zoom: 1.2 },
+            'rule-row': { step: 'Na stałe', text: 'Każda kolejna faktura z tego NIP-u trafi do Paliwa sama.' },
+            'fuel-before': { step: 'Paliwo', text: 'Suma paliwa z ostatnich 30 dni, przed tankowaniem.' },
+            station: { step: 'Na stacji', text: 'A teraz tankujesz auto serwisowe.', wide: true },
+            receipt: { step: 'Faktura', text: 'ORLEN wystawia fakturę na NIP studia: 404,95 zł.', wide: true },
+            ksef: { step: 'KSeF', text: 'Faktura trafia do KSeF. Nikt jej nie wpisuje do CRM.', wide: true },
+            refresh: { step: 'Pobranie z KSeF', text: 'DetailBoost pobiera faktury kosztowe z KSeF sam, co 15 minut.', wide: true },
+            arrived: { step: 'Już jest', text: 'Faktura ORLEN za 404,95 zł w Dokumentach kosztowych.' },
+            'auto-category': { step: 'Paliwo, automatycznie', text: 'Faktura od razu ma kategorię Paliwo. Zadziałała Twoja reguła.' },
+            'fuel-after': { step: 'Statystyki rosną', text: 'Paliwo z ostatnich 30 dni urosło o 404,95 zł.' },
+            stats: { step: 'Struktura kosztów', text: 'Wykres i udział kategorii są już policzone z nową fakturą.', wide: true },
         }),
     },
     {

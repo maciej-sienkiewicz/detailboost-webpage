@@ -422,30 +422,37 @@ function nip(prefix9) {
 
 /*
  * Dostawcy są FIKCYJNI, z NIP-ami przechodzącymi tylko test sumy kontrolnej. Strona jest
- * publiczna, a faktury są zmyślone - nie przypisujemy ich prawdziwym firmom.
+ * publiczna, a faktury są zmyślone - nie przypisujemy ich prawdziwym firmom. Wyjątek to
+ * paliwo: scena opowiada o tankowaniu na stacji ORLEN (prośba biznesu), więc tu stoi
+ * nazwa i publiczny NIP ORLEN S.A.; numery faktur i numery KSeF są zmyślone.
  */
 export const SUPPLIERS = {
     chemia: { name: 'Detailing Chemie Hurt Sp. z o.o.', nip: nip('598412736'), category: 'Chemia detailingowa', color: '#3B82F6', about: 'Szampony, pre-washe, woski, mikrofibry' },
-    paliwo: { name: 'Stacje Paliw Ekspres S.A.', nip: nip('641937205'), category: 'Paliwo', color: '#F97316', about: 'Auto serwisowe i odbiór door-to-door' },
+    paliwo: { name: 'ORLEN S.A.', nip: '7740001454', category: 'Paliwo', color: '#F97316', about: 'Auto serwisowe i odbiór door-to-door' },
     ppf: { name: 'PPF Protect Dystrybucja Sp. z o.o.', nip: nip('712506384'), category: 'Folie PPF', color: '#8B5CF6', about: 'Rolki folii ochronnej i akcesoria montażowe' },
     leasing: { name: 'AutoLease Finanse Sp. z o.o.', nip: nip('846210397'), category: 'Leasing', color: '#64748B', about: 'Raty leasingowe auta serwisowego i sprzętu' },
     media: { name: 'Energia Miasto Sp. z o.o.', nip: nip('935874120'), category: 'Media', color: '#EAB308', about: 'Prąd, woda, ogrzewanie' },
     narzedzia: { name: 'Narzędziownia Profi Sp. z o.o.', nip: nip('578203916'), category: 'Narzędzia i sprzęt', color: '#14B8A6', about: 'Polerki, narzędzia, materiały warsztatowe' },
 };
 
-/** Nowa faktura, która „przychodzi" z KSeF w nagraniu (i w animacji przed nim). */
-export const NEW_COST_INVOICE = {
-    supplier: 'ppf',
-    number: 'FV/PP/2026/0915',
-    items: [
-        ['Folia PPF bezbarwna 152 cm × 15,24 m', 'rolka', 1, 6890.0],
-        ['Płyn montażowy do folii 1 l', 'szt.', 2, 89.0],
-    ],
+/**
+ * Faktura z tankowania, która „przychodzi" z KSeF w nagraniu - ta sama, którą drukuje
+ * terminal w capture/anim/fuel.html. Na stacji cenę ustala dystrybutor w brutto
+ * (6,29 zł/l × 64,38 l = 404,95 zł), więc brutto pozycji jest podane wprost, a netto
+ * wyliczone z niego (40495 / 1,23 → 32923 gr). VAT to różnica: 7572 gr.
+ */
+export const NEW_FUEL_INVOICE = {
+    supplier: 'paliwo',
+    number: 'F/4412/26/183577',
+    items: [['ON EFECTA DIESEL', 'l', 64.38, 5.11, { net: 32923, gross: 40495 }]],
 };
 
-function insertCostInvoice(studio, buyer, { supplier, number, daysAgo, payForm, items, minutesAgo }) {
+function insertCostInvoice(studio, buyer, { supplier, number, daysAgo, payForm, items, minutesAgo, ksefNumber }) {
     const s = SUPPLIERS[supplier];
-    const lines = items.map(([name, unit, qty, unitNet], i) => {
+    const lines = items.map(([name, unit, qty, unitNet, exact], i) => {
+        // Pozycja podana w brutto (paliwo z dystrybutora) zostaje w brutto - netto jest
+        // z niego wyliczone, nie odwrotnie.
+        if (exact) return { i: i + 1, name, unit, qty, unitNet: Math.round(unitNet * 100), net: exact.net, gross: exact.gross };
         const net = Math.round(qty * unitNet * 100);
         // Brutto pozycji z faktury dostawcy: netto × stawka, zaokrąglone raz na pozycję.
         return { i: i + 1, name, unit, qty, unitNet: Math.round(unitNet * 100), net, gross: Math.round(net * 1.23) };
@@ -455,7 +462,7 @@ function insertCostInvoice(studio, buyer, { supplier, number, daysAgo, payForm, 
     const when = minutesAgo != null ? `now() - interval '${minutesAgo} minutes'` : `((current_date - ${daysAgo})::timestamp + time '09:40') at time zone 'Europe/Warsaw'`;
     const issue = minutesAgo != null ? 'current_date' : `current_date - ${daysAgo}`;
     const hash = sql(`select upper(substr(md5(${q(number + studio)}), 1, 14))`);
-    const ksef = `${s.nip}-${sql(`select to_char(${issue}, 'YYYYMMDD')`)}-${hash.slice(0, 12)}-${hash.slice(12, 14)}`;
+    const ksef = ksefNumber ?? `${s.nip}-${sql(`select to_char(${issue}, 'YYYYMMDD')`)}-${hash.slice(0, 12)}-${hash.slice(12, 14)}`;
     const id = sql('select gen_random_uuid()');
     const paid = payForm === 'KARTA' || (daysAgo ?? 0) > 20;
     sql(`insert into ksef_invoices (id, studio_id, source, ksef_number, invoice_number, invoicing_date, issue_date,
@@ -481,11 +488,14 @@ function insertCostInvoice(studio, buyer, { supplier, number, daysAgo, payForm, 
  * Kategoryzację robi PRAWDZIWY silnik reguł: wołamy jego endpoint
  * („Zastosuj wszystkie reguły teraz") - historię przed nagraniem, nową fakturę na nim.
  */
-export async function seedCostData(page, base, studio) {
+export async function seedCostData(page, base, studio, { without = [] } = {}) {
     const [[owner, buyer]] = rows(`select u.id, coalesce(ss.name, s.name) from studios s
         join users u on u.studio_id = s.id left join studio_settings ss on ss.studio_id = s.id
         where s.id=${q(studio)} order by u.created_at limit 1`);
-    for (const s of Object.values(SUPPLIERS)) {
+    // `without`: kategorie, które w nagraniu zakłada właściciel (ich faktury czekają
+    // jako nieprzypisane, aż reguła je zbierze).
+    for (const [key, s] of Object.entries(SUPPLIERS)) {
+        if (without.includes(key)) continue;
         const cat = sql('select gen_random_uuid()');
         sql(`insert into cost_categories (id, studio_id, name, description, color, is_active, exclude_from_stats, created_by, created_at, updated_at)
              values (${q(cat)}, ${q(studio)}, ${q(s.category)}, ${q(s.about)}, ${q(s.color)}, true, false, ${q(owner)},
@@ -497,7 +507,7 @@ export async function seedCostData(page, base, studio) {
     [170, 140, 110, 79, 48, 18].forEach((d, i) => history.push({ supplier: 'leasing', number: `AL/2026/${118734 + i * 3411}`, daysAgo: d, payForm: 'PRZELEW',
         items: [[`Rata leasingowa ${9 + i}/48, umowa AL/25/01187 (auto serwisowe)`, 'szt.', 1, 2450]] }));
     [[165, 92, 5.37], [133, 104, 5.41], [101, 88, 5.29], [70, 97, 5.33], [39, 110, 5.45], [9, 95, 5.49]].forEach(([d, l, p], i) =>
-        history.push({ supplier: 'paliwo', number: `FVS/0412/26/${118455 + i * 9731}`, daysAgo: d, payForm: 'KARTA',
+        history.push({ supplier: 'paliwo', number: `F/4412/26/${118455 + i * 9731}`, daysAgo: d, payForm: 'KARTA',
             items: [['Olej napędowy', 'l', l, p], ...(i === 2 ? [['AdBlue 10 l', 'szt.', 1, 39]] : [])] }));
     [[150, 1840], [89, 1610], [28, 1725]].forEach(([d, kwh], i) => history.push({ supplier: 'media', number: `P/23518840/000${3 + i}/26`, daysAgo: d,
         payForm: 'PRZELEW', items: [['Energia elektryczna, taryfa C12a', 'kWh', kwh, 0.62], ['Opłata handlowa', 'mies.', 2, 22.5]] }));
@@ -514,6 +524,21 @@ export async function seedCostData(page, base, studio) {
     [[128, [['Polerka rotacyjna 1500 W', 'szt.', 1, 1290], ['Rękawice nitrylowe, op. 100 szt.', 'op.', 5, 34.9]]],
      [55, [['Komplet nasadek 1/2", 24 elem.', 'kpl.', 1, 389], ['Taśma maskująca 48 mm', 'szt.', 12, 11.2]]]].forEach(([d, items], i) =>
         history.push({ supplier: 'narzedzia', number: `NP/26/00${45118 + i * 16259}`, daysAgo: d, payForm: 'PRZELEW', items }));
+    // Ostatnie 30 dni muszą być gęste: nagranie pokazuje ten okres i ani tabela, ani
+    // wykres dzienny nie może w nim świecić pustką.
+    [[30, 58.2, 6.19], [23, 61.7, 6.24], [16, 55.4, 6.27], [2, 47.9, 6.31]].forEach(([d, l, p], i) => {
+        const gross = Math.round(l * p * 100);
+        history.push({ supplier: 'paliwo', number: `F/4412/26/${(171204 + i * 3217)}`, daysAgo: d, payForm: 'KARTA',
+            items: [['ON EFECTA DIESEL', 'l', l, Math.round((p / 1.23) * 100) / 100, { net: Math.round(gross / 1.23), gross }]] });
+    });
+    [[25, [['Szampon pH neutralny 5 l', 'szt.', 2, 119], ['Mikrofibra 40×40 cm', 'szt.', 30, 9.5]]],
+     [12, [['Pre-wash alkaliczny 5 l', 'szt.', 2, 129], ['Usuwacz smoły i kleju 1 l', 'szt.', 2, 49]]],
+     [1, [['Powłoka ceramiczna 50 ml', 'szt.', 3, 189], ['Wosk w sprayu 1 l', 'szt.', 4, 59]]]].forEach(([d, items], i) =>
+        history.push({ supplier: 'chemia', number: `FV/2026/0${9 + i}/0${1104 + i * 61}`, daysAgo: d, payForm: 'PRZELEW', items }));
+    history.push({ supplier: 'ppf', number: 'FV/PP/2026/0915', daysAgo: 20, payForm: 'PRZELEW',
+        items: [['Folia PPF bezbarwna 152 cm × 15,24 m', 'rolka', 1, 6890], ['Płyn montażowy do folii 1 l', 'szt.', 2, 89]] });
+    history.push({ supplier: 'narzedzia', number: 'NP/26/0078841', daysAgo: 6, payForm: 'PRZELEW',
+        items: [['Pady polerskie 150 mm, komplet', 'kpl.', 2, 149], ['Lampa inspekcyjna LED', 'szt.', 1, 459]] });
     for (const inv of history) insertCostInvoice(studio, buyer, inv);
     const res = await page.request.post(`${base}/api/v1/cost-categories/auto-rules/apply`, { data: {} });
     if (!res.ok()) throw new Error(`apply rules: ${res.status()} ${await res.text()}`);
@@ -521,6 +546,7 @@ export async function seedCostData(page, base, studio) {
 }
 
 /** Faktura „przychodzi" z KSeF - wiersz w miejscu, w które zapisuje go synchronizacja. */
-export function insertNewCostInvoice(studio, buyer) {
-    return insertCostInvoice(studio, buyer, { ...NEW_COST_INVOICE, payForm: 'PRZELEW', minutesAgo: 2 });
+export function insertNewFuelInvoice(studio, buyer) {
+    return insertCostInvoice(studio, buyer, { ...NEW_FUEL_INVOICE, payForm: 'KARTA', minutesAgo: 6,
+        ksefNumber: '7740001454-20261002-3F9A1C7E52B0-4D' });
 }

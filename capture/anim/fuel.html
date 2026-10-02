@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<title>Tankowanie → KSeF → DetailBoost</title>
+<!--
+  Wstawka do nagrania kosztów (capture/scene-costs.mjs): to, czego nie da się nagrać
+  w CRM, bo dzieje się na stacji paliw. Strona jest nagrywana tym samym screencastem co
+  CRM, więc w filmie to zwykłe cięcie. Oś czasu startuje po `window.start()`.
+
+  Na stacji kończy się animacja: dalej film wraca do CRM, gdzie ta sama faktura przychodzi
+  z KSeF i sama trafia do kategorii „Paliwo".
+  Kwoty są te same, które potem widać w CRM (NEW_FUEL_INVOICE w seed.mjs): brutto
+  z dystrybutora 404,95 zł, netto 329,23 zł, VAT to różnica (75,72 zł).
+-->
+<style>
+@font-face { font-family: Geist; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2) format('woff2'); }
+@font-face { font-family: Geist; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist/files/geist-latin-ext-wght-normal.woff2) format('woff2'); unicode-range: U+0100-024F; }
+@font-face { font-family: GeistMono; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2) format('woff2'); }
+@font-face { font-family: GeistMono; font-weight: 100 900; src: url(../../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-ext-wght-normal.woff2) format('woff2'); unicode-range: U+0100-024F; }
+:root { --void: #0b0b0d; --paper: #f4f4f2; --mute: #a1a1aa; --dim: #71717a; --gold: #ecd08f; --gold2: #dcae5c; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: radial-gradient(ellipse at 40% 35%, #1b1b21, var(--void) 70%); color: var(--paper); font-family: Geist, system-ui, sans-serif; overflow: hidden; }
+.grain { position: absolute; inset: 0; background-image: radial-gradient(rgb(255 255 255 / .07) 1px, transparent 1px); background-size: 26px 26px; }
+
+/* Lewa kolumna: opowieść w trzech zdaniach. */
+.story { position: absolute; left: 96px; top: 210px; width: 560px; }
+.eyebrow { font-family: GeistMono; font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold2); opacity: 0; transition: opacity .8s; }
+.line { font-size: 46px; line-height: 1.12; font-weight: 600; letter-spacing: -.035em; margin-top: 22px; opacity: 0; transform: translateY(14px); transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1), color .6s; }
+.line.on { opacity: 1; transform: none; }
+.line.past { color: #5f5f68; }
+.sub { font-size: 19px; color: var(--mute); margin-top: 26px; line-height: 1.5; opacity: 0; transition: opacity .9s; }
+.on { opacity: 1 !important; }
+
+/* Terminal na stacji i wydruk. */
+.terminal { position: absolute; left: 820px; top: 96px; width: 420px; height: 64px; border-radius: 16px 16px 6px 6px;
+  background: linear-gradient(180deg, #3a3a41, #222227); box-shadow: 0 0 0 1px #4a4a52 inset, 0 24px 40px -18px #000; opacity: 0; transition: opacity .8s; }
+.terminal::after { content: ''; position: absolute; left: 34px; right: 34px; bottom: 10px; height: 6px; border-radius: 3px; background: #0d0d10; }
+.terminal .lcd { position: absolute; left: 24px; top: 13px; font-family: GeistMono; font-size: 13px; color: #9fe6b0; letter-spacing: .06em; }
+.receiptWrap { position: absolute; left: 856px; top: 150px; width: 348px; height: 690px; overflow: hidden; }
+.receipt { position: absolute; left: 0; top: 0; width: 348px; padding: 22px 22px 26px;
+  background: linear-gradient(180deg, #fbfbf8, #f1f0ea); color: #1a1a1d; font-family: GeistMono; font-size: 12.4px; line-height: 1.55;
+  box-shadow: 0 30px 60px -20px rgb(0 0 0 / .8); transform: translateY(-100%); transition: transform 4.2s linear;
+  -webkit-mask: linear-gradient(#000 calc(100% - 10px), transparent calc(100% - 10px)), radial-gradient(circle 6px at 6px 100%, transparent 5.5px, #000 6px) 0 100% / 12px 10px repeat-x; }
+.receipt.print { transform: translateY(0); }
+.receipt .c { text-align: center; }
+.receipt b { font-weight: 700; }
+.receipt .big { font-size: 15px; font-weight: 700; letter-spacing: .04em; }
+.receipt hr { border: 0; border-top: 1px dashed #9a9a9a; margin: 9px 0; }
+.row { display: flex; justify-content: space-between; gap: 12px; }
+.ksef { margin-top: 12px; border: 1.5px solid #15803d; color: #15803d; border-radius: 6px; padding: 8px 10px; font-size: 11.5px;
+  opacity: 0; transform: scale(1.25) rotate(-3deg); transition: opacity .35s, transform .5s cubic-bezier(.2,1.6,.4,1); }
+.ksef.on { transform: scale(1) rotate(-2deg); }
+.ksef b { display: block; font-size: 12.5px; letter-spacing: .06em; }
+
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="story">
+  <div class="eyebrow" id="eyebrow">Dziś rano, stacja ORLEN</div>
+  <div class="line" id="l1">Tankujesz auto serwisowe.</div>
+  <div class="line" id="l2">Stacja wystawia fakturę na&nbsp;NIP studia.</div>
+  <div class="line" id="l3">Faktura trafia do KSeF. Resztę robi DetailBoost.</div>
+  <div class="sub" id="sub">Nikt jej nie przepisuje i nikt nie wybiera dla niej kategorii.</div>
+</div>
+
+<div class="terminal" id="terminal"><div class="lcd">DRUKOWANIE FAKTURY…</div></div>
+<div class="receiptWrap">
+  <div class="receipt" id="receipt">
+    <div class="c big">ORLEN S.A.</div>
+    <div class="c">ul. Chemików 7, 09-411 Płock</div>
+    <div class="c">NIP 774-00-01-454</div>
+    <div class="c">Stacja paliw nr 4412</div>
+    <div class="c">ul. Puławska 251, Warszawa</div>
+    <hr>
+    <div class="c"><b>FAKTURA VAT</b></div>
+    <div class="c">nr F/4412/26/183577</div>
+    <div class="row"><span>Data sprzedaży</span><span>02.10.2026 08:14</span></div>
+    <div>Nabywca: Studio Połysk Sp. z o.o.</div>
+    <div>NIP 521-387-02-74</div>
+    <hr>
+    <div><b>ON EFECTA DIESEL</b> dystr. 4</div>
+    <div class="row"><span>64,38 l × 6,29</span><span>404,95 A</span></div>
+    <hr>
+    <div class="row"><span>Netto A 23%</span><span>329,23</span></div>
+    <div class="row"><span>VAT A 23%</span><span>75,72</span></div>
+    <div class="row big"><span>SUMA PLN</span><span>404,95</span></div>
+    <hr>
+    <div class="row"><span>Płatność</span><span>karta ****4421</span></div>
+    <div class="ksef" id="ksef"><b>PRZYJĘTA W KSeF</b>7740001454-20261002-3F9A1C7E52B0-4D</div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const at = (ms, fn) => setTimeout(fn, ms);
+// Oś czasu (ms). Te same chwile zna skrypt nagrania - znaczy po nich kroki filmu.
+window.TIMELINE = { story: 0, print: 1400, ksef: 6600, end: 9800 };
+window.start = () => {
+  const T = window.TIMELINE;
+  at(T.story, () => { $('eyebrow').classList.add('on'); $('l1').classList.add('on'); $('terminal').classList.add('on'); });
+  at(T.print, () => $('receipt').classList.add('print'));
+  at(T.print + 3600, () => { $('l1').classList.add('past'); $('l2').classList.add('on'); });
+  at(T.ksef, () => { $('ksef').classList.add('on'); });
+  at(T.ksef + 900, () => { $('l2').classList.add('past'); $('l3').classList.add('on'); });
+  at(T.ksef + 2200, () => $('sub').classList.add('on'));
+};
+</script>
+</body>
+</html>

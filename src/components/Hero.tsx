@@ -37,8 +37,8 @@ const FEATURES: readonly Feature[] = [
     { text: 'Faktura VAT', scene: 'handover', beat: 'invoice', size: 3, r: -9, spot: { side: 'l', x: 46, y: 53 }, pile: 15 },
     { text: 'KSeF', scene: 'handover', beat: 'ksef', size: 4, keepCase: true, r: 10, spot: { side: 'r', x: 58, y: 7 }, pile: 6 },
     { text: 'Koszty', scene: 'costs', size: 4, outline: true, r: 3, spot: { side: 'r', x: 42, y: 55 }, pile: 12 },
-    { text: 'Reguły po NIP', scene: 'costs', beat: 'rules', size: 1, r: 19, spot: { side: 'l', x: 32, y: 70 }, pile: 3 },
-    { text: 'Statystyki', scene: 'costs', beat: 'year', size: 2, r: 90, spot: { side: 'r', x: 93, y: 72 }, pile: 19 },
+    { text: 'Reguły po NIP', scene: 'costs', beat: 'new-rule', size: 1, r: 19, spot: { side: 'l', x: 32, y: 70 }, pile: 3 },
+    { text: 'Statystyki', scene: 'costs', beat: 'stats', size: 2, r: 90, spot: { side: 'r', x: 93, y: 72 }, pile: 19 },
     { text: 'Konkurencja', scene: 'instagram', beat: 'alert', size: 3, r: 9, spot: { side: 'l', x: 54, y: 80 }, pile: 10 },
     { text: 'Biblioteka reklam', scene: 'instagram', beat: 'area', size: 1, r: -10, spot: { side: 'r', x: 54, y: 93 }, pile: 18 },
 ];
@@ -151,7 +151,7 @@ export function Hero() {
                             <SceneTabs scenes={SCENES} player={player} />
                         </div>
                         <p className="mt-6 text-center font-mono text-[0.6875rem] tracking-[0.04em] text-dim">
-                            Nagrania z działającej aplikacji na koncie demonstracyjnym. Przyjęcie auta nagrane w oknie tabletu. Animacja przed nagraniem kosztów pokazuje drogę faktury przez KSeF.
+                            Nagrania z działającej aplikacji na koncie demonstracyjnym. Przyjęcie auta nagrane w oknie tabletu. Tankowanie w scenie kosztów to animacja, bo dzieje się na stacji, nie w CRM.
                         </p>
                     </div>
 
