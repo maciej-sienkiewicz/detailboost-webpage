@@ -69,7 +69,8 @@ export function Navbar() {
             <div
                 ref={progress}
                 aria-hidden
-                className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px] origin-left scale-x-0 bg-[linear-gradient(90deg,var(--color-gold-50)_0%,var(--color-gold-200)_45%,var(--color-gold-600)_100%)] opacity-0 transition-opacity duration-500"
+                style={{ transform: 'scaleX(0)' }}
+                className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-[2px] origin-left bg-[linear-gradient(90deg,var(--color-gold-50)_0%,var(--color-gold-200)_45%,var(--color-gold-600)_100%)] opacity-0 transition-opacity duration-500"
             />
             {/* Przekładka = wysokość paska nad górą strony (50 px logo + 2 × 16 px). */}
             <div aria-hidden className="h-[82px]" />

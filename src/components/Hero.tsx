@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { DeviceFrame, Stage3D } from './Stage3D';
-import { SceneControls, SceneTabs, SceneVideos, useScenePlayer } from './ScenePlayer';
+import { SceneBar, SceneVideos, useScenePlayer } from './ScenePlayer';
 import { FeatureSpill, type SpillWord, type WordState } from './FeatureSpill';
 import { SCENES } from '../scenes';
 
@@ -154,14 +154,11 @@ export function Hero() {
                             layout="pile"
                             className="mt-10 sm:mt-14 xl:hidden"
                         />
-                        <div className="mt-10 sm:mt-14 xl:mt-10">
-                            <SceneControls scenes={SCENES} player={player} />
-                        </div>
                         <div className="mt-8 sm:mt-10">
-                            <SceneTabs scenes={SCENES} player={player} />
+                            <SceneBar scenes={SCENES} player={player} />
                         </div>
-                        <p className="mt-6 text-center font-mono text-[0.6875rem] tracking-[0.04em] text-dim">
-                            Nagrania z działającej aplikacji na koncie demonstracyjnym. Przyjęcie auta nagrane w oknie tabletu. Tankowanie, ekran SMS klienta i powiadomienia na telefonie to animacje z treściami z CRM, bo nie dzieją się w przeglądarce.
+                        <p className="mt-5 text-[0.75rem] leading-relaxed text-dim">
+                            Nagrania z działającego CRM, bez makiet. Tankowanie, SMS u klienta i powiadomienia na telefonie to animacje z danymi z CRM.
                         </p>
                     </div>
 

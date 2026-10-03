@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { BeatCaption, FocusRing, SceneCamera, type Beat } from './SceneOverlay';
 
 export type Scene = {
@@ -300,110 +300,89 @@ export function SceneVideos({ scenes, player }: { scenes: readonly Scene[]; play
     );
 }
 
-export function SceneTabs({ scenes, player }: { scenes: readonly Scene[]; player: Player }) {
-    const current = scenes[player.active];
+/**
+ * Pasek pod oknem: linia czasu i sterowanie, nic więcej. Co dzieje się na nagraniu,
+ * mówi podpis w oknie, a co system umie - napisy wokół okna; tu nie powtarzamy
+ * żadnego z nich.
+ *
+ * Linia czasu to po jednym cienkim odcinku na nagranie. Bieżący wypełnia się złotem
+ * (pasek postępu idzie wprost do DOM, patrz `barRef`), obejrzane stoją pełne.
+ * Tytuł nagrania pokazuje się nad odcinkiem po najechaniu, a pod linią stoi tytuł
+ * tego, które leci. Sterowanie to jedna grupa trzech słów - jak w pasku nawigacji.
+ */
+export function SceneBar({ scenes, player }: { scenes: readonly Scene[]; player: Player }) {
+    const scene = scenes[player.active];
+    const btn =
+        'inline-flex h-8 items-center justify-center rounded-md px-3 text-[0.8125rem] font-medium text-white/70 transition-colors duration-200 hover:bg-white/[0.07] hover:text-white';
     return (
-        <div>
-            <div
-                role="tablist"
-                aria-label="Nagrania z aplikacji"
-                // Na telefonie same numery mieszczą się w jednym rzędzie; z tytułami
-                // osiem kolumn łamałoby każdy tytuł na trzy linie, więc od sm są dwa rzędy.
-                className={`grid grid-cols-[repeat(var(--tabs),minmax(0,1fr))] gap-3 sm:gap-x-6 sm:gap-y-5 ${
-                    scenes.length > 5 ? 'sm:grid-cols-4' : ''
-                }`}
-                style={{ '--tabs': scenes.length } as CSSProperties}
-            >
-                {scenes.map((scene, i) => {
+        <div className="font-ui">
+            <div role="tablist" aria-label="Nagrania z aplikacji" className="flex gap-1.5">
+                {scenes.map((s, i) => {
                     const on = i === player.active;
                     return (
                         <button
-                            key={scene.id}
+                            key={s.id}
                             type="button"
                             role="tab"
                             aria-selected={on}
-                            aria-label={scene.title}
+                            aria-label={s.title}
                             onClick={() => player.choose(i)}
-                            className="group flex flex-col justify-start py-1 text-left"
+                            className="group relative flex-1 py-3"
                         >
-                            <span className="relative block h-px overflow-hidden bg-line-strong">
+                            <span
+                                className={`relative block h-[3px] overflow-hidden rounded-full transition-colors duration-200 ${
+                                    on ? 'bg-white/[0.16]' : 'bg-white/[0.1] group-hover:bg-white/[0.22]'
+                                }`}
+                            >
+                                {/* Skala przez `transform`, nie klasę `scale-x-0`: Tailwind 4 ustawia
+                                    nią osobną właściwość `scale`, która zeruje pasek niezależnie
+                                    od `transform` wpisywanego przez odtwarzacz. */}
                                 <span
                                     ref={player.barRef(i)}
-                                    className="absolute inset-0 origin-left scale-x-0 bg-[linear-gradient(90deg,var(--color-gold-200),var(--color-gold-400))]"
+                                    style={{ transform: 'scaleX(0)' }}
+                                    className="absolute inset-0 origin-left bg-[linear-gradient(90deg,var(--color-gold-200),var(--color-gold-400))]"
                                 />
                             </span>
-                            <span className="mt-3 flex items-baseline gap-2 sm:mt-4 sm:gap-2.5">
-                                <span
-                                    className={`font-mono text-[0.6875rem] tracking-[0.06em] tabular-nums transition-colors duration-300 ${
-                                        on ? 'text-gold-200' : 'text-dim'
-                                    }`}
-                                >
-                                    {String(i + 1).padStart(2, '0')}
-                                </span>
-                                {/* Na telefonie tytuły w kolumnach łamią się po słowie; zostaje
-                                    numer, a tytuł aktywnego nagrania stoi pełną szerokością
-                                    pod rzędem rozdziałów. */}
-                                <span
-                                    className={`hidden text-[0.875rem] leading-snug font-medium tracking-[-0.01em] text-balance transition-colors duration-300 sm:inline ${
-                                        on ? 'text-paper' : 'text-dim group-hover:text-mute'
-                                    }`}
-                                >
-                                    {scene.title}
-                                </span>
+                            <span
+                                aria-hidden
+                                className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden -translate-x-1/2 translate-y-1 rounded-md border border-white/[0.1] bg-[#141416] px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white/85 opacity-0 shadow-[0_8px_24px_-8px_rgb(0_0_0/0.6)] transition-[opacity,transform] duration-200 group-hover:translate-y-0 group-hover:opacity-100 sm:block"
+                            >
+                                {s.title}
                             </span>
-
                         </button>
                     );
                 })}
             </div>
-            {/* Opis tylko aktywnego nagrania, pełną szerokością: przy pięciu rozdziałach
-                opisy w kolumnach zamieniały się w wąskie słupki tekstu. */}
-            {current && (
-                <div aria-live="polite" className="mt-5 max-w-[46rem] sm:mt-6">
-                    <p className="text-[0.9375rem] font-medium tracking-[-0.01em] text-paper sm:hidden">{current.title}</p>
-                    <p className="mt-1 text-[0.875rem] leading-[1.6] text-pretty text-mute sm:mt-0 sm:text-[0.9375rem]">{current.summary}</p>
-                </div>
-            )}
-        </div>
-    );
-}
 
-/**
- * Sterowanie odtwarzaczem: krok wstecz, pauza, krok dalej. Słowa zamiast ikon - jak
- * w całej stronie. Krok = fragment nagrania z jednym podpisem; „Dalej" na ostatnim
- * kroku przechodzi do następnego nagrania, „Wstecz" na pierwszym - do poprzedniego.
- */
-export function SceneControls({ scenes, player }: { scenes: readonly Scene[]; player: Player }) {
-    const scene = scenes[player.active];
-    const beats = scene?.beats ?? [];
-    const intro = player.phase === 'intro';
-    const label = intro ? 'Animacja' : beats[player.beat]?.step ?? scene?.title ?? '';
-    const count = intro ? '00' : String(Math.max(1, player.beat + 1)).padStart(2, '0');
-    const btn =
-        'inline-flex h-9 items-center justify-center rounded-[3px] border border-line-strong px-3.5 text-[0.8125rem] font-medium tracking-[-0.01em] text-paper transition-colors duration-150 hover:border-paper/40 hover:bg-white/[0.04] sm:px-4';
-    return (
-        <div role="group" aria-label="Sterowanie nagraniem" className="flex items-center justify-between gap-3">
-            <p className="min-w-0 truncate font-mono text-[0.6875rem] tracking-[0.12em] text-dim uppercase" aria-live="polite">
-                <span className="text-gold-200 tabular-nums">
-                    {count}/{String(beats.length).padStart(2, '0')}
-                </span>
-                <span className="ml-2.5 hidden sm:inline">{label}</span>
-            </p>
-            <div className="flex shrink-0 items-center gap-2">
-                <button type="button" onClick={player.prev} className={btn}>
-                    Wstecz
-                </button>
-                <button
-                    type="button"
-                    onClick={player.togglePause}
-                    aria-pressed={player.paused}
-                    className={`${btn} w-[6.5rem] ${player.paused ? 'border-gold-400/60 text-gold-50' : ''}`}
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                <p aria-live="polite" className="flex min-w-0 items-baseline gap-3">
+                    <span className="font-mono text-[0.6875rem] text-dim tabular-nums">
+                        {String(player.active + 1).padStart(2, '0')}/{String(scenes.length).padStart(2, '0')}
+                    </span>
+                    <span className="truncate text-[0.9375rem] font-medium tracking-[-0.01em] text-white/90">
+                        {scene?.title}
+                    </span>
+                </p>
+                <div
+                    role="group"
+                    aria-label="Sterowanie nagraniem"
+                    className="inline-flex shrink-0 self-start rounded-lg border border-white/[0.1] bg-white/[0.03] p-0.5 sm:self-auto"
                 >
-                    {player.paused ? 'Odtwórz' : 'Pauza'}
-                </button>
-                <button type="button" onClick={player.next} className={btn}>
-                    Dalej
-                </button>
+                    <button type="button" onClick={player.prev} className={btn}>
+                        Wstecz
+                    </button>
+                    <button
+                        type="button"
+                        onClick={player.togglePause}
+                        aria-pressed={player.paused}
+                        className={`${btn} w-[4.75rem] ${player.paused ? 'bg-white/[0.07] text-white' : ''}`}
+                    >
+                        {player.paused ? 'Odtwórz' : 'Pauza'}
+                    </button>
+                    <button type="button" onClick={player.next} className={btn}>
+                        Dalej
+                    </button>
+                </div>
             </div>
         </div>
     );
