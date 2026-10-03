@@ -1,13 +1,14 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DeviceFrame, Stage3D } from './Stage3D';
 import { SceneBar, SceneVideos, type Player } from './ScenePlayer';
-import { FeatureSpill, type SpillWord, type WordState } from './FeatureSpill';
+import { FeatureIndex, type ItemState } from './FeatureIndex';
 import { SCENES, findStep } from '../scenes';
 import { DEMO_URL, OFFER_TERMS, SIGNUP_URL } from '../site';
 import { btnPrimary, btnSecondary } from './ui';
 
-type Feature = SpillWord & {
+type Feature = {
+    text: string;
     /** Nagranie (`Scene.id`) i krok w nim (`Beat.id`); bez kroku - nagranie od początku. */
     scene: string;
     beat?: string;
@@ -20,39 +21,57 @@ type Feature = SpillWord & {
  * przeciągania wizyt w kalendarzu, synchronizacji z Kalendarzem Google, eksportu CSV
  * klientów), tego tu nie ma.
  *
- * Kolejność = kolejność kroków w nagraniach (i czytania); miejsce na stronie jest
- * celowo inne - sąsiedzi na marginesie nie są sąsiadami w nagraniu.
+ * Kolejność = kolejność nagrań i kroków w nich; spis przy oknie grupuje je po nagraniu.
  */
 const FEATURES: readonly Feature[] = [
-    { text: 'Poczta', scene: 'lead', beat: 'thread', size: 2, outline: true, r: 21, spot: { side: 'l', x: 80, y: 62 }, pile: 7 },
-    { text: 'Historia klienta', scene: 'lead', beat: 'history', size: 2, r: 6, spot: { side: 'l', x: 58, y: 16 }, pile: 14 },
-    { text: 'Wycena', scene: 'lead', beat: 'accept', size: 3, outline: true, r: -24, spot: { side: 'r', x: 30, y: 72 }, pile: 2 },
-    { text: 'Kalendarz', scene: 'lead', beat: 'calendar', size: 3, r: -90, spot: { side: 'l', x: 10, y: 37 }, pile: 11 },
-    { text: 'Rezerwacje', scene: 'lead', beat: 'form', size: 3, r: 12, spot: { side: 'r', x: 44, y: 31 }, pile: 5 },
-    { text: 'SMS', scene: 'lead', beat: 'sms', size: 4, r: -12, spot: { side: 'l', x: 34, y: 5 }, pile: 17 },
-    { text: 'Przyjęcie auta', scene: 'checkin', beat: 'reservation', size: 2, r: -9, spot: { side: 'r', x: 46, y: 18 }, pile: 9 },
-    { text: 'Depozyt', scene: 'checkin', beat: 'deposit', size: 3, outline: true, r: -7, spot: { side: 'l', x: 52, y: 41 }, pile: 0 },
-    { text: 'Zdjęcia przez QR', scene: 'checkin', beat: 'qr', size: 2, r: -21, spot: { side: 'r', x: 50, y: 43 }, pile: 13 },
-    { text: 'Mapa uszkodzeń', scene: 'checkin', beat: 'damage', size: 2, r: -13, spot: { side: 'l', x: 72, y: 28 }, pile: 4 },
-    { text: 'Podpis na tablecie', scene: 'checkin', beat: 'sign-protocol', size: 2, r: 4, spot: { side: 'r', x: 52, y: 82 }, pile: 16 },
-    { text: 'Zgody marketingowe', scene: 'checkin', beat: 'sign-consent', size: 1, r: -7, spot: { side: 'l', x: 52, y: 91 }, pile: 8 },
-    { text: 'Karta Wizyty', scene: 'visitcard', beat: 'card-modal', size: 2, r: -8, spot: { side: 'r', x: 60, y: 89 }, pile: 21 },
-    { text: 'Usługi dodatkowe', scene: 'visitcard', beat: 'offer', size: 1, r: -16, spot: { side: 'l', x: 30, y: 22 }, pile: 23 },
-    { text: 'Protokół wydania', scene: 'handover', beat: 'protocol', size: 1, r: 8, spot: { side: 'r', x: 42, y: 65 }, pile: 1 },
-    { text: 'Faktura VAT', scene: 'handover', beat: 'invoice', size: 3, r: -9, spot: { side: 'l', x: 46, y: 53 }, pile: 15 },
-    { text: 'KSeF', scene: 'handover', beat: 'ksef', size: 4, keepCase: true, r: 10, spot: { side: 'r', x: 58, y: 7 }, pile: 6 },
-    { text: 'Koszty', scene: 'costs', size: 4, outline: true, r: 3, spot: { side: 'r', x: 42, y: 55 }, pile: 12 },
-    { text: 'Reguły po NIP', scene: 'costs', beat: 'new-rule', size: 1, r: 19, spot: { side: 'l', x: 32, y: 70 }, pile: 3 },
-    { text: 'Statystyki', scene: 'costs', beat: 'stats', size: 2, r: 90, spot: { side: 'r', x: 93, y: 72 }, pile: 19 },
-    { text: 'Czas pracy', scene: 'team', beat: 'worktime', size: 2, outline: true, r: -6, spot: { side: 'r', x: 26, y: 24 }, pile: 20 },
-    { text: 'Urlopy', scene: 'team', beat: 'leave', size: 3, r: 14, spot: { side: 'l', x: 22, y: 61 }, pile: 24 },
-    { text: 'Konkurencja', scene: 'instagram', beat: 'alert', size: 3, r: 9, spot: { side: 'l', x: 54, y: 80 }, pile: 10 },
-    { text: 'Biblioteka reklam', scene: 'instagram', beat: 'area', size: 1, r: 6, spot: { side: 'r', x: 42, y: 97 }, pile: 18 },
-    { text: 'Powiadomienia push', scene: 'push', beat: 'intro', size: 1, r: 5, spot: { side: 'l', x: 46, y: 99 }, pile: 22 },
+    { text: 'Historia klienta', scene: 'lead', beat: 'history' },
+    { text: 'Poczta', scene: 'lead', beat: 'thread' },
+    { text: 'Wycena', scene: 'lead', beat: 'accept' },
+    { text: 'Kalendarz', scene: 'lead', beat: 'calendar' },
+    { text: 'Rezerwacje', scene: 'lead', beat: 'form' },
+    { text: 'SMS', scene: 'lead', beat: 'sms' },
+    { text: 'Przyjęcie auta', scene: 'checkin', beat: 'reservation' },
+    { text: 'Depozyt', scene: 'checkin', beat: 'deposit' },
+    { text: 'Zdjęcia przez QR', scene: 'checkin', beat: 'qr' },
+    { text: 'Mapa uszkodzeń', scene: 'checkin', beat: 'damage' },
+    { text: 'Podpis na tablecie', scene: 'checkin', beat: 'sign-protocol' },
+    { text: 'Zgody marketingowe', scene: 'checkin', beat: 'sign-consent' },
+    { text: 'Karta Wizyty', scene: 'visitcard', beat: 'card-modal' },
+    { text: 'Usługi dodatkowe', scene: 'visitcard', beat: 'offer' },
+    { text: 'Protokół wydania', scene: 'handover', beat: 'protocol' },
+    { text: 'Faktura VAT', scene: 'handover', beat: 'invoice' },
+    { text: 'KSeF', scene: 'handover', beat: 'ksef' },
+    { text: 'Koszty', scene: 'costs' },
+    { text: 'Reguły po NIP', scene: 'costs', beat: 'new-rule' },
+    { text: 'Statystyki', scene: 'costs', beat: 'stats' },
+    { text: 'Czas pracy', scene: 'team', beat: 'worktime' },
+    { text: 'Urlopy', scene: 'team', beat: 'leave' },
+    { text: 'Konkurencja', scene: 'instagram', beat: 'alert' },
+    { text: 'Biblioteka reklam', scene: 'instagram', beat: 'area' },
+    { text: 'Powiadomienia push', scene: 'push', beat: 'intro' },
 ];
 
 /** Napis → indeks nagrania, indeks kroku (-1 = początek) i sekunda, od której krok leci. */
 const TARGETS = FEATURES.map((f) => findStep(f.scene, f.beat));
+const INDEX = FEATURES.map((f, i) => ({ text: f.text, scene: TARGETS[i]!.scene }));
+
+/**
+ * Kolumny przy oknie: nagrania po kolei, podzielone tak, żeby obie kolumny miały
+ * podobną liczbę wierszy (nagłówek grupy liczy się za dwa - zwykle łamie się na dwie
+ * linie). Granica tam, gdzie różnica wierszy między kolumnami jest najmniejsza.
+ */
+const ROWS = SCENES.map((_, g) => 2 + INDEX.filter((item) => item.scene === g).length);
+const TOTAL = ROWS.reduce((a, b) => a + b, 0);
+const SPLIT = ROWS.reduce(
+    (best, _, i) => {
+        const left = ROWS.slice(0, i + 1).reduce((a, b) => a + b, 0);
+        const diff = Math.abs(2 * left - TOTAL);
+        return diff < best.diff ? { at: i + 1, diff } : best;
+    },
+    { at: 1, diff: Infinity },
+).at;
+const LEFT = SCENES.slice(0, SPLIT).map((_, i) => i);
+const RIGHT = SCENES.slice(SPLIT).map((_, i) => SPLIT + i);
 
 /**
  * Który napis świeci: ostatni krok sceny, który już minął. Zanim nagranie dojdzie
@@ -71,9 +90,8 @@ function currentFeature(scene: number, beat: number) {
 }
 
 export function Hero({ player }: { player: Player }) {
-    const stage = useRef<HTMLDivElement>(null);
     const current = currentFeature(player.active, player.phase === 'intro' ? -1 : player.beat);
-    const states: WordState[] = TARGETS.map((t, i) =>
+    const states: ItemState[] = TARGETS.map((t, i) =>
         i === current ? 'current' : t.scene === player.active ? 'scene' : 'idle',
     );
     const pick = (i: number) => {
@@ -125,52 +143,53 @@ export function Hero({ player }: { player: Player }) {
                 </header>
 
                 {/*
-                 * Kolejność w DOM = kolejność czytania na telefonie: okno aplikacji, stos
-                 * napisów tuż pod nim (stuknięcie zmienia to, co widać nad palcem), potem
-                 * sterowanie. Od 1280 px napisy wysypują się na marginesy przy oknie.
+                 * Kolejność w DOM = kolejność czytania na telefonie: okno aplikacji,
+                 * sterowanie, spis funkcji pod nim. Od 1280 px spis dzieli się na dwie
+                 * kolumny po obu stronach okna, wyrównane do okna.
                  */}
                 <div className="mt-16 grid grid-cols-1 sm:mt-20 xl:mt-16 xl:grid-cols-[14rem_minmax(0,1fr)_14rem] xl:gap-x-10 2xl:grid-cols-[16rem_minmax(0,1fr)_16rem] 2xl:gap-x-14">
                     <div className="xl:col-start-2 xl:row-start-1">
-                        <div ref={stage} id="nagrania" className="scroll-mt-28">
+                        <div id="nagrania" className="scroll-mt-28">
                             <Stage3D>
                                 <DeviceFrame>
                                     <SceneVideos scenes={SCENES} player={player} />
                                 </DeviceFrame>
                             </Stage3D>
                         </div>
-                        <FeatureSpill
-                            words={FEATURES}
-                            states={states}
-                            onPick={pick}
-                            origin={stage}
-                            layout="pile"
-                            className="mt-10 sm:mt-14 xl:hidden"
-                        />
                         <div className="mt-8 sm:mt-10">
                             <SceneBar scenes={SCENES} player={player} />
                         </div>
                         <p className="mt-5 text-[0.75rem] leading-relaxed text-dim">
                             Nagrania z działającego CRM, bez makiet. Tankowanie, SMS u klienta i powiadomienia na telefonie to animacje z danymi z CRM.
                         </p>
+                        <FeatureIndex
+                            scenes={SCENES}
+                            groups={SCENES.map((_, i) => i)}
+                            items={INDEX}
+                            states={states}
+                            onPick={pick}
+                            side="flow"
+                            className="mt-14 border-t border-white/[0.06] pt-10 xl:hidden"
+                        />
                     </div>
 
-                    {/* Marginesy po obu stronach okna, na wysokość całego bloku. Napisy
-                        stoją w nich w procentach, część celowo zachodzi na krawędź okna. */}
-                    <FeatureSpill
-                        words={FEATURES}
+                    <FeatureIndex
+                        scenes={SCENES}
+                        groups={LEFT}
+                        items={INDEX}
                         states={states}
                         onPick={pick}
-                        origin={stage}
-                        layout="l"
-                        className="hidden xl:col-start-1 xl:row-start-1 xl:block"
+                        side="l"
+                        className="hidden pt-2 xl:col-start-1 xl:row-start-1 xl:flex"
                     />
-                    <FeatureSpill
-                        words={FEATURES}
+                    <FeatureIndex
+                        scenes={SCENES}
+                        groups={RIGHT}
+                        items={INDEX}
                         states={states}
                         onPick={pick}
-                        origin={stage}
-                        layout="r"
-                        className="hidden xl:col-start-3 xl:row-start-1 xl:block"
+                        side="r"
+                        className="hidden pt-2 xl:col-start-3 xl:row-start-1 xl:flex"
                     />
                 </div>
             </div>
@@ -233,17 +252,24 @@ function StepWord() {
 
 /**
  * Warunki oferty w jednej linijce, pod przyciskami: to, co właściciel studia chce
- * wiedzieć, zanim kliknie (karta? umowa? ile za darmo?). Kropki rozdzielające, bez ikon.
+ * wiedzieć, zanim kliknie (karta? umowa? ile za darmo?). Rozdziela je cienka pionowa
+ * kreska, nie kropka - kropki w środku zdania czytały się jak pozostawione znaki.
  */
-export function OfferTerms({ className = '' }: { className?: string }) {
+export function OfferTerms({
+    terms = OFFER_TERMS,
+    className = '',
+}: {
+    terms?: readonly string[];
+    className?: string;
+}) {
     return (
-        <p className={`font-ui text-[0.8125rem] text-white/55 ${className}`}>
-            {OFFER_TERMS.map((term, i) => (
-                <span key={term} className="whitespace-nowrap">
-                    {i > 0 && <span aria-hidden className="mx-2 text-white/25">·</span>}
-                    <span className={i === 0 ? 'text-white/85' : ''}>{term}</span>
-                </span>
+        <ul className={`flex flex-wrap items-center gap-y-1 font-ui text-[0.8125rem] text-white/55 ${className}`}>
+            {terms.map((term, i) => (
+                <li key={term} className="flex items-center whitespace-nowrap">
+                    {i > 0 && <span aria-hidden className="mx-3 h-3 w-px bg-white/20" />}
+                    <span className={i === 0 && term === OFFER_TERMS[0] ? 'text-white/85' : ''}>{term}</span>
+                </li>
             ))}
-        </p>
+        </ul>
     );
 }

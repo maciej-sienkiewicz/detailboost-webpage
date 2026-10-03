@@ -32,11 +32,15 @@ export const ADD_ONS: ReadonlyArray<{ name: string; note: string; grossCents: nu
     { name: 'Statystyki', note: 'przychody, usługi i opóźnienia', grossCents: 1_900 },
 ];
 
-/** Pakiety SMS: najmniejszy i największy z katalogu (brutto). */
-export const SMS_RANGE = {
-    smallest: { credits: 50, grossCents: 1_999 },
-    largest: { credits: 2_500, grossCents: 49_999 },
-} as const;
+/** Pakiety SMS z katalogu (SmsCreditPackageSeeder), brutto, jednorazowo. */
+export const SMS_PACKAGES: ReadonlyArray<{ credits: number; grossCents: number }> = [
+    { credits: 50, grossCents: 1_999 },
+    { credits: 100, grossCents: 3_499 },
+    { credits: 250, grossCents: 7_999 },
+    { credits: 500, grossCents: 14_999 },
+    { credits: 1_000, grossCents: 24_999 },
+    { credits: 2_500, grossCents: 49_999 },
+];
 
 const VAT = 1.23;
 

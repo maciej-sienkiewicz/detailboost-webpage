@@ -1,4 +1,5 @@
-import { ADD_ONS, OFFER_TERMS, PLANS, SIGNUP_URL, SMS_RANGE, net, perDay, zl } from '../site';
+import { ADD_ONS, OFFER_TERMS, PLANS, SIGNUP_URL, SMS_PACKAGES, net, perDay, zl } from '../site';
+import { OfferTerms } from './Hero';
 import { btnPrimary, btnSecondary, container, sectionKicker, sectionTitle } from './ui';
 
 /*
@@ -25,8 +26,6 @@ const FULL_INCLUDES = [
 
 export function Pricing() {
     const allModules = PLANS.basic.grossCents + ADD_ONS.reduce((sum, a) => sum + a.grossCents, 0);
-    const smsFrom = SMS_RANGE.largest.grossCents / SMS_RANGE.largest.credits;
-    const smsTo = SMS_RANGE.smallest.grossCents / SMS_RANGE.smallest.credits;
 
     return (
         <section id="cennik" aria-labelledby="cennik-title" className="scroll-mt-24">
@@ -62,7 +61,7 @@ export function Pricing() {
                 </div>
 
                 <div className="mt-4 grid gap-4 lg:grid-cols-12">
-                    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 sm:p-8 lg:col-span-8">
+                    <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 sm:p-8 lg:col-span-7">
                         <h3 className="font-ui text-[1.0625rem] font-semibold tracking-[-0.015em] text-paper">
                             Moduły do planu BASIC
                         </h3>
@@ -80,21 +79,11 @@ export function Pricing() {
                             ))}
                         </ul>
                     </div>
-                    <div className="flex flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 sm:p-8 lg:col-span-4">
-                        <h3 className="font-ui text-[1.0625rem] font-semibold tracking-[-0.015em] text-paper">SMS-y</h3>
-                        <p className="mt-3 text-[0.9375rem] leading-[1.6] text-mute">
-                            Dokupujesz pakiety, kiedy chcesz, bez abonamentu: od {SMS_RANGE.smallest.credits} SMS za{' '}
-                            {zl(SMS_RANGE.smallest.grossCents)} zł do {SMS_RANGE.largest.credits.toLocaleString('pl-PL')} SMS za{' '}
-                            {zl(SMS_RANGE.largest.grossCents)} zł.
-                        </p>
-                        <p className="mt-auto pt-6 font-mono text-[0.8125rem] text-white/80 tabular-nums">
-                            {Math.round(smsFrom)}–{Math.round(smsTo)} gr za SMS
-                        </p>
-                    </div>
+                    <SmsPackages />
                 </div>
 
                 <p className="mt-6 font-ui text-[0.8125rem] leading-relaxed text-dim">
-                    Ceny brutto (z 23% VAT), miesięcznie, za jedno studio. Pakiety SMS brutto.
+                    Ceny planów i modułów brutto (z 23% VAT), miesięcznie, za jedno studio.
                 </p>
             </div>
         </section>
@@ -140,9 +129,16 @@ function PlanCard({
                 </span>
                 <span className="font-ui text-[0.9375rem] text-white/70">zł / mies.</span>
             </p>
-            <p className="mt-2 font-ui text-[0.8125rem] text-dim">
-                {zl(net(grossCents))} zł netto · ok. {zl(perDay(grossCents))} zł dziennie
-            </p>
+            <dl className="mt-3 flex gap-6 font-ui text-[0.8125rem]">
+                <div>
+                    <dt className="text-dim">netto</dt>
+                    <dd className="font-mono text-white/75 tabular-nums">{zl(net(grossCents))} zł</dd>
+                </div>
+                <div>
+                    <dt className="text-dim">dziennie</dt>
+                    <dd className="font-mono text-white/75 tabular-nums">ok. {zl(perDay(grossCents))} zł</dd>
+                </div>
+            </dl>
 
             <ul className="mt-8 flex flex-1 flex-col gap-3">
                 {includes.map((item) => (
@@ -158,8 +154,70 @@ function PlanCard({
                 <a href={SIGNUP_URL} className={featured ? btnPrimary : btnSecondary}>
                     Wypróbuj 3 miesiące za darmo
                 </a>
-                <p className="text-center font-ui text-[0.75rem] text-dim">{OFFER_TERMS.slice(1).join(' · ')}</p>
+                <OfferTerms terms={OFFER_TERMS.slice(1)} className="justify-center text-[0.75rem]" />
             </div>
+        </div>
+    );
+}
+
+/**
+ * Pakiety SMS jako cennik, nie zdanie: liczba SMS, cena pakietu i cena jednej
+ * wiadomości, a pasek pokazuje, jak spada cena SMS-a z wielkością pakietu.
+ * Najtańszy SMS (największy pakiet) ma złoty pasek - jedyny akcent w karcie.
+ */
+function SmsPackages() {
+    const perSms = SMS_PACKAGES.map((p) => p.grossCents / p.credits);
+    const max = Math.max(...perSms);
+    const min = Math.min(...perSms);
+    return (
+        <div className="flex flex-col rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6 sm:p-8 lg:col-span-5">
+            <div className="flex items-baseline justify-between gap-4">
+                <h3 className="font-ui text-[1.0625rem] font-semibold tracking-[-0.015em] text-paper">Pakiety SMS</h3>
+                <span className="font-ui text-[0.75rem] text-dim">jednorazowo, brutto</span>
+            </div>
+            <p className="mt-2 text-[0.875rem] leading-[1.55] text-mute">
+                Dokupujesz, kiedy potrzebujesz. Niewykorzystane SMS-y zostają na koncie.
+            </p>
+
+            <table className="mt-6 w-full border-collapse font-ui text-[0.875rem]">
+                <thead>
+                    <tr className="text-left font-mono text-[0.625rem] tracking-[0.14em] text-dim uppercase">
+                        <th className="pb-2 font-normal">SMS</th>
+                        <th className="pb-2 font-normal">
+                            <span className="sr-only">Cena za SMS na tle pakietów</span>
+                        </th>
+                        <th className="pb-2 text-right font-normal">za SMS</th>
+                        <th className="pb-2 text-right font-normal">pakiet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {SMS_PACKAGES.map((p, i) => {
+                        const price = perSms[i] ?? 0;
+                        const best = price === min;
+                        return (
+                            <tr key={p.credits} className="border-t border-white/[0.06]">
+                                <td className="py-2.5 pr-4 font-mono text-white/85 tabular-nums">
+                                    {p.credits.toLocaleString('pl-PL')}
+                                </td>
+                                <td className="w-full py-2.5 pr-4" aria-hidden>
+                                    <span className="block h-1 overflow-hidden rounded-full bg-white/[0.06]">
+                                        <span
+                                            className={`block h-full rounded-full ${best ? 'bg-gold-400' : 'bg-white/25'}`}
+                                            style={{ width: `${(price / max) * 100}%` }}
+                                        />
+                                    </span>
+                                </td>
+                                <td className={`py-2.5 pr-4 text-right font-mono whitespace-nowrap tabular-nums ${best ? 'text-gold-200' : 'text-white/60'}`}>
+                                    {Math.round(price)} gr
+                                </td>
+                                <td className="py-2.5 text-right font-mono whitespace-nowrap text-white/85 tabular-nums">
+                                    {zl(p.grossCents)} zł
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
         </div>
     );
 }

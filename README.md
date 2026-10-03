@@ -10,7 +10,7 @@ Przy zmianie cen w backendzie trzeba je zmienić także tam. Tam też adresy apl
 (`APP_URL`, rejestracja, logowanie, konto demo).
 
 React 19, Tailwind CSS 4, Vite 8, TypeScript. Kroje: Geist i Geist Mono, w pasku
-nawigacji Inter, a do napisów wokół okna i znaku słownego Archivo ze zmienną szerokością
+nawigacji, spisie funkcji i przyciskach Inter, a w nagłówkach i znaku słownym Archivo ze zmienną szerokością
 (wszystkie zmienne, hostowane lokalnie przez `@fontsource-variable`, z polskimi znakami).
 
 ```sh
@@ -26,13 +26,11 @@ npm run build      # typecheck + build do dist/
   odcinki osi czasu pod oknem i napis kroku, który właśnie leci w oknie.
 - **Zero ikon.** Hierarchię niesie krój, grubość, interlinia i siatka. Dane techniczne
   w Geist Mono, menu na telefonie otwiera słowo „Menu".
-- **Napisy wysypane wokół okna** (`FeatureSpill`): same nazwy funkcji, wersalikami
-  w ściśniętym Archivo, część z obrysem. Opadają krótko, lekko od strony okna, z obrotem
-  do ok. 20° i rozmyciem, kaskadą w ok. sekundę, i układają się krzywo na marginesach przy
-  oknie, a poniżej 1280 px - na stosie pod oknem. Każdy napis to krok jednego nagrania:
-  kliknięcie przewija okno do tego kroku (i zdejmuje pauzę), a gdy nikt nie klika,
-  złotem świeci napis kroku, który właśnie leci. Napisy tego samego nagrania jaśnieją
-  o stopień. Mapa napis → nagranie i krok jest w `Hero.tsx` (`FEATURES`).
+- **Spis funkcji przy oknie** (`FeatureIndex`): nazwy funkcji pogrupowane według
+  nagrań, jak spis treści - od 1280 px w dwóch kolumnach po obu stronach okna, niżej
+  w wierszach pod oknem. Każda pozycja to krok nagrania: kliknięcie przewija okno do
+  niego, a krok, który właśnie leci, jest biały ze złotą kreską od strony okna.
+  Mapa pozycja → nagranie i krok jest w `Hero.tsx` (`FEATURES`).
 - **Nagłówek jak plakat**: „Od telefonu do kolejnej wizyty." w tym samym Archivo co znak
   słowny (szerokim od 640 px, wąskim na telefonie, żeby litery mogły być duże). Po „do"
   przewijają się etapy pracy studia - rezerwacji, przyjęcia, protokołu, faktury, odbioru
