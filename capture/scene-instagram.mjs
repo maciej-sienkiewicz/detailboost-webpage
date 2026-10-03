@@ -45,17 +45,17 @@ export default {
     },
     async play({ page, rec }) {
         await wait(page, 500);
-        await beat(page, rec, 'alert', page.getByText(/W Twoim rejonie/).first().locator('xpath=ancestor::*[2]'));
+        await beat(page, rec, 'alert', page.locator('div', { has: page.getByText(/W Twoim rejonie/), hasNot: page.getByText('Najbliższe wizyty') }).filter({ has: page.getByRole('button', { name: /Zobacz, kto/ }) }).last());
         await moveTo(page, page.getByText(/W Twoim rejonie/).first(), 900);
         await wait(page, 1300);
-        await click(page, page.getByRole('button', { name: /Zobacz, kto/ }).first(), { ms: 800, settle: 200 });
+        await click(page, page.getByRole('button', { name: /Zobacz, kto/ }).first(), { ms: 800, settle: 200, end: true });
         await page.getByText('Reklamodawcy w okolicy').waitFor({ timeout: 20000 });
         await wait(page, 900);
         await beat(page, rec, 'area', page.getByText('Reklamodawcy w okolicy').first().locator('xpath=ancestor::*[3]'));
         await moveTo(page, page.getByText('Nowa kampania', { exact: true }).first(), 900);
         await wait(page, 1300);
         await beat(page, rec, 'calendar', page.getByText(/Kalendarz reklam/).first().locator('xpath=ancestor::*[2]'));
-        await click(page, page.getByLabel(/shinestudio_waw: Jesienna promocja/).first(), { ms: 900, settle: 1500 });
+        await click(page, page.getByLabel(/shinestudio_waw: Jesienna promocja/).first(), { ms: 900, settle: 1500, end: true });
         await beat(page, rec, 'campaign', page.getByText('kont w Polsce').first().locator('xpath=ancestor::*[3]'));
         await moveTo(page, page.getByText('kont w Polsce').first(), 800);
         await wait(page, 900);

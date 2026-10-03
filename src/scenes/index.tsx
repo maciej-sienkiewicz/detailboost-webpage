@@ -5,6 +5,9 @@ import checkin from './checkin.timing.json';
 import handover from './handover.timing.json';
 import costs from './costs.timing.json';
 import instagram from './instagram.timing.json';
+import visitcard from './visitcard.timing.json';
+import team from './team.timing.json';
+import push from './push.timing.json';
 
 type Timing = Record<string, { at: number; until?: number; focus?: Focus }>;
 type Caption = { step: string; text: string; zoom?: number; wide?: boolean };
@@ -18,7 +21,7 @@ type Caption = { step: string; text: string; zoom?: number; wide?: boolean };
  * o produkcie (patrz README, „Co jest dosiewane do bazy").
  */
 /** Najdłużej trzymana ramka - dłużej oko i tak już jest gdzie indziej. */
-const MAX_FOCUS = 3.6;
+const MAX_FOCUS = 3;
 
 function beats(timing: Timing, captions: Record<string, Caption>): Beat[] {
     const list = Object.entries(timing)
@@ -92,6 +95,31 @@ export const SCENES: readonly Scene[] = [
         }),
     },
     {
+        id: 'visitcard',
+        title: 'Karta Wizyty dla klienta',
+        summary: 'Klient dostaje SMS-em stronę swojej wizyty: postęp prac, protokół, zdjęcia i propozycję usługi dodatkowej. Potwierdza ją SMS-em „TAK”, a usługa sama trafia do wizyty.',
+        poster: `${DIR}visitcard-poster.webp`,
+        video: `${DIR}visitcard`,
+        features: [0, 3],
+        beats: beats(visitcard, {
+            visit: { step: 'Wizyta w realizacji', text: 'Mercedes klasy S w trakcie korekty lakieru.', wide: true },
+            'card-modal': { step: 'Karta Wizyty', text: 'Każda wizyta ma swoją stronę dla klienta, pod jednym linkiem.', zoom: 1.2 },
+            upsell: { step: 'Propozycja', text: 'Studio proponuje usługę dodatkową z cennika: impregnację szyb.', zoom: 1.2 },
+            send: { step: 'Wysyłka', text: 'Link idzie do klienta SMS-em albo e-mailem.', zoom: 1.2 },
+            sent: { step: 'Wysłano', text: 'Karta poszła do klienta SMS-em.' },
+            progress: { step: 'Telefon klienta', text: 'Klient widzi, na jakim etapie jest jego auto.', wide: true },
+            documents: { step: 'Dokumenty', text: 'Podpisany protokół przyjęcia do pobrania.', wide: true },
+            photos: { step: 'Zdjęcia', text: 'Zdjęcia z przyjęcia, te same, które ma studio.', wide: true },
+            offer: { step: 'Polecane usługi', text: 'Propozycja studia z ceną. Klient decyduje sam, bez telefonu.', wide: true },
+            requested: { step: 'Wybór klienta', text: 'Klient zaznacza usługę, a CRM prosi go SMS-em o potwierdzenie.', wide: true },
+            sms: { step: 'SMS', text: 'Treść prosto z CRM: usługa i kwota brutto.', wide: true },
+            yes: { step: 'TAK', text: 'Klient odpisuje „TAK”.', wide: true },
+            added: { step: 'Dodano do wizyty', text: 'Usługa jest potwierdzona i dopisana do wizyty.', wide: true },
+            total: { step: 'Nowa kwota', text: 'Klient od razu widzi nową wycenę: 3378,81 zł brutto.', wide: true },
+            studio: { step: 'W studiu', text: 'Impregnacja jest już w wizycie. Nikt nie dzwonił i nic nie przepisywał.' },
+        }),
+    },
+    {
         id: 'handover',
         title: 'Wydanie auta z podpisem i fakturą',
         summary: 'Klient podpisuje protokół wydania na swoim telefonie. Faktura VAT idzie do KSeF i wraca z numerem i kodem QR.',
@@ -135,6 +163,29 @@ export const SCENES: readonly Scene[] = [
         }),
     },
     {
+        id: 'team',
+        title: 'Zespół, czas pracy i urlopy',
+        summary: 'Nowy pracownik z kontem i rolą, karta czasu pracy zatwierdzona jednym kliknięciem, lista obecności za miesiąc w PDF i urlop zaznaczony w kalendarzu.',
+        poster: `${DIR}team-poster.webp`,
+        video: `${DIR}team`,
+        features: [1],
+        beats: beats(team, {
+            team: { step: 'Zespół', text: 'Pracownicy z rolami i kontami. Przy każdym widać, czy liczy mu się czas pracy.' },
+            'new-employee': { step: 'Nowe konto', text: 'Imię, telefon i e-mail. Zaproszenie z linkiem do hasła przychodzi mailem.', zoom: 1.2 },
+            role: { step: 'Rola', text: 'Rola decyduje, co pracownik widzi i czy liczy mu się czas pracy.', zoom: 1.2 },
+            added: { step: 'Konto założone', text: 'Kacper jest w zespole jako Detailer.' },
+            worktime: { step: 'Czas pracy', text: 'Pracownicy wpisują godziny sami i składają kartę za miesiąc.' },
+            card: { step: 'Karta za wrzesień', text: 'Godziny dzień po dniu i norma miesiąca.', wide: true },
+            approved: { step: 'Zatwierdzona', text: 'Jedno kliknięcie i karta Marka jest zatwierdzona.' },
+            'sheet-new': { step: 'Lista obecności', text: 'Wybierasz miesiąc i osoby. Godziny CRM bierze z czasu pracy.', zoom: 1.2 },
+            sheet: { step: 'PDF', text: 'Lista obecności za wrzesień, dzień po dniu, gotowa do podpisu.', wide: true },
+            leave: { step: 'Urlop z kalendarza', text: 'Pracownik i rodzaj urlopu, prosto z kalendarza.', zoom: 1.2 },
+            'leave-days': { step: 'Zaznacz dni', text: 'Przeciągnięcie przez tydzień zaznacza cały urlop.', wide: true },
+            'leave-confirm': { step: 'Potwierdzenie', text: 'Dni, rodzaj i notatka. Urlop obniża normę czasu pracy.', zoom: 1.2 },
+            'leave-saved': { step: 'W kalendarzu', text: 'Dni urlopu są oznaczone w kalendarzu, widać je przy planowaniu wizyt.', wide: true },
+        }),
+    },
+    {
         id: 'instagram',
         title: 'Nowa kampania u konkurencji',
         summary: 'Konkurent z okolicy ogłasza promocję i puszcza reklamę. Widzisz zasięg, odbiorców i treść, zanim zadzwoni klient.',
@@ -147,6 +198,24 @@ export const SCENES: readonly Scene[] = [
             campaign: { step: 'Kampania', text: 'Zasięg, start emisji i grupa odbiorców reklamy.', zoom: 1.2 },
             creative: { step: 'Treść reklamy', text: 'Co dokładnie obiecuje konkurent.' },
             week: { step: 'Tydzień', text: 'Post z promocją ma 6,5 raza więcej reakcji niż zwykle.' },
+        }),
+    },
+    {
+        id: 'push',
+        title: 'Powiadomienia na telefon',
+        summary: 'Zarobek po wydaniu auta, nieobecny klient, kampania konkurencji, raport, nowy lead i przyjęte auto. Studio pod kontrolą z każdego miejsca.',
+        poster: `${DIR}push-poster.webp`,
+        video: `${DIR}push`,
+        features: [],
+        beats: beats(push, {
+            intro: { step: 'Telefon właściciela', text: 'Powiadomienia z CRM przychodzą także przy zamkniętej aplikacji.', wide: true },
+            earned: { step: 'Zarobek', text: 'Auto wydane: kwota stoi w tytule powiadomienia.', wide: true },
+            'no-show': { step: 'Klient nie przyjechał', text: 'Wiesz od razu, że termin się zwolnił.', wide: true },
+            campaign: { step: 'Konkurencja', text: 'Firma z okolicy puściła nowe reklamy na Facebooku i Instagramie.', wide: true },
+            report: { step: 'Raport', text: 'Raport za wrzesień czeka rano po zamknięciu miesiąca.', wide: true },
+            lead: { step: 'Nowy lead', text: 'Ktoś pyta o usługę przez formularz na stronie.', wide: true },
+            checkin: { step: 'Przyjęcie auta', text: 'Pracownik przyjął BMW X5, wizyta ruszyła.', wide: true },
+            control: { step: 'Z każdego miejsca', text: 'Wiesz, co dzieje się w studiu, zanim ktokolwiek zadzwoni.', wide: true },
         }),
     },
 ];

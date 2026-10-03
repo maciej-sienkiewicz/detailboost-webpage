@@ -9,7 +9,7 @@
 // trafia do klienta pionowo. Osobna aplikacja „DetailBoost Tablet" (kiosk do podpisu)
 // nie jest częścią repozytoriów CRM - dokumenty wysłane na sparowany tablet podpisujemy
 // na stronie podpisu klienta (te same dokumenty, ta sama treść), otwartej na tablecie.
-import { BASE, beat, click, drawSignature, moveTo, release, showCursorAt, type, wait, waitForLogo } from './lib.mjs';
+import { BASE, beat, click, drawSignature, moveTo, panelOf, release, showCursorAt, type, wait, waitForLogo } from './lib.mjs';
 import { sql, q } from './db.mjs';
 import { enableFullPlan, enableSmsAutomation } from './seed.mjs';
 
@@ -66,11 +66,14 @@ export default {
         const appt = (await res.json()).appointments.find((a) => a.appointmentTitle === EVENT);
         if (!appt) throw new Error(`Brak rezerwacji „${EVENT}"`);
         this.apptId = appt.id;
+        // Dzień rezerwacji z bazy: dane demo układają się względem dnia nagrania, więc
+        // data na sztywno („2026-10-04") przestaje działać już następnego dnia.
+        this.day = sql(`select to_char(start_date_time at time zone 'Europe/Warsaw', 'YYYY-MM-DD') from appointments where id=${q(appt.id)}`);
         // Rozgrzewka formularza przyjęcia (leniwa paczka), poza nagraniem.
         await page.goto(`${BASE}/reservations/${appt.id}/checkin`, { waitUntil: 'networkidle' });
         await page.getByText('Przyjęcie pojazdu do studia').first().waitFor({ timeout: 30000 });
         await page.goto(`${BASE}/calendar`, { waitUntil: 'networkidle' });
-        await page.locator('.fc-daygrid-day[data-date="2026-10-04"] .fc-daygrid-event', { hasText: EVENT }).first().waitFor({ timeout: 30000 });
+        await page.locator(`.fc-daygrid-day[data-date="${this.day}"] .fc-daygrid-event`, { hasText: EVENT }).first().waitFor({ timeout: 30000 });
         await wait(page, 1500);
         // Telefon pracownika do zdjęć - przygotowany wcześniej, otwierany po QR.
         this.phone = await ctx.newPage();
@@ -80,19 +83,24 @@ export default {
     },
     async play({ page, ctx, rec }) {
         await wait(page, 600);
-        const event = page.locator('.fc-daygrid-day[data-date="2026-10-04"] .fc-daygrid-event', { hasText: EVENT }).first();
-        await beat(page, rec, 'calendar', page.locator('.fc-daygrid-day[data-date="2026-10-04"]').first());
+        const event = page.locator(`.fc-daygrid-day[data-date="${this.day}"] .fc-daygrid-event`, { hasText: EVENT }).first();
+        await beat(page, rec, 'calendar', page.locator(`.fc-daygrid-day[data-date="${this.day}"]`).first());
         await moveTo(page, event, 1000);
         await wait(page, 1200);
-        await click(page, event, { ms: 300, settle: 900 });
+        await click(page, event, { ms: 300, settle: 900, end: true });
         const start = page.getByRole('button', { name: 'ROZPOCZNIJ' });
         await start.waitFor({ timeout: 15000 });
-        await beat(page, rec, 'popover', start.locator('xpath=ancestor::*[4]'));
+        await beat(page, rec, 'popover', await panelOf(start, { minW: 300, minH: 260 }));
         await wait(page, 2000);
         const token = page.waitForResponse((r) => r.url().includes('/upload-token'), { timeout: 60000 }).catch(() => null);
-        await click(page, start, { ms: 800, settle: 200 });
+        await click(page, start, { ms: 800, settle: 0, end: true });
+        // Formularz przyjęcia ładuje się chwilę („Ładowanie…") - cięcie na gotowy ekran.
+        rec.pause(0.2);
         await page.getByText('Przyjęcie pojazdu do studia').first().waitFor({ timeout: 30000 });
+        await page.getByText('Dane klienta', { exact: true }).first().waitFor({ timeout: 30000 });
         await wait(page, 1200);
+        rec.resume();
+        await wait(page, 300);
 
         await beat(page, rec, 'reservation', page.getByText('Dane klienta', { exact: true }).first().locator('xpath=ancestor::*[3]'));
         await moveTo(page, page.getByText('Dane klienta', { exact: true }).first(), 900, { dx: 200 });

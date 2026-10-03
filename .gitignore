@@ -6,3 +6,4 @@ capture/state.json
 capture/raw
 *.tsbuildinfo
 dump.rdb
+capture/_*.mjs

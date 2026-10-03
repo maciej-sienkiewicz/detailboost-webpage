@@ -153,7 +153,12 @@ export async function moveTo(page, locator, ms = 650, { dx = 0, dy = 0 } = {}) {
     return { x, y };
 }
 
-export async function click(page, locator, { ms = 650, settle = 250 } = {}) {
+/**
+ * `end: true` - kliknięcie kończy to, co obrysowuje ramka (zapis zamykający okno,
+ * otwarcie okna NAD obrysowanym miejscem). Kliknięcie wewnątrz ramki samo jej nie gasi,
+ * więc bez tego ramka zostawała na zamkniętym oknie aż do następnego kroku.
+ */
+export async function click(page, locator, { ms = 650, settle = 250, end = false } = {}) {
     const at = await moveTo(page, locator, ms);
     await wait(page, 120);
     await page.evaluate(() => window.__cursor.press());
@@ -162,6 +167,7 @@ export async function click(page, locator, { ms = 650, settle = 250 } = {}) {
     if (open && (open.page !== page || at.x < open.box.x || at.x > open.box.x + open.box.width
         || at.y < open.box.y || at.y > open.box.y + open.box.height)) release();
     await locator.click();
+    if (end) release();
     await page.evaluate(() => window.__cursor.release());
     await wait(page, settle);
 }
@@ -193,10 +199,27 @@ export function release() {
     open = null;
 }
 
+/**
+ * Położenie elementu, gdy przestanie się ruszać. Okna wjeżdżają, powiadomienia
+ * rozsuwają stos, paragon się drukuje - pomiar w trakcie ruchu dawał ramkę obok treści.
+ */
+async function stableBox(locator, timeout = 1500) {
+    let prev = await locator.boundingBox();
+    const t0 = Date.now();
+    while (Date.now() - t0 < timeout) {
+        await new Promise((r) => setTimeout(r, 90));
+        const box = await locator.boundingBox();
+        const same = prev && box && ['x', 'y', 'width', 'height'].every((k) => Math.abs(box[k] - prev[k]) < 0.5);
+        prev = box;
+        if (same) break;
+    }
+    return prev;
+}
+
 export async function beat(page, rec, id, locator, pad = 10) {
     open = null;
     if (!locator) return rec.mark(id);
-    const box = await locator.boundingBox();
+    const box = await stableBox(locator);
     const vp = page.viewportSize();
     if (!box) return rec.mark(id);
     open = { rec, page, box };
@@ -252,4 +275,21 @@ export async function waitForLogo(page) {
     await page.waitForFunction(() => [...document.images].some((img) =>
         (img.src.startsWith('blob:') || img.src.includes('car-logos')) && img.complete && img.naturalWidth > 0), null, { timeout: 15000 });
     await page.waitForTimeout(400);
+}
+
+/**
+ * Panel, na którym ma stać ramka: najmniejszy przodek elementu o rozsądnych wymiarach.
+ * Rola `dialog` i „przodek nr 4" bywają całym przyciemnionym tłem albo całą stroną -
+ * wtedy złota ramka obrysowywała krawędź kadru zamiast okna.
+ */
+export async function panelOf(locator, { minW = 380, minH = 160 } = {}) {
+    const tag = `p${Math.random().toString(36).slice(2, 8)}`;
+    await locator.evaluate((el, [tag, minW, minH]) => {
+        document.querySelectorAll('[data-ring-panel]').forEach((n) => n.removeAttribute('data-ring-panel'));
+        let n = el;
+        while (n.parentElement && n.getBoundingClientRect().width < minW) n = n.parentElement;
+        while (n.parentElement && n.getBoundingClientRect().height < minH) n = n.parentElement;
+        n.setAttribute('data-ring-panel', tag);
+    }, [tag, minW, minH]);
+    return locator.page().locator(`[data-ring-panel="${tag}"]`);
 }
