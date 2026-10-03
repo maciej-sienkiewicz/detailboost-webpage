@@ -1,4 +1,5 @@
-import { useRef, type ReactNode } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useRef, useState } from 'react';
 import { DeviceFrame, Stage3D } from './Stage3D';
 import { SceneControls, SceneTabs, SceneVideos, useScenePlayer } from './ScenePlayer';
 import { FeatureSpill, type SpillWord, type WordState } from './FeatureSpill';
@@ -89,48 +90,44 @@ export function Hero() {
         <section aria-labelledby="hero-title" className="relative">
             <div className="relative mx-auto max-w-[100rem] px-5 pt-10 pb-24 sm:px-8 sm:pt-16 sm:pb-32 lg:px-12 xl:pt-20">
                 {/*
-                 * Nagłówek jak plakat, tym samym krojem co znak „DETAIL BOOST": duże
-                 * rzeczowniki, małe przyimki. „od" i „do" wiszą w wąskiej kolumnie przed
-                 * krawędzią tekstu, więc oba wiersze zaczynają się w jednej pionie - jak
-                 * numer przed blokiem tekstu w siatce szwajcarskiej. Bez gradientów
-                 * w literach: złota jest tylko kropka.
+                 * Nagłówek jak plakat, tym samym krojem co znak „DETAIL BOOST". Po „do"
+                 * przewijają się etapy pracy studia - zamiast akapitu z listą funkcji,
+                 * którego nikt nie czyta - i zatrzymują się na „odbioru auta." ze złotą
+                 * kropką. Biel to treść, złoto to jedyny akcent.
                  */}
                 <header className="mx-auto max-w-[80rem]">
                     <h1
                         id="hero-title"
                         aria-label="Od telefonu do odbioru auta."
-                        className="font-display text-[clamp(3rem,9vw,8.75rem)] leading-[0.86] font-[820] tracking-[-0.04em] text-paper uppercase [font-stretch:108%]"
+                        className="font-display text-[clamp(2.375rem,11.6vw,3.75rem)] leading-[0.9] font-[800] tracking-[-0.03em] text-paper uppercase [font-stretch:74%] sm:text-[clamp(3rem,8vw,7.25rem)] sm:[font-stretch:104%]"
                     >
-                        <HeadLine small="od" delay={0}>
-                            telefonu
-                        </HeadLine>
-                        <HeadLine small="do" delay={110}>
-                            odbioru auta<span className="text-gold-400">.</span>
-                        </HeadLine>
+                        <span aria-hidden className="-my-[0.08em] block overflow-hidden py-[0.08em]">
+                            <span className="hero-line block">Od telefonu</span>
+                        </span>
+                        <span aria-hidden className="-my-[0.08em] block overflow-hidden py-[0.08em]">
+                            <span className="hero-line block whitespace-nowrap [animation-delay:110ms]">
+                                do <StepWord />
+                            </span>
+                        </span>
                     </h1>
 
-                    <div className="hero-rise mt-10 grid gap-8 border-t border-line pt-6 sm:mt-12 lg:grid-cols-12 lg:gap-x-8 [animation-delay:420ms]">
-                        <p className="max-w-[34rem] text-[1.0625rem] leading-[1.6] tracking-[-0.012em] text-pretty text-mute lg:col-span-6 xl:col-span-5">
-                            <span className="text-paper">CRM dla studiów auto detailingu.</span> Rezerwacje,
-                            przyjęcie pojazdu, protokół wydania, faktura w KSeF i historia każdego klienta
-                            w jednym systemie.
+                    <div className="hero-rise mt-9 flex flex-col gap-6 border-t border-line pt-6 sm:mt-11 lg:flex-row lg:items-center lg:justify-between [animation-delay:420ms]">
+                        <p className="font-ui text-[1.0625rem] font-medium tracking-[-0.015em] text-white/75 sm:text-lg">
+                            CRM dla studiów auto detailingu.
                         </p>
-                        <div className="flex flex-col gap-4 lg:col-span-6 lg:items-end xl:col-span-5 xl:col-start-8">
-                            <div className="flex flex-col gap-2.5 sm:flex-row">
-                                <a
-                                    href="#"
-                                    className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-6 font-ui text-[0.9375rem] font-semibold whitespace-nowrap text-[#0a0709] shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_14px_34px_-12px_rgb(220_174_92/0.8)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-gold-50 hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_16px_40px_-10px_rgb(220_174_92/0.95)] active:translate-y-px"
-                                >
-                                    Rozpocznij za darmo
-                                </a>
-                                <a
-                                    href="#"
-                                    className="inline-flex h-12 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] px-6 font-ui text-[0.9375rem] font-medium whitespace-nowrap text-white/80 transition-colors duration-200 hover:bg-white/[0.07] hover:text-white"
-                                >
-                                    Otwórz konto demo
-                                </a>
-                            </div>
-                            <p className="text-[0.8125rem] text-dim">Konto demo bez rejestracji, z danymi przykładowego studia.</p>
+                        <div className="flex flex-col gap-2.5 sm:flex-row">
+                            <a
+                                href="#"
+                                className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-6 font-ui text-[0.9375rem] font-semibold whitespace-nowrap text-[#0a0709] shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_14px_34px_-12px_rgb(220_174_92/0.8)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-gold-50 hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_16px_40px_-10px_rgb(220_174_92/0.95)] active:translate-y-px"
+                            >
+                                Rozpocznij za darmo
+                            </a>
+                            <a
+                                href="#"
+                                className="inline-flex h-12 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] px-6 font-ui text-[0.9375rem] font-medium whitespace-nowrap text-white/80 transition-colors duration-200 hover:bg-white/[0.07] hover:text-white"
+                            >
+                                Konto demo bez rejestracji
+                            </a>
                         </div>
                     </div>
                 </header>
@@ -192,25 +189,52 @@ export function Hero() {
     );
 }
 
+/** Etapy po „do", w kolejności pracy studia. Ostatni zostaje na stałe. */
+const STEPS = ['rezerwacji', 'przyjęcia', 'protokołu', 'faktury', 'odbioru auta'] as const;
+
 /**
- * Wiersz nagłówka: mały przyimek w kolumnie o stałej szerokości, duże słowa obok.
- * Słowa wjeżdżają od dołu spod maski (overflow), jak plansza w kinie - wiersz po
- * wierszu, raz, przy wejściu na stronę.
+ * Słowo po „do": etapy wjeżdżają od dołu i wyjeżdżają w górę spod maski, raz,
+ * po wejściu nagłówka. Etapy w drodze są przygaszone - „jeszcze w toku" - a
+ * ostatni ląduje pełną bielą ze złotą kropką. Bez ruchu (prefers-reduced-motion)
+ * od razu stoi ostatni.
  */
-function HeadLine({ small, delay, children }: { small: string; delay: number; children: ReactNode }) {
+function StepWord() {
+    const [step, setStep] = useState(0);
+    const last = STEPS.length - 1;
+
+    useEffect(() => {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            setStep(last);
+            return;
+        }
+        // Pierwszy etap stoi, aż wiersz skończy wjeżdżać; kolejne co 0,68 s.
+        let i = 0;
+        let timer = window.setTimeout(function tick() {
+            i += 1;
+            setStep(i);
+            if (i < last) timer = window.setTimeout(tick, 680);
+        }, 1300);
+        return () => window.clearTimeout(timer);
+    }, [last]);
+
+    const done = step === last;
     return (
-        <span aria-hidden className="grid grid-cols-[0.62em_minmax(0,1fr)] items-start">
-            <span
-                className="hero-rise pt-[0.12em] text-[0.24em] leading-none font-[700] tracking-[0.02em] text-dim [font-stretch:100%]"
-                style={{ animationDelay: `${delay + 160}ms` }}
-            >
-                {small}
-            </span>
-            <span className="-my-[0.08em] block overflow-hidden py-[0.08em]">
-                <span className="hero-line block" style={{ animationDelay: `${delay}ms` }}>
-                    {children}
-                </span>
-            </span>
+        <span className="relative -mb-[0.14em] inline-grid overflow-hidden pb-[0.14em] align-bottom">
+            <AnimatePresence initial={false} mode="popLayout">
+                <motion.span
+                    key={step}
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '-100%' }}
+                    transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                    className={`col-start-1 row-start-1 block ${
+                        done ? '' : 'text-white/30'
+                    }`}
+                >
+                    {STEPS[step]}
+                    {done && <span className="text-gold-400">.</span>}
+                </motion.span>
+            </AnimatePresence>
         </span>
     );
 }
