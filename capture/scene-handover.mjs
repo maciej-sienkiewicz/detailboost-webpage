@@ -3,7 +3,7 @@
 // stronę podpisu na telefonie klienta (dokument, oświadczenie, podpis palcem), powrót
 // do wydania z potwierdzeniem podpisu, fakturę VAT z „Wyślij fakturę do KSeF",
 // a po cięciu - fakturę w Finansach ze statusem „W KSeF" i kodem QR.
-import { BASE, beat, release, click, drawSignature, moveTo, showCursorAt, wait, waitForLogo } from './lib.mjs';
+import { BASE, beat, release, click, drawSignature, moveTo, panelOf, showCursorAt, wait, waitForLogo } from './lib.mjs';
 import { sql, q } from './db.mjs';
 import {
     enableFullPlan, enableSmsAutomation, markInvoiceAccepted, markKsefSynced, setupInvoicing, visitIdByTitle,
@@ -32,17 +32,17 @@ export default {
     async play({ page, ctx, studioId, rec }) {
         await wait(page, 500);
         await beat(page, rec, 'ready', page.getByRole('button', { name: /oznacz jako gotowe/i }).first().locator('xpath=ancestor::header[1] | ancestor::*[4]').first());
-        await click(page, page.getByRole('button', { name: /oznacz jako gotowe/i }).first(), { ms: 800, settle: 900 });
-        await beat(page, rec, 'notify', page.getByRole('dialog').first());
+        await click(page, page.getByRole('button', { name: /oznacz jako gotowe/i }).first(), { ms: 800, settle: 900, end: true });
+        await beat(page, rec, 'notify', await panelOf(page.getByRole('dialog').getByText('Pojazd gotowy do odbioru').first()));
         await moveTo(page, page.getByRole('dialog').getByText('SMS', { exact: true }).first(), 700);
         await wait(page, 900);
-        await click(page, page.getByRole('dialog').getByRole('button', { name: /oznacz jako gotowe/i }).last(), { ms: 700, settle: 1200 });
+        await click(page, page.getByRole('dialog').getByRole('button', { name: /oznacz jako gotowe/i }).last(), { ms: 700, settle: 1200, end: true });
         await click(page, page.getByRole('button', { name: /Wydaj pojazd/ }).first(), { ms: 800, settle: 600 });
         const send = page.getByRole('button', { name: 'Wyślij prośbę na telefon klienta' });
         await send.waitFor({ timeout: 20000 });
         await wait(page, 500);
-        await beat(page, rec, 'protocol', page.getByRole('dialog').first());
-        await click(page, send, { ms: 800, settle: 700 });
+        await beat(page, rec, 'protocol', await panelOf(page.getByRole('dialog').getByText('Wydanie pojazdu').first()));
+        await click(page, send, { ms: 800, settle: 700, end: true });
         await click(page, page.getByRole('button', { name: /Tak, stan zgodny/ }), { ms: 700, settle: 400 });
         await click(page, page.getByRole('button', { name: 'Zapisz i wyślij do podpisu' }), { ms: 600, settle: 250 });
 
@@ -88,9 +88,9 @@ export default {
         await page.getByRole('button', { name: /^Przejdź do płatności/ }).first().waitFor({ timeout: 20000 });
         await rec.switchTo(page, 0.25);
         await wait(page, 400);
-        await beat(page, rec, 'back', page.getByRole('dialog').first());
+        await beat(page, rec, 'back', await panelOf(page.getByRole('dialog').getByText('Wydanie pojazdu').first()));
         await wait(page, 1100);
-        await click(page, page.getByRole('button', { name: /Przejdź do płatności/ }).first(), { ms: 800, settle: 800 });
+        await click(page, page.getByRole('button', { name: /Przejdź do płatności/ }).first(), { ms: 800, settle: 800, end: true });
         await click(page, page.getByRole('button', { name: /^Karta$/ }).first(), { ms: 700, settle: 300 });
         await click(page, page.getByRole('button', { name: /Faktura VAT/ }).first(), { ms: 600, settle: 800 });
         await beat(page, rec, 'invoice', page.getByText('Wyślij fakturę do KSeF').first().locator('xpath=ancestor::*[3]'));

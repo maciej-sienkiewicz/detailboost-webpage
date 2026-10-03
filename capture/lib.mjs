@@ -276,3 +276,20 @@ export async function waitForLogo(page) {
         (img.src.startsWith('blob:') || img.src.includes('car-logos')) && img.complete && img.naturalWidth > 0), null, { timeout: 15000 });
     await page.waitForTimeout(400);
 }
+
+/**
+ * Panel, na którym ma stać ramka: najmniejszy przodek elementu o rozsądnych wymiarach.
+ * Rola `dialog` i „przodek nr 4" bywają całym przyciemnionym tłem albo całą stroną -
+ * wtedy złota ramka obrysowywała krawędź kadru zamiast okna.
+ */
+export async function panelOf(locator, { minW = 380, minH = 160 } = {}) {
+    const tag = `p${Math.random().toString(36).slice(2, 8)}`;
+    await locator.evaluate((el, [tag, minW, minH]) => {
+        document.querySelectorAll('[data-ring-panel]').forEach((n) => n.removeAttribute('data-ring-panel'));
+        let n = el;
+        while (n.parentElement && n.getBoundingClientRect().width < minW) n = n.parentElement;
+        while (n.parentElement && n.getBoundingClientRect().height < minH) n = n.parentElement;
+        n.setAttribute('data-ring-panel', tag);
+    }, [tag, minW, minH]);
+    return locator.page().locator(`[data-ring-panel="${tag}"]`);
+}

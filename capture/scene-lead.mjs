@@ -9,11 +9,26 @@ import { enableFullPlan, enableSmsAutomation, insertCustomerReply, seedReturning
 
 const LEAD = 'Porsche 911 Carrera 4S';
 
-async function openLead(page) {
+async function openLead(page, rec) {
     await page.getByText(LEAD).first().waitFor({ timeout: 30000 });
-    await click(page, page.getByText(LEAD).first(), { ms: 800, settle: 100 });
+    await click(page, page.getByText(LEAD).first(), { ms: 800, settle: 0, end: true });
+    // Logo marki w nagłówku leada ładuje się i przycina (canvas) dopiero po otwarciu -
+    // przez ok. sekundę stał tam szary pusty kwadrat. Cięcie na gotowy widok.
+    rec.pause(0.15);
     await page.getByText('Przebieg sprawy').first().waitFor({ timeout: 15000 });
-    await waitForLogo(page).catch(() => {});
+    // Logo przy NAGŁÓWKU leada (tytuł dużym pismem) - lista pod spodem ma swoje logo,
+    // więc samo „jakiś obrazek się wczytał" niczego nie dowodzi.
+    await page.waitForFunction((title) => [...document.querySelectorAll('body *')]
+        .filter((el) => el.childElementCount === 0 && el.textContent.trim() === title && parseFloat(getComputedStyle(el).fontSize) >= 18)
+        .some((el) => {
+            for (let n = el.parentElement, i = 0; n && i < 5; n = n.parentElement, i++) {
+                const img = n.querySelector('img');
+                if (img) return img.complete && img.naturalWidth > 0;
+            }
+            return false;
+        }), LEAD, { timeout: 15000 }).catch(() => console.warn('[lead] logo w nagłówku nie wczytało się'));
+    await wait(page, 300);
+    rec.resume();
 }
 
 export default {
@@ -46,7 +61,7 @@ export default {
         const entry = (title) => page.getByText(title, { exact: true }).first().locator('xpath=ancestor::*[.//p or .//div][2]');
         await wait(page, 400);
         await beat(page, rec, 'inbox', page.getByText(LEAD).first().locator('xpath=ancestor::*[self::button or self::a or @role="button"][1]'));
-        await openLead(page);
+        await openLead(page, rec);
         await wait(page, 300);
 
         await beat(page, rec, 'question', entry('Pierwszy kontakt klienta'));
@@ -82,7 +97,7 @@ export default {
         await wait(page, 1800);
 
         await click(page, page.getByRole('link', { name: /Leady/ }).first(), { ms: 800, settle: 200 });
-        await openLead(page);
+        await openLead(page, rec);
         await wait(page, 300);
         await beat(page, rec, 'replied', entry('Odpisaliśmy'));
         await moveTo(page, page.getByText('Odpisaliśmy', { exact: true }).first(), 800, { dx: 120, dy: 22 });

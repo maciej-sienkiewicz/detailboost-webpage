@@ -112,7 +112,8 @@ export default {
             await type(page, 'Woda spłynie z szyby już przy 60 km/h. Robimy przy okazji korekty.', 28);
         }
         await beat(page, rec, 'upsell', await modal(page, 'Karta Wizyty'));
-        await click(page, page.getByRole('button', { name: /^Zapisz sugesti/ }).first(), { ms: 700, settle: 900 });
+        // Po zapisie formularz sugestii się zwija - okno maleje, więc ramka kroku gaśnie.
+        await click(page, page.getByRole('button', { name: /^Zapisz sugesti/ }).first(), { ms: 700, settle: 900, end: true });
         await moveTo(page, page.getByText('Widoczna na karcie').first(), 700);
         await wait(page, 1200);
         await click(page, page.getByRole('button', { name: /Wyślij kartę/ }).first(), { ms: 800, settle: 700, end: true });
