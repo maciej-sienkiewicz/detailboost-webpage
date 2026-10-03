@@ -100,7 +100,6 @@ export const SCENES: readonly Scene[] = [
         summary: 'Klient dostaje SMS-em stronę swojej wizyty: postęp prac, protokół, zdjęcia i propozycję usługi dodatkowej. Potwierdza ją SMS-em „TAK”, a usługa sama trafia do wizyty.',
         poster: `${DIR}visitcard-poster.webp`,
         video: `${DIR}visitcard`,
-        features: [0, 3],
         beats: beats(visitcard, {
             visit: { step: 'Wizyta w realizacji', text: 'Mercedes klasy S w trakcie korekty lakieru.', wide: true },
             'card-modal': { step: 'Karta Wizyty', text: 'Każda wizyta ma swoją stronę dla klienta, pod jednym linkiem.', zoom: 1.2 },
@@ -168,7 +167,6 @@ export const SCENES: readonly Scene[] = [
         summary: 'Nowy pracownik z kontem i rolą, karta czasu pracy zatwierdzona jednym kliknięciem, lista obecności za miesiąc w PDF i urlop zaznaczony w kalendarzu.',
         poster: `${DIR}team-poster.webp`,
         video: `${DIR}team`,
-        features: [1],
         beats: beats(team, {
             team: { step: 'Zespół', text: 'Pracownicy z rolami i kontami. Przy każdym widać, czy liczy mu się czas pracy.' },
             'new-employee': { step: 'Nowe konto', text: 'Imię, telefon i e-mail. Zaproszenie z linkiem do hasła przychodzi mailem.', zoom: 1.2 },
@@ -206,7 +204,6 @@ export const SCENES: readonly Scene[] = [
         summary: 'Zarobek po wydaniu auta, nieobecny klient, kampania konkurencji, raport, nowy lead i przyjęte auto. Studio pod kontrolą z każdego miejsca.',
         poster: `${DIR}push-poster.webp`,
         video: `${DIR}push`,
-        features: [],
         beats: beats(push, {
             intro: { step: 'Telefon właściciela', text: 'Powiadomienia z CRM przychodzą także przy zamkniętej aplikacji.', wide: true },
             earned: { step: 'Zarobek', text: 'Auto wydane: kwota stoi w tytule powiadomienia.', wide: true },
