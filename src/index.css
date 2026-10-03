@@ -70,6 +70,13 @@
         line-height: 1.5;
     }
 
+    /* Kotwice z paska przewijają płynnie - poza ograniczonym ruchem. */
+    @media (prefers-reduced-motion: no-preference) {
+        html {
+            scroll-behavior: smooth;
+        }
+    }
+
     ::selection {
         background: var(--color-gold-200);
         color: var(--color-void);

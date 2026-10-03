@@ -255,7 +255,7 @@ export function useScenePlayer(scenes: readonly Scene[]) {
     };
 }
 
-type Player = ReturnType<typeof useScenePlayer>;
+export type Player = ReturnType<typeof useScenePlayer>;
 
 export function SceneVideos({ scenes, player }: { scenes: readonly Scene[]; player: Player }) {
     const scene = scenes[player.active];

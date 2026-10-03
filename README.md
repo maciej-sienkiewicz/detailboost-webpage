@@ -1,7 +1,13 @@
 # detailboost-webpage
 
-Strona główna DetailBoost, CRM dla studiów auto detailingu. Na razie jeden ekran:
-pasek nawigacji i sekcja Hero z oknem aplikacji, w którym lecą nagrania z CRM.
+Strona główna DetailBoost, CRM dla studiów auto detailingu: pasek nawigacji, Hero z oknem
+aplikacji, w którym lecą nagrania z CRM, sześć kart „kłopot → rozwiązanie” (każda włącza
+swój krok nagrania), sekcja KSeF, cennik i stopka z danymi spółki.
+
+Cennik i warunki oferty są w `src/site.ts`, przepisane z katalogu w backendzie CRM
+(`EntitlementDataSeeder`, `SmsCreditPackageSeeder`; ceny brutto za studio miesięcznie).
+Przy zmianie cen w backendzie trzeba je zmienić także tam. Tam też adresy aplikacji
+(`APP_URL`, rejestracja, logowanie, konto demo).
 
 React 19, Tailwind CSS 4, Vite 8, TypeScript. Kroje: Geist i Geist Mono, w pasku
 nawigacji Inter, a do napisów wokół okna i znaku słownego Archivo ze zmienną szerokością

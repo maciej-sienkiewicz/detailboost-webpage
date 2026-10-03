@@ -1,9 +1,11 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { DeviceFrame, Stage3D } from './Stage3D';
-import { SceneBar, SceneVideos, useScenePlayer } from './ScenePlayer';
+import { SceneBar, SceneVideos, type Player } from './ScenePlayer';
 import { FeatureSpill, type SpillWord, type WordState } from './FeatureSpill';
-import { SCENES } from '../scenes';
+import { SCENES, findStep } from '../scenes';
+import { DEMO_URL, OFFER_TERMS, SIGNUP_URL } from '../site';
+import { btnPrimary, btnSecondary } from './ui';
 
 type Feature = SpillWord & {
     /** Nagranie (`Scene.id`) i krok w nim (`Beat.id`); bez kroku - nagranie od początku. */
@@ -50,13 +52,7 @@ const FEATURES: readonly Feature[] = [
 ];
 
 /** Napis → indeks nagrania, indeks kroku (-1 = początek) i sekunda, od której krok leci. */
-const TARGETS = FEATURES.map((f) => {
-    const scene = SCENES.findIndex((s) => s.id === f.scene);
-    const beats = SCENES[scene]?.beats ?? [];
-    const beat = f.beat ? beats.findIndex((b) => b.id === f.beat) : -1;
-    if (scene < 0 || (f.beat && beat < 0)) throw new Error(`Napis „${f.text}" wskazuje krok, którego nie ma w nagraniu.`);
-    return { scene, beat, at: beat >= 0 ? beats[beat]?.at : undefined };
-});
+const TARGETS = FEATURES.map((f) => findStep(f.scene, f.beat));
 
 /**
  * Który napis świeci: ostatni krok sceny, który już minął. Zanim nagranie dojdzie
@@ -74,8 +70,7 @@ function currentFeature(scene: number, beat: number) {
     return best >= 0 ? best : first;
 }
 
-export function Hero() {
-    const player = useScenePlayer(SCENES);
+export function Hero({ player }: { player: Player }) {
     const stage = useRef<HTMLDivElement>(null);
     const current = currentFeature(player.active, player.phase === 'intro' ? -1 : player.beat);
     const states: WordState[] = TARGETS.map((t, i) =>
@@ -115,19 +110,16 @@ export function Hero() {
                         <p className="font-ui text-[1.0625rem] font-medium tracking-[-0.015em] text-white/75 sm:text-lg">
                             CRM dla studiów auto detailingu.
                         </p>
-                        <div className="flex flex-col gap-2.5 sm:flex-row">
-                            <a
-                                href="#"
-                                className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-6 font-ui text-[0.9375rem] font-semibold whitespace-nowrap text-[#0a0709] shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_14px_34px_-12px_rgb(220_174_92/0.8)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-gold-50 hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_16px_40px_-10px_rgb(220_174_92/0.95)] active:translate-y-px"
-                            >
-                                Rozpocznij za darmo
-                            </a>
-                            <a
-                                href="#"
-                                className="inline-flex h-12 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] px-6 font-ui text-[0.9375rem] font-medium whitespace-nowrap text-white/80 transition-colors duration-200 hover:bg-white/[0.07] hover:text-white"
-                            >
-                                Konto demo bez rejestracji
-                            </a>
+                        <div className="flex flex-col gap-3 lg:items-end">
+                            <div className="flex flex-col gap-2.5 sm:flex-row">
+                                <a href={SIGNUP_URL} className={btnPrimary}>
+                                    Wypróbuj 3 miesiące za darmo
+                                </a>
+                                <a href={DEMO_URL} className={btnSecondary}>
+                                    Konto demo bez rejestracji
+                                </a>
+                            </div>
+                            <OfferTerms />
                         </div>
                     </div>
                 </header>
@@ -139,7 +131,7 @@ export function Hero() {
                  */}
                 <div className="mt-16 grid grid-cols-1 sm:mt-20 xl:mt-16 xl:grid-cols-[14rem_minmax(0,1fr)_14rem] xl:gap-x-10 2xl:grid-cols-[16rem_minmax(0,1fr)_16rem] 2xl:gap-x-14">
                     <div className="xl:col-start-2 xl:row-start-1">
-                        <div ref={stage}>
+                        <div ref={stage} id="nagrania" className="scroll-mt-28">
                             <Stage3D>
                                 <DeviceFrame>
                                     <SceneVideos scenes={SCENES} player={player} />
@@ -236,5 +228,22 @@ function StepWord() {
                 </motion.span>
             </AnimatePresence>
         </span>
+    );
+}
+
+/**
+ * Warunki oferty w jednej linijce, pod przyciskami: to, co właściciel studia chce
+ * wiedzieć, zanim kliknie (karta? umowa? ile za darmo?). Kropki rozdzielające, bez ikon.
+ */
+export function OfferTerms({ className = '' }: { className?: string }) {
+    return (
+        <p className={`font-ui text-[0.8125rem] text-white/55 ${className}`}>
+            {OFFER_TERMS.map((term, i) => (
+                <span key={term} className="whitespace-nowrap">
+                    {i > 0 && <span aria-hidden className="mx-2 text-white/25">·</span>}
+                    <span className={i === 0 ? 'text-white/85' : ''}>{term}</span>
+                </span>
+            ))}
+        </p>
     );
 }

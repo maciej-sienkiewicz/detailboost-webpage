@@ -216,3 +216,16 @@ export const SCENES: readonly Scene[] = [
         }),
     },
 ];
+
+/**
+ * Krok nagrania po kluczach z capture/*.timing.json: indeks sceny, indeks kroku
+ * (-1 = początek nagrania) i sekunda, od której krok leci. Rzuca przy literówce -
+ * odnośnik do kroku, którego nie ma, ma wywalić build strony, nie cicho nie działać.
+ */
+export function findStep(sceneId: string, beatId?: string) {
+    const scene = SCENES.findIndex((s) => s.id === sceneId);
+    const beats = SCENES[scene]?.beats ?? [];
+    const beat = beatId ? beats.findIndex((b) => b.id === beatId) : -1;
+    if (scene < 0 || (beatId && beat < 0)) throw new Error(`Nie ma kroku ${sceneId}/${beatId ?? '-'} w nagraniach.`);
+    return { scene, beat, at: beat >= 0 ? beats[beat]?.at : undefined };
+}

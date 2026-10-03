@@ -1,6 +1,13 @@
 import { useEffect, useId, useRef, useState } from 'react';
+import { LOGIN_URL, SIGNUP_URL } from '../site';
 
-const LINKS = ['Funkcje', 'Cennik', 'Integracje', 'Kontakt'] as const;
+/** Kotwice sekcji strony. „Kontakt" prowadzi do stopki z danymi spółki. */
+const LINKS = [
+    ['Funkcje', '#funkcje'],
+    ['KSeF', '#ksef'],
+    ['Cennik', '#cennik'],
+    ['Kontakt', '#kontakt'],
+] as const;
 
 /**
  * Pasek nawigacji według fotohub.app: Inter 14 px, miękkie narożniki (6 px przy
@@ -86,10 +93,10 @@ export function Navbar() {
 
                     <div className="flex items-center">
                         <ul className="hidden items-center gap-1.5 lg:flex">
-                            {LINKS.map((label) => (
+                            {LINKS.map(([label, href]) => (
                                 <li key={label}>
                                     <a
-                                        href="#"
+                                        href={href}
                                         className="inline-flex h-9 items-center justify-center rounded-md px-2.5 text-sm font-medium text-white/70 transition-colors duration-200 hover:text-white xl:px-4"
                                     >
                                         {label}
@@ -102,18 +109,18 @@ export function Navbar() {
 
                         <div className="flex items-center gap-1.5 sm:gap-2 lg:ml-3 xl:ml-0">
                             <a
-                                href="#"
+                                href={LOGIN_URL}
                                 className="hidden h-9 items-center justify-center rounded-lg bg-white px-4 text-sm font-medium whitespace-nowrap text-[#0a0908] transition-[background-color,transform] duration-200 hover:bg-white/90 active:translate-y-px lg:inline-flex"
                             >
                                 Zaloguj
                             </a>
                             <a
-                                href="#"
+                                href={SIGNUP_URL}
                                 className="inline-flex h-9 items-center justify-center rounded-lg bg-white px-3.5 text-sm font-semibold sm:px-4 whitespace-nowrap text-[#0a0709] shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_10px_26px_-10px_rgb(220_174_92/0.75)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-gold-50 hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_12px_30px_-8px_rgb(220_174_92/0.9)] active:translate-y-px"
                             >
                                 {/* Poniżej 400 px pełna etykieta wypycha „Menu" poza ekran; pełną
                                     obietnicę i tak niesie przycisk na całą szerokość pod paskiem. */}
-                                Rozpocznij<span className="max-[399px]:hidden">&nbsp;za darmo</span>
+                                Wypróbuj<span className="max-[399px]:hidden">&nbsp;za darmo</span>
                             </a>
                             <button
                                 type="button"
@@ -130,10 +137,10 @@ export function Navbar() {
 
                 <div id={panelId} hidden={!open} className="mx-auto mt-3 max-w-[80rem] pb-2 lg:hidden">
                     <ul className="flex flex-col gap-1 rounded-2xl border border-white/[0.08] bg-white/[0.03] p-2">
-                        {[...LINKS, 'Zaloguj'].map((label) => (
+                        {[...LINKS, ['Zaloguj', LOGIN_URL] as const].map(([label, href]) => (
                             <li key={label}>
                                 <a
-                                    href="#"
+                                    href={href}
                                     onClick={() => setOpen(false)}
                                     className={`flex h-12 items-center rounded-lg px-3 text-[0.9375rem] font-medium transition-colors duration-200 hover:bg-white/[0.06] hover:text-white ${
                                         label === 'Zaloguj' ? 'text-white/60' : 'text-white/85'
@@ -155,10 +162,10 @@ export function Navbar() {
  * wersalikami, oparte o linię bazową pierwszego. Archivo rozszerzone (112%) daje
  * ten sam szeroki, miękki rysunek liter. Bez ikony - jak cała strona.
  */
-function Wordmark() {
+export function Wordmark() {
     return (
         <a
-            href="#"
+            href="#top"
             aria-label="DetailBoost - strona główna"
             className="flex h-[50px] shrink-0 items-center text-white transition-opacity duration-200 hover:opacity-70"
         >
