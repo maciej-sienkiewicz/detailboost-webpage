@@ -306,7 +306,9 @@ export function seedCompetitorCampaign(studio, userId) {
             'PROMO:shine_pk_promo', 'NEW', date_trunc('week', (now() at time zone 'UTC'))::date, now(), now())`);
 
     // Płatna kampania obserwowanego profilu (Biblioteka Reklam Meta).
-    sql(`delete from meta_ad_snapshots where profile_id=${q(profile)}`);
+    // Numer reklamy w Bibliotece Reklam jest unikalny w całej bazie - z poprzedniego nagrania
+    // może wisieć przy innym profilu, więc kasujemy po numerze, nie po profilu.
+    sql(`delete from meta_ad_snapshots where profile_id=${q(profile)} or ad_archive_id='900000000000001'`);
     sql(`insert into meta_ad_snapshots (id, ad_archive_id, page_id, profile_id, title, delivery_start, delivery_stop,
             reach_eu, reach_pl, platforms, target_ages, target_gender, target_locations, payer, beneficiary, reach_breakdown,
             creative_body, link_description, link_caption, first_seen_at, last_seen_at, created_at, updated_at)
