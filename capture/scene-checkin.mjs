@@ -66,11 +66,14 @@ export default {
         const appt = (await res.json()).appointments.find((a) => a.appointmentTitle === EVENT);
         if (!appt) throw new Error(`Brak rezerwacji „${EVENT}"`);
         this.apptId = appt.id;
+        // Dzień rezerwacji z bazy: dane demo układają się względem dnia nagrania, więc
+        // data na sztywno („2026-10-04") przestaje działać już następnego dnia.
+        this.day = sql(`select to_char(start_date_time at time zone 'Europe/Warsaw', 'YYYY-MM-DD') from appointments where id=${q(appt.id)}`);
         // Rozgrzewka formularza przyjęcia (leniwa paczka), poza nagraniem.
         await page.goto(`${BASE}/reservations/${appt.id}/checkin`, { waitUntil: 'networkidle' });
         await page.getByText('Przyjęcie pojazdu do studia').first().waitFor({ timeout: 30000 });
         await page.goto(`${BASE}/calendar`, { waitUntil: 'networkidle' });
-        await page.locator('.fc-daygrid-day[data-date="2026-10-04"] .fc-daygrid-event', { hasText: EVENT }).first().waitFor({ timeout: 30000 });
+        await page.locator(`.fc-daygrid-day[data-date="${this.day}"] .fc-daygrid-event`, { hasText: EVENT }).first().waitFor({ timeout: 30000 });
         await wait(page, 1500);
         // Telefon pracownika do zdjęć - przygotowany wcześniej, otwierany po QR.
         this.phone = await ctx.newPage();
@@ -80,8 +83,8 @@ export default {
     },
     async play({ page, ctx, rec }) {
         await wait(page, 600);
-        const event = page.locator('.fc-daygrid-day[data-date="2026-10-04"] .fc-daygrid-event', { hasText: EVENT }).first();
-        await beat(page, rec, 'calendar', page.locator('.fc-daygrid-day[data-date="2026-10-04"]').first());
+        const event = page.locator(`.fc-daygrid-day[data-date="${this.day}"] .fc-daygrid-event`, { hasText: EVENT }).first();
+        await beat(page, rec, 'calendar', page.locator(`.fc-daygrid-day[data-date="${this.day}"]`).first());
         await moveTo(page, event, 1000);
         await wait(page, 1200);
         await click(page, event, { ms: 300, settle: 900, end: true });
