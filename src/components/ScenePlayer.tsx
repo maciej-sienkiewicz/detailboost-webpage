@@ -29,10 +29,9 @@ export type Scene = {
  *    bierze pierwsze źródło, które umie odtworzyć, i pobiera tylko je;
  *  - odtwarzanie staje, gdy okno wyjedzie z ekranu albo karta przejdzie w tło.
  *
- * Wideo stoi w oknie 3D, a rozdziały pod nim, płasko - dlatego stan żyje w hooku,
- * a obie części dostają go osobno. Pasek postępu idzie wprost do DOM, a do stanu
- * trafia tylko zmiana kroku i postęp animacji wstępnej w krokach co 1/60: stan
- * aktualizowany co klatkę przerysowywałby całe Hero.
+ * Wideo stoi w oknie 3D, a spis funkcji i karty na stronie też nim sterują - dlatego
+ * stan żyje w hooku. Do stanu trafia tylko zmiana kroku i postęp animacji wstępnej
+ * w krokach co 1/60: stan aktualizowany co klatkę przerysowywałby całe Hero.
  */
 export function useScenePlayer(scenes: readonly Scene[]) {
     const [active, setActive] = useState(0);
@@ -43,7 +42,6 @@ export function useScenePlayer(scenes: readonly Scene[]) {
     const [introProgress, setIntroProgress] = useState(0);
     const [paused, setPaused] = useState(false);
     const videos = useRef<(HTMLVideoElement | null)[]>([]);
-    const bars = useRef<(HTMLSpanElement | null)[]>([]);
     const root = useRef<HTMLDivElement>(null);
     const inView = useRef(false);
     const reduced = useRef(false);
@@ -97,9 +95,6 @@ export function useScenePlayer(scenes: readonly Scene[]) {
         });
         const video = videos.current[active];
         if (video && pendingSeek.current === null) video.currentTime = 0;
-        bars.current.forEach((bar, i) => {
-            if (bar) bar.style.transform = `scaleX(${i < active ? 1 : 0})`;
-        });
     }, [active]);
 
     useEffect(() => {
@@ -138,7 +133,6 @@ export function useScenePlayer(scenes: readonly Scene[]) {
             const dt = Math.min(0.1, (now - last) / 1000);
             last = now;
             const video = videos.current[active];
-            const bar = bars.current[active];
 
             if (phaseRef.current === 'intro') {
                 if (canPlay()) introElapsed.current += dt;
@@ -148,8 +142,6 @@ export function useScenePlayer(scenes: readonly Scene[]) {
                     shownIntro = q;
                     setIntroProgress(q);
                 }
-                const total = intro + (video?.duration || 20);
-                if (bar) bar.style.transform = `scaleX(${introElapsed.current / total})`;
                 if (p >= 1) setPhase('video');
                 return;
             }
@@ -161,8 +153,6 @@ export function useScenePlayer(scenes: readonly Scene[]) {
                 pendingSeek.current = null;
             }
             const t = video.currentTime;
-            const total = intro + video.duration;
-            if (bar) bar.style.transform = `scaleX(${Math.min(1, (intro + t) / total)})`;
             let b = -1;
             for (let i = 0; i < beats.length; i++) if ((beats[i]?.at ?? Infinity) <= t) b = i;
             if (b !== shownBeat) {
@@ -249,9 +239,6 @@ export function useScenePlayer(scenes: readonly Scene[]) {
         videoRef: (i: number) => (el: HTMLVideoElement | null) => {
             videos.current[i] = el;
         },
-        barRef: (i: number) => (el: HTMLSpanElement | null) => {
-            bars.current[i] = el;
-        },
     };
 }
 
@@ -296,94 +283,6 @@ export function SceneVideos({ scenes, player }: { scenes: readonly Scene[]; play
             {player.phase === 'video' && (
                 <BeatCaption beat={beat} index={Math.max(0, player.beat)} total={beats.length} />
             )}
-        </div>
-    );
-}
-
-/**
- * Pasek pod oknem: linia czasu i sterowanie, nic więcej. Co dzieje się na nagraniu,
- * mówi podpis w oknie, a co system umie - napisy wokół okna; tu nie powtarzamy
- * żadnego z nich.
- *
- * Linia czasu to po jednym cienkim odcinku na nagranie. Bieżący wypełnia się złotem
- * (pasek postępu idzie wprost do DOM, patrz `barRef`), obejrzane stoją pełne.
- * Tytuł nagrania pokazuje się nad odcinkiem po najechaniu, a pod linią stoi tytuł
- * tego, które leci. Sterowanie to jedna grupa trzech słów - jak w pasku nawigacji.
- */
-export function SceneBar({ scenes, player }: { scenes: readonly Scene[]; player: Player }) {
-    const scene = scenes[player.active];
-    const btn =
-        'inline-flex h-8 items-center justify-center rounded-md px-3 text-[0.8125rem] font-medium text-white/70 transition-colors duration-200 hover:bg-white/[0.07] hover:text-white';
-    return (
-        <div className="font-ui">
-            <div role="tablist" aria-label="Nagrania z aplikacji" className="flex gap-1.5">
-                {scenes.map((s, i) => {
-                    const on = i === player.active;
-                    return (
-                        <button
-                            key={s.id}
-                            type="button"
-                            role="tab"
-                            aria-selected={on}
-                            aria-label={s.title}
-                            onClick={() => player.choose(i)}
-                            className="group relative flex-1 py-3"
-                        >
-                            <span
-                                className={`relative block h-[3px] overflow-hidden rounded-full transition-colors duration-200 ${
-                                    on ? 'bg-white/[0.16]' : 'bg-white/[0.1] group-hover:bg-white/[0.22]'
-                                }`}
-                            >
-                                {/* Skala przez `transform`, nie klasę `scale-x-0`: Tailwind 4 ustawia
-                                    nią osobną właściwość `scale`, która zeruje pasek niezależnie
-                                    od `transform` wpisywanego przez odtwarzacz. */}
-                                <span
-                                    ref={player.barRef(i)}
-                                    style={{ transform: 'scaleX(0)' }}
-                                    className="absolute inset-0 origin-left bg-[linear-gradient(90deg,var(--color-gold-200),var(--color-gold-400))]"
-                                />
-                            </span>
-                            <span
-                                aria-hidden
-                                className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-1 hidden -translate-x-1/2 translate-y-1 rounded-md border border-white/[0.1] bg-[#141416] px-2.5 py-1 text-xs font-medium whitespace-nowrap text-white/85 opacity-0 shadow-[0_8px_24px_-8px_rgb(0_0_0/0.6)] transition-[opacity,transform] duration-200 group-hover:translate-y-0 group-hover:opacity-100 sm:block"
-                            >
-                                {s.title}
-                            </span>
-                        </button>
-                    );
-                })}
-            </div>
-
-            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                <p aria-live="polite" className="flex min-w-0 items-baseline gap-3">
-                    <span className="font-mono text-[0.6875rem] text-dim tabular-nums">
-                        {String(player.active + 1).padStart(2, '0')}/{String(scenes.length).padStart(2, '0')}
-                    </span>
-                    <span className="truncate text-[0.9375rem] font-medium tracking-[-0.01em] text-white/90">
-                        {scene?.title}
-                    </span>
-                </p>
-                <div
-                    role="group"
-                    aria-label="Sterowanie nagraniem"
-                    className="inline-flex shrink-0 self-start rounded-lg border border-white/[0.1] bg-white/[0.03] p-0.5 sm:self-auto"
-                >
-                    <button type="button" onClick={player.prev} className={btn}>
-                        Wstecz
-                    </button>
-                    <button
-                        type="button"
-                        onClick={player.togglePause}
-                        aria-pressed={player.paused}
-                        className={`${btn} w-[4.75rem] ${player.paused ? 'bg-white/[0.07] text-white' : ''}`}
-                    >
-                        {player.paused ? 'Odtwórz' : 'Pauza'}
-                    </button>
-                    <button type="button" onClick={player.next} className={btn}>
-                        Dalej
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }

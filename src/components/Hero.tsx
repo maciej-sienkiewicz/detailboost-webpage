@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { DeviceFrame, Stage3D } from './Stage3D';
-import { SceneBar, SceneVideos, type Player } from './ScenePlayer';
+import { SceneVideos, type Player } from './ScenePlayer';
+import { StageOverlay } from './StageOverlay';
 import { FeatureIndex, type ItemState } from './FeatureIndex';
 import { SCENES, findStep } from '../scenes';
 import { DEMO_URL, OFFER_TERMS, SIGNUP_URL } from '../site';
@@ -143,8 +144,8 @@ export function Hero({ player }: { player: Player }) {
                 </header>
 
                 {/*
-                 * Kolejność w DOM = kolejność czytania na telefonie: okno aplikacji,
-                 * sterowanie, spis funkcji pod nim. Od 1280 px spis dzieli się na dwie
+                 * Kolejność w DOM = kolejność czytania na telefonie: okno aplikacji
+                 * (kliknięcie w nie zatrzymuje nagranie), spis funkcji pod nim. Od 1280 px spis dzieli się na dwie
                  * kolumny po obu stronach okna, wyrównane do okna.
                  */}
                 <div className="mt-16 grid grid-cols-1 sm:mt-20 xl:mt-16 xl:grid-cols-[14rem_minmax(0,1fr)_14rem] xl:gap-x-10 2xl:grid-cols-[16rem_minmax(0,1fr)_16rem] 2xl:gap-x-14">
@@ -153,15 +154,10 @@ export function Hero({ player }: { player: Player }) {
                             <Stage3D>
                                 <DeviceFrame>
                                     <SceneVideos scenes={SCENES} player={player} />
+                                    <StageOverlay player={player} />
                                 </DeviceFrame>
                             </Stage3D>
                         </div>
-                        <div className="mt-8 sm:mt-10">
-                            <SceneBar scenes={SCENES} player={player} />
-                        </div>
-                        <p className="mt-5 text-[0.75rem] leading-relaxed text-dim">
-                            Nagrania z działającego CRM, bez makiet. Tankowanie, SMS u klienta i powiadomienia na telefonie to animacje z danymi z CRM.
-                        </p>
                         <FeatureIndex
                             scenes={SCENES}
                             groups={SCENES.map((_, i) => i)}

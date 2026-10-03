@@ -23,7 +23,7 @@ npm run build      # typecheck + build do dist/
 
 - **Ciemna scena, jeden kolor.** Czerń, grafit, szarości i złoto z logo DetailBoost.
   Złoto niesie wyłącznie światło i postęp: poświatę pod oknem, drugą linię nagłówka,
-  odcinki osi czasu pod oknem i napis kroku, który właśnie leci w oknie.
+  złotą kreskę przy bieżącym kroku w spisie funkcji, który właśnie leci w oknie.
 - **Zero ikon.** Hierarchię niesie krój, grubość, interlinia i siatka. Dane techniczne
   w Geist Mono, menu na telefonie otwiera słowo „Menu".
 - **Spis funkcji przy oknie** (`FeatureIndex`): nazwy funkcji pogrupowane według
@@ -50,7 +50,7 @@ npm run build      # typecheck + build do dist/
 - **Siatka margines / okno / margines** od 1280 px. Napisy stoją w marginesach
   w procentach kolumny, część celowo zachodzi na krawędź okna.
 - **`prefers-reduced-motion`**: tło stoi, okno jest płaskie, napisy leżą od razu na
-  miejscu, nagrania nie ruszają same. Kliknięcie odcinka osi czasu albo napisu uruchamia nagranie.
+  miejscu, nagrania nie ruszają same. Kliknięcie w nagranie albo pozycję spisu uruchamia nagranie.
 
 ## Nagrania z aplikacji
 
@@ -72,12 +72,16 @@ w `src/scenes/index.tsx`.
 | `instagram` | alert na Tablicy o nowej kampanii w okolicy, reklamodawcy w okolicy, kalendarz reklam, szczegóły kampanii i treść reklamy, tydzień u obserwowanych profili |
 | `push` | animacja (`capture/anim/push.html`): telefon właściciela i sześć powiadomień z szablonów backendu (`PushMessages.kt`) z ikonami service workera CRM |
 
-Pod oknem jest smukły pasek (`SceneBar`): oś czasu z odcinkiem na nagranie (bieżący
-wypełnia się złotem, tytuł po najechaniu), pod nią tytuł bieżącego nagrania i sterowanie
-„Wstecz", „Pauza"/„Odtwórz", „Dalej" - krokiem jest fragment
-nagrania z jednym podpisem; na pierwszym i ostatnim kroku przyciski przechodzą do
-poprzedniego i następnego nagrania. Ramka kroku gaśnie przy pierwszym kliknięciu poza nią,
-przewinięciu albo cięciu (czas z nagrania), najpóźniej po 3 s.
+Pod oknem nie ma paska sterowania: kliknięcie w nagranie je zatrzymuje i wznawia
+(z planszą „Pauza”), a nagrania przełącza spis funkcji przy oknie i karty na stronie.
+Ramka kroku gaśnie przy pierwszym kliknięciu poza nią, przewinięciu albo cięciu (czas
+z nagrania), najpóźniej po 3 s.
+
+**Dźwięk** (`src/audio/soundtrack.ts`): ścieżka grana na żywo w Web Audio, bez pliku
+i bez licencji - spokojny ambient (Fmaj9, Am9, Dm9, Cmaj7 po 8 s, filtr z wolnym LFO,
+pogłos z wygenerowanej odpowiedzi impulsowej) i cichy dzwonek przy każdej zmianie
+kroku. Startuje wyciszony; przełącznik „Włącz dźwięk / Wycisz” stoi w rogu okna. Gra
+tylko, gdy nagranie leci - pauza, okno poza ekranem albo karta w tle go wyciszają.
 
 Aplikacja tabletowa do podpisu („DetailBoost Tablet") nie jest w repozytoriach CRM, więc
 w scenie `checkin` klient podpisuje dokumenty na stronie podpisu (`/sign/:token`) otwartej
