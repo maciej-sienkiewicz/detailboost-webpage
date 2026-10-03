@@ -1,0 +1,48 @@
+{
+    "lead": [
+        { "beat": "inbox", "text": "Klient pyta mailem o korektę lakieru i powłokę ceramiczną." },
+        { "beat": "warning", "text": "DetailBoost od razu podsuwa usługi z cennika i pokazuje historię klienta, także dwie porzucone rezerwacje." },
+        { "beat": "compose", "text": "Odpowiadasz z tej samej rozmowy, a mail wychodzi z firmowej skrzynki studia." },
+        { "beat": "consent", "text": "Klient potwierdza termin. Wycena przechodzi do rezerwacji jednym kliknięciem." },
+        { "beat": "form", "text": "Rezerwacja wypełnia się sama, a klient dostaje SMS z potwierdzeniem i przypomnienie przed wizytą." }
+    ],
+    "checkin": [
+        { "beat": "calendar", "text": "Klient przyjechał. Jedno stuknięcie w kalendarzu i zaczyna się przyjęcie auta." },
+        { "beat": "vehicle", "text": "Przebieg, kluczyki i dowód rejestracyjny zapisujesz na tablecie, razem z uwagami do protokołu." },
+        { "beat": "qr", "text": "Pracownik skanuje kod QR telefonem i robi zdjęcia. Każde od razu pojawia się na tablecie." },
+        { "beat": "damage", "text": "Uszkodzenia zaznaczasz na schemacie auta, z krótkim opisem." },
+        { "beat": "documents", "text": "Protokół i zgody marketingowe trafiają na tablet klienta. Klient czyta je i podpisuje palcem." },
+        { "beat": "signed", "text": "Wszystko zostaje w wizycie: usługi, przebieg, zdjęcia, podpisany protokół i mapa uszkodzeń." }
+    ],
+    "visitcard": [
+        { "beat": "visit", "text": "Każda wizyta ma swoją stronę dla klienta. Wysyłasz ją SMS-em, razem z propozycją dodatkowej usługi." },
+        { "beat": "progress", "text": "Klient widzi, na jakim etapie jest auto, pobiera protokół i ogląda zdjęcia z przyjęcia." },
+        { "beat": "offer", "text": "Propozycję akceptuje sam. Odpisuje TAK na SMS-a i usługa trafia do wizyty, bez jednego telefonu." },
+        { "beat": "total", "text": "Nowa kwota jest od razu u klienta i w studiu." }
+    ],
+    "handover": [
+        { "beat": "ready", "text": "Auto gotowe? Jedno kliknięcie i klient dostaje SMS-a, że może je odebrać." },
+        { "beat": "protocol", "text": "Protokół wydania klient podpisuje palcem na swoim telefonie. Podpis od razu wraca do wizyty." },
+        { "beat": "invoice", "text": "Faktura powstaje z pozycji wizyty i idzie prosto do KSeF, z numerem i kodem QR." }
+    ],
+    "costs": [
+        { "beat": "overview", "text": "Koszty studia widzisz w kategoriach. Kategorie i ich kolory ustawiasz sam." },
+        { "beat": "new-rule", "text": "Reguła po NIP mówi, że faktury od ORLEN to zawsze paliwo. Porządkuje też te, które już są w systemie." },
+        { "beat": "station", "text": "Tankujesz auto serwisowe, a ORLEN wysyła fakturę do KSeF." },
+        { "beat": "refresh", "text": "DetailBoost pobiera ją sam, przypisuje do paliwa i od razu przelicza statystyki." }
+    ],
+    "team": [
+        { "beat": "team", "text": "Zespół ma konta i role. Rola decyduje, co pracownik widzi i czy liczy mu się czas pracy." },
+        { "beat": "worktime", "text": "Pracownicy sami wpisują godziny, a Ty zatwierdzasz kartę jednym kliknięciem." },
+        { "beat": "sheet-new", "text": "Lista obecności za miesiąc powstaje z tych godzin, gotowa do podpisu." },
+        { "beat": "leave", "text": "Urlop zaznaczasz w kalendarzu. Widać go przy planowaniu wizyt." }
+    ],
+    "instagram": [
+        { "beat": "alert", "text": "Konkurencja z okolicy puściła nową kampanię? Widzisz to na Tablicy." },
+        { "beat": "campaign", "text": "Widzisz zasięg, odbiorców i treść reklamy, zanim zadzwoni pierwszy klient." }
+    ],
+    "push": [
+        { "beat": "intro", "text": "Najważniejsze sprawy przychodzą na telefon: zarobek z wydanego auta, nieobecny klient, nowe zapytanie." },
+        { "beat": "lead", "text": "Wiesz, co dzieje się w studiu, nawet gdy cię w nim nie ma." }
+    ]
+}

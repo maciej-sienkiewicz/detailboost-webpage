@@ -6,7 +6,8 @@
  * filtr dolnoprzepustowy z wolnym LFO i pogłos z wygenerowanej odpowiedzi
  * impulsowej. Pod spodem cichy bas, nad nim kilka rzadkich dźwięków z akordu
  * w wyższej oktawie, żeby tło nie stało w miejscu. Zmiana kroku na nagraniu
- * dostaje cichy dzwonek w tonacji bieżącego akordu.
+ * dostaje cichy dzwonek w tonacji bieżącego akordu. Gdy mówi lektor, muzyka schodzi
+ * pod głos (`duck`).
  *
  * Dźwięk gra tylko, gdy użytkownik go włączył I nagranie leci (nie pauza, okno na
  * ekranie, karta na wierzchu). Wyłączenie to wyciszenie z łagodnym wygaszeniem,
@@ -22,6 +23,8 @@ const CHORDS: readonly (readonly number[])[] = [
 const BASS = [41, 45, 38, 36] as const;
 const BAR = 8;
 const VOLUME = 0.55;
+/** Głośność muzyki pod głosem lektora - tło ma zostać, ale nie konkurować ze słowami. */
+const DUCKED = 0.16;
 
 const hz = (midi: number) => 440 * 2 ** ((midi - 69) / 12);
 
@@ -35,6 +38,7 @@ export class Soundtrack {
     private wanted = false;
     private active = false;
     private scheduled = false;
+    private ducked = false;
 
     get enabled() {
         return this.wanted;
@@ -56,6 +60,13 @@ export class Soundtrack {
     /** Czy nagranie właśnie leci (nie pauza, na ekranie). */
     setActive(active: boolean) {
         this.active = active;
+        this.update();
+    }
+
+    /** Lektor mówi: muzyka schodzi pod głos, a po zdaniu wraca. */
+    duck(ducked: boolean) {
+        if (this.ducked === ducked) return;
+        this.ducked = ducked;
         this.update();
     }
 
@@ -123,7 +134,7 @@ export class Soundtrack {
         master.gain.cancelScheduledValues(now);
         master.gain.setValueAtTime(master.gain.value, now);
         if (this.audible) {
-            master.gain.linearRampToValueAtTime(VOLUME, now + 1.5);
+            master.gain.linearRampToValueAtTime(this.ducked ? DUCKED : VOLUME, now + (this.ducked ? 0.35 : 1.5));
             if (!this.scheduled) {
                 this.scheduled = true;
                 this.playBar(now + 0.05);

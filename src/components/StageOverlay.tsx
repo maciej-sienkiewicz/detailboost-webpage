@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
+import { Narrator, cueFor, cuesOf } from '../audio/narration';
 import { Soundtrack } from '../audio/soundtrack';
 import type { Player } from './ScenePlayer';
 
@@ -7,12 +8,15 @@ import type { Player } from './ScenePlayer';
  * Warstwa nad nagraniem: kliknięcie w okno zatrzymuje i wznawia, a w rogu stoi
  * przełącznik dźwięku. Bez paska sterowania pod oknem - okno samo jest przyciskiem.
  *
- * Dźwięk startuje wyciszony (przeglądarki i tak nie wpuszczają dźwięku bez gestu,
- * a strona, która nagle gra, to strona, którą się zamyka). Gra tylko wtedy, gdy
- * nagranie leci: pauza, okno poza ekranem albo karta w tle wyciszają go łagodnie.
+ * Dźwięk to lektor i muzyka pod nim. Startuje wyciszony (przeglądarki i tak nie
+ * wpuszczają dźwięku bez gestu, a strona, która nagle gra, to strona, którą się
+ * zamyka). Gra tylko wtedy, gdy nagranie leci: pauza, okno poza ekranem albo karta
+ * w tle zatrzymują lektora w pół zdania i wyciszają muzykę; wznowienie dokańcza zdanie.
  */
 export function StageOverlay({ player }: { player: Player }) {
     const sound = useRef<Soundtrack | null>(null);
+    const voice = useRef<Narrator | null>(null);
+    const last = useRef({ scene: -1, beat: -1 });
     const root = useRef<HTMLDivElement>(null);
     const [on, setOn] = useState(false);
     const [visible, setVisible] = useState(true);
@@ -32,6 +36,8 @@ export function StageOverlay({ player }: { player: Player }) {
             document.removeEventListener('visibilitychange', onVisibility);
             sound.current?.dispose();
             sound.current = null;
+            voice.current?.stop();
+            voice.current = null;
         };
     }, []);
 
@@ -39,20 +45,42 @@ export function StageOverlay({ player }: { player: Player }) {
 
     useEffect(() => {
         sound.current?.setActive(playing);
+        if (playing) voice.current?.resume();
+        else voice.current?.hold();
     }, [playing]);
 
-    // Każdy nowy krok nagrania dostaje cichy dzwonek (gdy dźwięk jest włączony).
+    // Nowy krok: zdanie lektora, jeśli jest do niego przypięte, a jeśli nie - cichy
+    // dzwonek. Przeskok (inne nagranie, krok wstecz albo o więcej niż jeden naprzód,
+    // czyli kliknięcie w spis) ucina bieżące zdanie - mówiłoby o czymś, czego już nie widać.
     useEffect(() => {
-        if (player.phase === 'video' && player.beat >= 0) sound.current?.chime();
-    }, [player.active, player.beat, player.phase]);
+        const prev = last.current;
+        last.current = { scene: player.active, beat: player.beat };
+        const narrator = voice.current;
+        if (!narrator || !on) return;
+        if (player.active !== prev.scene) narrator.prefetch(cuesOf(player.active));
+        const jumped = player.active !== prev.scene || player.beat < prev.beat || player.beat > prev.beat + 1;
+        if (jumped) narrator.stop();
+        if (player.phase !== 'video' || player.beat < 0) return;
+        const cue = cueFor(player.active, player.beat);
+        if (cue) narrator.say(cue);
+        else sound.current?.chime();
+    }, [player.active, player.beat, player.phase, on]);
 
     const toggleSound = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (!sound.current) sound.current = new Soundtrack();
+        if (!voice.current) {
+            const narrator = new Narrator();
+            narrator.onSpeaking = (speaking) => sound.current?.duck(speaking);
+            voice.current = narrator;
+        }
         if (sound.current.enabled) {
             sound.current.disable();
+            voice.current.stop();
             setOn(false);
         } else {
+            voice.current.unlock();
+            voice.current.prefetch(cuesOf(player.active));
             sound.current.setActive(playing);
             sound.current.enable();
             setOn(true);

@@ -77,11 +77,21 @@ Pod oknem nie ma paska sterowania: kliknięcie w nagranie je zatrzymuje i wznawi
 Ramka kroku gaśnie przy pierwszym kliknięciu poza nią, przewinięciu albo cięciu (czas
 z nagrania), najpóźniej po 3 s.
 
-**Dźwięk** (`src/audio/soundtrack.ts`): ścieżka grana na żywo w Web Audio, bez pliku
-i bez licencji - spokojny ambient (Fmaj9, Am9, Dm9, Cmaj7 po 8 s, filtr z wolnym LFO,
-pogłos z wygenerowanej odpowiedzi impulsowej) i cichy dzwonek przy każdej zmianie
-kroku. Startuje wyciszony; przełącznik „Włącz dźwięk / Wycisz” stoi w rogu okna. Gra
-tylko, gdy nagranie leci - pauza, okno poza ekranem albo karta w tle go wyciszają.
+**Dźwięk**: lektor i muzyka pod nim, za jednym przełącznikiem „Włącz dźwięk / Wycisz”
+w rogu okna. Startuje wyciszony i gra tylko, gdy nagranie leci - pauza, okno poza
+ekranem albo karta w tle zatrzymują lektora w pół zdania i wyciszają muzykę.
+
+- Lektor (`src/audio/narration.ts`): scenariusz w `src/scenes/narration.json` - zdania
+  przypięte do kroków nagrań, tylko o tym, co widać na ekranie. Zdanie startuje razem
+  ze swoim krokiem; przeskok w spisie funkcji ucina bieżące zdanie. Pliki
+  `public/narration/<scena>-<n>.mp3` (mono, 64 kb/s, ok. 1,4 MB) pobierają się dopiero
+  po włączeniu dźwięku. Generuje je `capture/narration.py` (ElevenLabs, model
+  Multilingual v2, albo offline Piper) i od razu sprawdza, czy każde zdanie mieści się
+  przed następnym i przed końcem nagrania:
+  `ELEVENLABS_API_KEY=… python3 capture/narration.py --voice <voice_id>`.
+- Muzyka (`src/audio/soundtrack.ts`): ambient grany na żywo w Web Audio, bez pliku
+  i licencji (Fmaj9, Am9, Dm9, Cmaj7 po 8 s, filtr z wolnym LFO, pogłos), cichy dzwonek
+  przy krokach bez zdania lektora. Gdy lektor mówi, muzyka schodzi pod głos.
 
 Aplikacja tabletowa do podpisu („DetailBoost Tablet") nie jest w repozytoriach CRM, więc
 w scenie `checkin` klient podpisuje dokumenty na stronie podpisu (`/sign/:token`) otwartej
