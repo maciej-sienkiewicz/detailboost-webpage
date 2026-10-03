@@ -40,13 +40,13 @@ function rand(i: number, salt: number) {
 type Throw = { dx: number; dy: number };
 
 /**
- * Napisy wysypane wokół okna aplikacji jak z wiaderka: wylatują z jednego punktu nad
- * oknem, lecą łukiem i lądują krzywo, z małym odbiciem. Każdy napis to krok jednego
+ * Napisy wysypane wokół okna aplikacji: opadają krótko, każdy lekko od strony okna,
+ * i układają się krzywo, kaskadą w ok. sekundę. Każdy napis to krok jednego
  * z nagrań - kliknięcie przewija okno do tego kroku, a napis kroku, który właśnie
  * leci, świeci złotem. Napisy tej samej sceny jaśnieją o stopień, reszta leży szara.
  *
- * Tor lotu liczy się z prawdziwego położenia napisu względem okna (`origin`), dlatego
- * ten sam kod sypie i na marginesy przy oknie (od 1280 px), i na stos pod oknem.
+ * Kierunek „od okna" liczy się z prawdziwego położenia napisu względem okna (`origin`),
+ * dlatego ten sam kod działa i na marginesach przy oknie (od 1280 px), i na stosie pod nim.
  */
 export function FeatureSpill({
     words,
@@ -142,9 +142,10 @@ export function FeatureSpill({
 }
 
 /**
- * Lot jednego napisu: rzut ukośny z punktu nad oknem. Pozycję liczymy w kilkunastu
- * próbkach (prawdziwa parabola, nie krzywa Béziera udająca łuk), potem dwa
- * malejące odbicia. Obrót wytraca się w locie jak u rzuconej kartki.
+ * Opadnięcie jednego napisu: krótki spadek z kilkudziesięciu pikseli nad jego
+ * miejscem, lekko od strony okna (ślad „wysypania" bez lotu przez cały ekran),
+ * z obrotem, który wytraca się do końcowego kąta. Bez odbicia - napis ma się
+ * ułożyć, nie spaść. Ostrość i krycie przychodzą razem z ruchem.
  */
 function Toss({
     index,
@@ -162,44 +163,23 @@ function Toss({
     if (still) return <div style={{ rotate: `${r}deg` }}>{children}</div>;
     if (!toss) return <div style={{ rotate: `${r}deg`, opacity: 0 }}>{children}</div>;
 
-    const N = 14;
-    const lift = 90 + rand(index, 1) * 140 + Math.max(0, -toss.dy) * 0.25;
-    const spin = (rand(index, 2) > 0.5 ? 1 : -1) * (160 + rand(index, 4) * 260);
-    const flight = 0.8;
-    const ts: number[] = [];
-    const xs: number[] = [];
-    const ys: number[] = [];
-    const rs: number[] = [];
-    for (let k = 0; k <= N; k++) {
-        const t = k / N;
-        ts.push(t * flight);
-        // Poziomo szybko na starcie i hamuje (opór), pionowo parabola.
-        const h = 1 - Math.pow(1 - t, 1.6);
-        xs.push(toss.dx * (1 - h));
-        ys.push(toss.dy * (1 - t) - lift * 4 * t * (1 - t));
-        rs.push(r + spin * Math.pow(1 - t, 2));
-    }
-    const bounce = 10 + rand(index, 5) * 10;
-    ts.push(0.87, 0.93, 1);
-    xs.push(0, 0, 0);
-    ys.push(-bounce, 0, 0);
-    rs.push(r + (rand(index, 6) - 0.5) * 8, r, r);
-
-    const duration = 1.15 + rand(index, 7) * 0.35;
-    const delay = 0.25 + index * 0.055 + rand(index, 8) * 0.08;
+    // Kierunek od okna zostaje, odległość nie: najwyżej 40 px w bok.
+    const dx = Math.max(-40, Math.min(40, toss.dx * 0.08));
+    const dy = -(28 + rand(index, 1) * 36);
+    const tilt = (rand(index, 2) > 0.5 ? 1 : -1) * (8 + rand(index, 4) * 12);
+    const delay = 0.15 + index * 0.03 + rand(index, 8) * 0.06;
+    const ease = [0.22, 1, 0.36, 1] as const;
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: toss.dx, y: toss.dy, rotate: rs[0], scale: 0.55 }}
-            animate={{ opacity: 1, x: xs, y: ys, rotate: rs, scale: 1 }}
+            initial={{ opacity: 0, x: dx, y: dy, rotate: r + tilt, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, x: 0, y: 0, rotate: r, filter: 'blur(0px)' }}
             transition={{
                 delay,
-                duration,
-                x: { delay, duration, times: ts, ease: 'linear' },
-                y: { delay, duration, times: ts, ease: 'linear' },
-                rotate: { delay, duration, times: ts, ease: 'linear' },
-                opacity: { delay, duration: 0.18 },
-                scale: { delay, duration: duration * flight, ease: [0.16, 1, 0.3, 1] },
+                duration: 0.9 + rand(index, 7) * 0.25,
+                ease,
+                opacity: { delay, duration: 0.5 },
+                filter: { delay, duration: 0.6 },
             }}
         >
             {children}

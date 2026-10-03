@@ -21,8 +21,8 @@ npm run build      # typecheck + build do dist/
 - **Zero ikon.** Hierarchię niesie krój, grubość, interlinia i siatka. Dane techniczne
   w Geist Mono, menu na telefonie otwiera słowo „Menu".
 - **Napisy wysypane wokół okna** (`FeatureSpill`): same nazwy funkcji, wersalikami
-  w ściśniętym Archivo, część z obrysem. Wylatują z punktu nad oknem jak z wiaderka
-  (parabola, obrót wytracany w locie, odbicie) i lądują krzywo na marginesach przy
+  w ściśniętym Archivo, część z obrysem. Opadają krótko, lekko od strony okna, z obrotem
+  do ok. 20° i rozmyciem, kaskadą w ok. sekundę, i układają się krzywo na marginesach przy
   oknie, a poniżej 1280 px - na stosie pod oknem. Każdy napis to krok jednego nagrania:
   kliknięcie przewija okno do tego kroku (i zdejmuje pauzę), a gdy nikt nie klika,
   złotem świeci napis kroku, który właśnie leci. Napisy tego samego nagrania jaśnieją
