@@ -153,7 +153,11 @@ export default {
         await click(page, page.getByPlaceholder('Dodaj tytuł rezerwacji'), { ms: 600, settle: 100 });
         await type(page, 'Korekta + ceramika Porsche 911', 38);
         await wait(page, 300);
-        await beat(page, rec, 'sms', page.getByText('Wyślij SMS z potwierdzeniem rezerwacji').first().locator('xpath=ancestor::*[3]'));
+        // Opcje SMS stoją pod zgięciem okna - bez przewinięcia ramka obrysowywała stopkę.
+        const smsOption = page.getByText('Wyślij SMS z potwierdzeniem rezerwacji').first();
+        await smsOption.evaluate((el) => el.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+        await wait(page, 700);
+        await beat(page, rec, 'sms', smsOption.locator('xpath=ancestor::*[3]'));
         await click(page, page.getByText('Wyślij SMS z potwierdzeniem rezerwacji').first(), { ms: 700, settle: 250 });
         await click(page, page.getByText('Wyślij SMS przypominający przed wizytą').first(), { ms: 400, settle: 600 });
         await click(page, page.getByRole('button', { name: 'Zapisz wizytę' }), { ms: 700, settle: 100 });
