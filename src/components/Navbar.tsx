@@ -74,7 +74,7 @@ export function Navbar() {
             {/* Przekładka = wysokość paska nad górą strony (50 px logo + 2 × 16 px). */}
             <div aria-hidden className="h-[82px]" />
             <header
-                className={`fixed inset-x-0 top-[env(safe-area-inset-top,0px)] z-50 px-4 font-ui transition-all duration-300 sm:px-6 ${
+                className={`fixed inset-x-0 top-[env(safe-area-inset-top,0px)] z-50 px-5 font-ui transition-all duration-300 sm:px-8 lg:px-12 ${
                     solid
                         ? 'bg-gradient-to-b from-[rgb(10_10_11/0.95)] to-[rgb(10_10_11/0.75)] py-2.5 shadow-[0_8px_32px_-8px_rgb(0_0_0/0.5)] backdrop-blur-2xl max-md:from-[rgb(10_10_11/0.97)] max-md:to-[rgb(10_10_11/0.94)]'
                         : 'bg-transparent py-4'

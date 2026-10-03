@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { DeviceFrame, Stage3D } from './Stage3D';
 import { SceneControls, SceneTabs, SceneVideos, useScenePlayer } from './ScenePlayer';
 import { FeatureSpill, type SpillWord, type WordState } from './FeatureSpill';
@@ -23,7 +23,7 @@ type Feature = SpillWord & {
 const FEATURES: readonly Feature[] = [
     { text: 'Poczta', scene: 'lead', beat: 'thread', size: 2, outline: true, r: 21, spot: { side: 'l', x: 80, y: 62 }, pile: 7 },
     { text: 'Historia klienta', scene: 'lead', beat: 'history', size: 2, r: 6, spot: { side: 'l', x: 58, y: 16 }, pile: 14 },
-    { text: 'Wycena', scene: 'lead', beat: 'accept', size: 3, outline: true, r: -24, spot: { side: 'r', x: 30, y: 75 }, pile: 2 },
+    { text: 'Wycena', scene: 'lead', beat: 'accept', size: 3, outline: true, r: -24, spot: { side: 'r', x: 30, y: 72 }, pile: 2 },
     { text: 'Kalendarz', scene: 'lead', beat: 'calendar', size: 3, r: -90, spot: { side: 'l', x: 10, y: 37 }, pile: 11 },
     { text: 'Rezerwacje', scene: 'lead', beat: 'form', size: 3, r: 12, spot: { side: 'r', x: 44, y: 31 }, pile: 5 },
     { text: 'SMS', scene: 'lead', beat: 'sms', size: 4, r: -12, spot: { side: 'l', x: 34, y: 5 }, pile: 17 },
@@ -31,16 +31,21 @@ const FEATURES: readonly Feature[] = [
     { text: 'Depozyt', scene: 'checkin', beat: 'deposit', size: 3, outline: true, r: -7, spot: { side: 'l', x: 52, y: 41 }, pile: 0 },
     { text: 'Zdjęcia przez QR', scene: 'checkin', beat: 'qr', size: 2, r: -21, spot: { side: 'r', x: 50, y: 43 }, pile: 13 },
     { text: 'Mapa uszkodzeń', scene: 'checkin', beat: 'damage', size: 2, r: -13, spot: { side: 'l', x: 72, y: 28 }, pile: 4 },
-    { text: 'Podpis na tablecie', scene: 'checkin', beat: 'sign-protocol', size: 2, r: 4, spot: { side: 'r', x: 50, y: 83 }, pile: 16 },
+    { text: 'Podpis na tablecie', scene: 'checkin', beat: 'sign-protocol', size: 2, r: 4, spot: { side: 'r', x: 52, y: 82 }, pile: 16 },
     { text: 'Zgody marketingowe', scene: 'checkin', beat: 'sign-consent', size: 1, r: -7, spot: { side: 'l', x: 52, y: 91 }, pile: 8 },
+    { text: 'Karta Wizyty', scene: 'visitcard', beat: 'card-modal', size: 2, r: -8, spot: { side: 'r', x: 60, y: 89 }, pile: 21 },
+    { text: 'Usługi dodatkowe', scene: 'visitcard', beat: 'offer', size: 1, r: -16, spot: { side: 'l', x: 30, y: 22 }, pile: 23 },
     { text: 'Protokół wydania', scene: 'handover', beat: 'protocol', size: 1, r: 8, spot: { side: 'r', x: 42, y: 65 }, pile: 1 },
     { text: 'Faktura VAT', scene: 'handover', beat: 'invoice', size: 3, r: -9, spot: { side: 'l', x: 46, y: 53 }, pile: 15 },
     { text: 'KSeF', scene: 'handover', beat: 'ksef', size: 4, keepCase: true, r: 10, spot: { side: 'r', x: 58, y: 7 }, pile: 6 },
     { text: 'Koszty', scene: 'costs', size: 4, outline: true, r: 3, spot: { side: 'r', x: 42, y: 55 }, pile: 12 },
     { text: 'Reguły po NIP', scene: 'costs', beat: 'new-rule', size: 1, r: 19, spot: { side: 'l', x: 32, y: 70 }, pile: 3 },
     { text: 'Statystyki', scene: 'costs', beat: 'stats', size: 2, r: 90, spot: { side: 'r', x: 93, y: 72 }, pile: 19 },
+    { text: 'Czas pracy', scene: 'team', beat: 'worktime', size: 2, outline: true, r: -6, spot: { side: 'r', x: 26, y: 24 }, pile: 20 },
+    { text: 'Urlopy', scene: 'team', beat: 'leave', size: 3, r: 14, spot: { side: 'l', x: 22, y: 61 }, pile: 24 },
     { text: 'Konkurencja', scene: 'instagram', beat: 'alert', size: 3, r: 9, spot: { side: 'l', x: 54, y: 80 }, pile: 10 },
-    { text: 'Biblioteka reklam', scene: 'instagram', beat: 'area', size: 1, r: -10, spot: { side: 'r', x: 54, y: 93 }, pile: 18 },
+    { text: 'Biblioteka reklam', scene: 'instagram', beat: 'area', size: 1, r: 6, spot: { side: 'r', x: 42, y: 97 }, pile: 18 },
+    { text: 'Powiadomienia push', scene: 'push', beat: 'intro', size: 1, r: 5, spot: { side: 'l', x: 46, y: 99 }, pile: 22 },
 ];
 
 /** Napis → indeks nagrania, indeks kroku (-1 = początek) i sekunda, od której krok leci. */
@@ -82,44 +87,52 @@ export function Hero() {
 
     return (
         <section aria-labelledby="hero-title" className="relative">
-            <div className="relative mx-auto max-w-[100rem] px-5 pt-14 pb-24 sm:px-8 sm:pt-20 sm:pb-32 lg:px-12 xl:pt-24">
-                <header className="mx-auto max-w-[60rem] text-center">
-                    <p className="inline-flex items-center gap-3 font-mono text-[0.6875rem] font-medium tracking-[0.22em] text-mute uppercase">
-                        <span aria-hidden className="h-px w-6 bg-gradient-to-r from-transparent to-gold-400" />
-                        CRM dla studiów auto detailingu
-                        <span aria-hidden className="h-px w-6 bg-gradient-to-l from-transparent to-gold-400" />
-                    </p>
-
+            <div className="relative mx-auto max-w-[100rem] px-5 pt-10 pb-24 sm:px-8 sm:pt-16 sm:pb-32 lg:px-12 xl:pt-20">
+                {/*
+                 * Nagłówek jak plakat, tym samym krojem co znak „DETAIL BOOST": duże
+                 * rzeczowniki, małe przyimki. „od" i „do" wiszą w wąskiej kolumnie przed
+                 * krawędzią tekstu, więc oba wiersze zaczynają się w jednej pionie - jak
+                 * numer przed blokiem tekstu w siatce szwajcarskiej. Bez gradientów
+                 * w literach: złota jest tylko kropka.
+                 */}
+                <header className="mx-auto max-w-[80rem]">
                     <h1
                         id="hero-title"
-                        className="mt-7 text-[clamp(2.75rem,7.6vw,6.25rem)] leading-[0.94] font-[620] tracking-[-0.052em] text-balance"
+                        aria-label="Od telefonu do odbioru auta."
+                        className="font-display text-[clamp(3rem,9vw,8.75rem)] leading-[0.86] font-[820] tracking-[-0.04em] text-paper uppercase [font-stretch:108%]"
                     >
-                        <span className="text-fill-silver">Zarządzaj studiem</span>{' '}
-                        <span className="text-fill-gold pb-[0.08em]">w&nbsp;jednym miejscu.</span>
+                        <HeadLine small="od" delay={0}>
+                            telefonu
+                        </HeadLine>
+                        <HeadLine small="do" delay={110}>
+                            odbioru auta<span className="text-gold-400">.</span>
+                        </HeadLine>
                     </h1>
 
-                    <p className="mx-auto mt-7 max-w-[40rem] text-[1.0625rem] leading-[1.6] tracking-[-0.012em] text-pretty text-mute sm:text-lg">
-                        Rezerwacje, przyjęcie pojazdu, protokół wydania, faktura w KSeF i historia
-                        każdego klienta. Jeden system od pierwszego telefonu do odbioru auta.
-                    </p>
-
-                    <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-                        <a
-                            href="#"
-                            className="beam relative inline-flex h-12 w-full items-center justify-center rounded-lg bg-paper px-7 text-[0.9375rem] font-medium tracking-[-0.01em] text-void shadow-[0_10px_40px_-10px_rgb(220_174_92/0.55)] transition-[background-color,transform] duration-200 hover:bg-gold-50 active:translate-y-px sm:w-auto"
-                        >
-                            Rozpocznij za darmo
-                        </a>
-                        <a
-                            href="#"
-                            className="inline-flex h-12 w-full items-center justify-center rounded-lg border border-line-strong bg-white/[0.02] px-7 text-[0.9375rem] font-medium tracking-[-0.01em] text-paper backdrop-blur-sm transition-colors duration-200 hover:border-paper/40 hover:bg-white/[0.05] sm:w-auto"
-                        >
-                            Otwórz konto demo
-                        </a>
+                    <div className="hero-rise mt-10 grid gap-8 border-t border-line pt-6 sm:mt-12 lg:grid-cols-12 lg:gap-x-8 [animation-delay:420ms]">
+                        <p className="max-w-[34rem] text-[1.0625rem] leading-[1.6] tracking-[-0.012em] text-pretty text-mute lg:col-span-6 xl:col-span-5">
+                            <span className="text-paper">CRM dla studiów auto detailingu.</span> Rezerwacje,
+                            przyjęcie pojazdu, protokół wydania, faktura w KSeF i historia każdego klienta
+                            w jednym systemie.
+                        </p>
+                        <div className="flex flex-col gap-4 lg:col-span-6 lg:items-end xl:col-span-5 xl:col-start-8">
+                            <div className="flex flex-col gap-2.5 sm:flex-row">
+                                <a
+                                    href="#"
+                                    className="inline-flex h-12 items-center justify-center rounded-lg bg-white px-6 font-ui text-[0.9375rem] font-semibold whitespace-nowrap text-[#0a0709] shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_14px_34px_-12px_rgb(220_174_92/0.8)] transition-[background-color,box-shadow,transform] duration-200 hover:bg-gold-50 hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.6),0_16px_40px_-10px_rgb(220_174_92/0.95)] active:translate-y-px"
+                                >
+                                    Rozpocznij za darmo
+                                </a>
+                                <a
+                                    href="#"
+                                    className="inline-flex h-12 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] px-6 font-ui text-[0.9375rem] font-medium whitespace-nowrap text-white/80 transition-colors duration-200 hover:bg-white/[0.07] hover:text-white"
+                                >
+                                    Otwórz konto demo
+                                </a>
+                            </div>
+                            <p className="text-[0.8125rem] text-dim">Konto demo bez rejestracji, z danymi przykładowego studia.</p>
+                        </div>
                     </div>
-                    <p className="mt-5 text-[0.8125rem] text-dim">
-                        Konto demo bez rejestracji, z danymi przykładowego studia.
-                    </p>
                 </header>
 
                 {/*
@@ -176,5 +189,28 @@ export function Hero() {
                 </div>
             </div>
         </section>
+    );
+}
+
+/**
+ * Wiersz nagłówka: mały przyimek w kolumnie o stałej szerokości, duże słowa obok.
+ * Słowa wjeżdżają od dołu spod maski (overflow), jak plansza w kinie - wiersz po
+ * wierszu, raz, przy wejściu na stronę.
+ */
+function HeadLine({ small, delay, children }: { small: string; delay: number; children: ReactNode }) {
+    return (
+        <span aria-hidden className="grid grid-cols-[0.62em_minmax(0,1fr)] items-start">
+            <span
+                className="hero-rise pt-[0.12em] text-[0.24em] leading-none font-[700] tracking-[0.02em] text-dim [font-stretch:100%]"
+                style={{ animationDelay: `${delay + 160}ms` }}
+            >
+                {small}
+            </span>
+            <span className="-my-[0.08em] block overflow-hidden py-[0.08em]">
+                <span className="hero-line block" style={{ animationDelay: `${delay}ms` }}>
+                    {children}
+                </span>
+            </span>
+        </span>
     );
 }

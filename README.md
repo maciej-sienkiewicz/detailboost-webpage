@@ -27,6 +27,11 @@ npm run build      # typecheck + build do dist/
   kliknięcie przewija okno do tego kroku (i zdejmuje pauzę), a gdy nikt nie klika,
   złotem świeci napis kroku, który właśnie leci. Napisy tego samego nagrania jaśnieją
   o stopień. Mapa napis → nagranie i krok jest w `Hero.tsx` (`FEATURES`).
+- **Nagłówek jak plakat**: „od TELEFONU / do ODBIORU AUTA." w tym samym rozszerzonym
+  Archivo co znak słowny - duże rzeczowniki wersalikami, małe przyimki w wąskiej kolumnie
+  przed krawędzią, więc oba wiersze zaczynają się w jednej pionie. Bez gradientów
+  w literach, złota jest tylko kropka. Wiersze wyjeżdżają spod maski przy wczytaniu.
+  Pod cienką linią: opis po lewej, przyciski po prawej (siatka 12 kolumn).
 - **Pasek nawigacji** (`Navbar`) w stylu fotohub.app: Inter 14 px, narożniki 6–8 px,
   dwa białe przyciski (główny z jasną krawędzią i złotą poświatą), znak słowny
   „DETAIL BOOST" w rozszerzonym Archivo. Nad górą strony przezroczysty, po przewinięciu
