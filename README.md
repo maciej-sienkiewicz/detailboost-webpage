@@ -27,10 +27,11 @@ npm run build      # typecheck + build do dist/
   kliknięcie przewija okno do tego kroku (i zdejmuje pauzę), a gdy nikt nie klika,
   złotem świeci napis kroku, który właśnie leci. Napisy tego samego nagrania jaśnieją
   o stopień. Mapa napis → nagranie i krok jest w `Hero.tsx` (`FEATURES`).
-- **Nagłówek jak plakat**: „Od telefonu do odbioru auta." w tym samym Archivo co znak
+- **Nagłówek jak plakat**: „Od telefonu do kolejnej wizyty." w tym samym Archivo co znak
   słowny (szerokim od 640 px, wąskim na telefonie, żeby litery mogły być duże). Po „do"
-  przewijają się etapy pracy studia - rezerwacji, przyjęcia, protokołu, faktury - i raz,
-  po wczytaniu, zatrzymują się na „odbioru auta." ze złotą kropką. To zastępuje akapit
+  przewijają się etapy pracy studia - rezerwacji, przyjęcia, protokołu, faktury, odbioru
+  auta, przypomnienia - i raz, po wczytaniu, zatrzymują się na „kolejnej wizyty." ze złotą
+  kropką. To zastępuje akapit
   z listą funkcji. Pod cienką linią jedno zdanie po lewej i przyciski po prawej.
 - **Pasek nawigacji** (`Navbar`) w stylu fotohub.app: Inter 14 px, narożniki 6–8 px,
   dwa białe przyciski (główny z jasną krawędzią i złotą poświatą), znak słowny

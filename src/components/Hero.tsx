@@ -92,14 +92,14 @@ export function Hero() {
                 {/*
                  * Nagłówek jak plakat, tym samym krojem co znak „DETAIL BOOST". Po „do"
                  * przewijają się etapy pracy studia - zamiast akapitu z listą funkcji,
-                 * którego nikt nie czyta - i zatrzymują się na „odbioru auta." ze złotą
-                 * kropką. Biel to treść, złoto to jedyny akcent.
+                 * którego nikt nie czyta - i zatrzymują się na „kolejnej wizyty." ze złotą
+                 * kropką: praca ze stałym klientem się nie kończy. Biel to treść, złoto to jedyny akcent.
                  */}
                 <header className="mx-auto max-w-[80rem]">
                     <h1
                         id="hero-title"
-                        aria-label="Od telefonu do odbioru auta."
-                        className="font-display text-[clamp(2.375rem,11.6vw,3.75rem)] leading-[0.9] font-[800] tracking-[-0.03em] text-paper uppercase [font-stretch:74%] sm:text-[clamp(3rem,8vw,7.25rem)] sm:[font-stretch:104%]"
+                        aria-label="Od telefonu do kolejnej wizyty."
+                        className="font-display text-[clamp(2rem,9.6vw,3.25rem)] leading-[0.9] font-[800] tracking-[-0.03em] text-paper uppercase [font-stretch:74%] sm:text-[clamp(2.75rem,6.9vw,6.5rem)] sm:[font-stretch:104%]"
                     >
                         <span aria-hidden className="-my-[0.08em] block overflow-hidden py-[0.08em]">
                             <span className="hero-line block">Od telefonu</span>
@@ -189,8 +189,11 @@ export function Hero() {
     );
 }
 
-/** Etapy po „do", w kolejności pracy studia. Ostatni zostaje na stałe. */
-const STEPS = ['rezerwacji', 'przyjęcia', 'protokołu', 'faktury', 'odbioru auta'] as const;
+/**
+ * Etapy po „do", w kolejności pracy studia. Nie kończą się na odbiorze auta: historia
+ * klienta i przypomnienia SMS prowadzą do kolejnej wizyty - i ten etap zostaje na stałe.
+ */
+const STEPS = ['rezerwacji', 'przyjęcia', 'protokołu', 'faktury', 'odbioru auta', 'przypomnienia', 'kolejnej wizyty'] as const;
 
 /**
  * Słowo po „do": etapy wjeżdżają od dołu i wyjeżdżają w górę spod maski, raz,
