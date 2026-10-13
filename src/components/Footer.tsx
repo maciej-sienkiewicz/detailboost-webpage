@@ -1,19 +1,8 @@
+import { COMPANY } from '../content';
 import { DEMO_URL, LOGIN_URL, SIGNUP_URL } from '../site';
 import { OfferTerms } from './Hero';
 import { Wordmark } from './Navbar';
 import { btnPrimary, btnSecondary, sectionTitle } from './ui';
-
-/** Dane spółki z KRS - stopka strony sp. z o.o. musi je podawać (art. 206 KSH). */
-const COMPANY = {
-    name: 'M&M SOLUTIONS sp. z o.o.',
-    address: ['ul. Poznańska 119', '60-185 Skórzewo'],
-    registry: [
-        ['KRS', '0001267442'],
-        ['NIP', '7773476300'],
-        ['REGON', '545750800'],
-        ['Kapitał zakładowy', '40 000 zł'],
-    ],
-} as const;
 
 export function Footer() {
     return (

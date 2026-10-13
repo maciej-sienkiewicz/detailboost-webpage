@@ -19,6 +19,25 @@ npm run dev        # http://localhost:5173
 npm run build      # typecheck + build do dist/
 ```
 
+## Wersja 2 (`v2.html`)
+
+Druga, jasna wersja strony w układzie szablonu GeneratePress: biały pasek z logo
+i linkami, hero z hasłem po lewej i ilustracją po prawej, ukośna szara płaszczyzna
+i trzy kolumny z ikonami. Niżej te same treści co w wersji ciemnej (funkcje, KSeF,
+cennik, stopka) - są wspólne w `src/content.ts`, ceny w `src/site.ts`.
+
+- **Hasło**: „Cała firma. Jeden system. Pełna kontrola.", pozostałe hasła stoją
+  w trzech kolumnach, w sekcji „Z każdego miejsca", w nagłówku funkcji i w wezwaniu
+  na dole strony.
+- **Makiety urządzeń** (`src/v2/Devices.tsx`): tablet i telefon rysowane w CSS,
+  w środku prawdziwe zrzuty DetailBoost z konta demo (`public/v2/*.webp`: kalendarz
+  na tablecie 1366 × 1024, kalendarz i tablica na telefonie 390 × 844, @2x).
+- **Kolory**: biel, chłodna szarość `#f3f6fa` i jeden niebieski akcent
+  (`--color-accent` w `src/v2/v2.css`). Krój Inter.
+
+Lokalnie: `npm run dev`, potem `http://localhost:5173/v2.html`. `npm run build`
+buduje obie strony.
+
 ## Projekt
 
 - **Ciemna scena, jeden kolor.** Czerń, grafit, szarości i złoto z logo DetailBoost.

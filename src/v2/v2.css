@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+
+/*
+ * Wersja 2 strony w układzie szablonu GeneratePress: jasna, biel i chłodna szarość,
+ * jeden niebieski akcent (przyciski, ikony funkcji, wyróżniony plan). Ciemnej wersji
+ * z nagraniami nic stąd nie dotyczy - to osobny arkusz osobnej strony (v2.html).
+ */
+@theme {
+    --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+
+    --color-ink: #1f2328;
+    --color-body: #3b4249;
+    --color-muted: #7d8894;
+    --color-line: #e3e8ee;
+    --color-mist: #f3f6fa;
+    --color-accent: #1e73be;
+    --color-accent-dark: #165f9f;
+    --color-accent-soft: #e8f1fa;
+
+    --animate-float: float 6s ease-in-out infinite;
+
+    /* Telefon przed tabletem unosi się o kilka pikseli - ledwie zauważalny ruch. */
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-0.5em); }
+    }
+}
+
+@layer base {
+    html {
+        background: #fff;
+        color: var(--color-body);
+        color-scheme: light;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        background: #fff;
+        color: var(--color-body);
+        font-family: var(--font-sans);
+        font-size: 16px;
+        line-height: 1.65;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        html {
+            scroll-behavior: smooth;
+        }
+    }
+
+    ::selection {
+        background: var(--color-accent-soft);
+        color: var(--color-ink);
+    }
+}

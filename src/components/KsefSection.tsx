@@ -1,26 +1,5 @@
+import { KSEF_COSTS, KSEF_SALES } from '../content';
 import { container, sectionKicker, sectionTitle } from './ui';
-
-/*
- * Każdy punkt odpowiada temu, co robi moduł KSeF w backendzie CRM (pl.detailing.crm.ksef):
- * faktura FA(3) z pozycji wizyty, wysyłka i UPO, kod QR weryfikacji, korekty, kolejka
- * offline24 z automatycznym dosłaniem, pobieranie faktur kosztowych co 15 minut
- * i przypisanie kategorii regułą po NIP. Czego moduł nie robi, tego tu nie ma.
- */
-const SALES = [
-    'Faktura VAT z pozycji wizyty, w schemacie FA(3)',
-    'Wysyłka do KSeF jednym kliknięciem przy wydaniu auta',
-    'Numer KSeF i UPO wracają do faktury same',
-    'Kod QR weryfikacji na fakturze dla klienta',
-    'Korekty faktur wystawione w KSeF',
-    'Gdy KSeF nie działa: faktura czeka w kolejce i dosyła się sama (offline24)',
-] as const;
-
-const COSTS = [
-    'Faktury od dostawców pobierane z KSeF co 15 minut',
-    'Reguła po NIP dostawcy przypisuje kategorię kosztu',
-    'Koszty w kategoriach: chemia, folie, paliwo, leasing',
-    'Statystyki kosztów w wybranym okresie',
-] as const;
 
 export function KsefSection({ onShow }: { onShow: (scene: string, beat?: string) => void }) {
     return (
@@ -42,8 +21,8 @@ export function KsefSection({ onShow }: { onShow: (scene: string, beat?: string)
                     </div>
 
                     <div className="grid gap-px overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.08] sm:grid-cols-2 lg:col-span-7">
-                        <KsefColumn title="Sprzedaż" items={SALES} action="Zobacz wysyłkę do KSeF" onClick={() => onShow('handover', 'ksef')} />
-                        <KsefColumn title="Koszty" items={COSTS} action="Zobacz koszty z KSeF" onClick={() => onShow('costs')} />
+                        <KsefColumn title="Sprzedaż" items={KSEF_SALES} action="Zobacz wysyłkę do KSeF" onClick={() => onShow('handover', 'ksef')} />
+                        <KsefColumn title="Koszty" items={KSEF_COSTS} action="Zobacz koszty z KSeF" onClick={() => onShow('costs')} />
                     </div>
                 </div>
                 <p className="mt-8 font-ui text-[0.8125rem] text-dim">

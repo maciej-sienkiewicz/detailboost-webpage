@@ -1,28 +1,7 @@
+import { BASIC_INCLUDES, FULL_INCLUDES } from '../content';
 import { ADD_ONS, OFFER_TERMS, PLANS, SIGNUP_URL, SMS_PACKAGES, net, perDay, zl } from '../site';
 import { OfferTerms } from './Hero';
 import { btnPrimary, btnSecondary, container, sectionKicker, sectionTitle } from './ui';
-
-/*
- * Cennik wprost z katalogu w backendzie: dwa plany i moduły do BASIC, ceny brutto
- * za studio miesięcznie. Kwotę netto pokazujemy obok, bo właściciel firmy liczy
- * w netto, ale nie zaokrąglamy jej „ładnie" - ma się zgadzać z fakturą.
- */
-const BASIC_INCLUDES = [
-    'Kalendarz i rezerwacje',
-    'Baza klientów i pojazdów z historią wizyt',
-    'Wizyty, protokoły i dokumenty',
-    'Galeria zdjęć',
-    'Cały zespół w cenie',
-] as const;
-
-const FULL_INCLUDES = [
-    'Wszystko z BASIC',
-    'Faktury i KSeF, koszty z KSeF',
-    'Przypomnienia i statusy SMS i e-mail',
-    'Podpisy na tablecie i Karta Wizyty',
-    'Statystyki, kampanie, monitoring konkurencji',
-    'Asystent AI przy zapytaniach',
-] as const;
 
 export function Pricing() {
     const allModules = PLANS.basic.grossCents + ADD_ONS.reduce((sum, a) => sum + a.grossCents, 0);
