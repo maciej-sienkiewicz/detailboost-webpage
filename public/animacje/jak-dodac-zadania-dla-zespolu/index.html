@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../osadzenie.css">
+<script>if (window.self !== window.top) { document.documentElement.classList.add('osadzona'); document.documentElement.dataset.theme = 'dark'; }</script>
+</head>
+<body>
+<title>Jak dodać zadanie dla zespołu lub pracownika</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-ext-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Page: help-centre look. Stage: style B, caption column on the left, the settings screen alone on the right. */
+:root {
+  --bg: #eef2f7; --surface: #ffffff; --ink: #0f172a; --ink-2: #475569; --muted: #64748b; --line: #e2e8f0;
+  --brand: #0ea5e9; --brand-ink: #0369a1; --brand-soft: #e0f2fe;
+  --font: 'InterDB', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  padding: 36px max(16px, env(safe-area-inset-right, 0px)) 72px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-ink); }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 800; margin: 6px 0 0; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--ink-2); margin: 0; max-width: 760px; }
+
+.player { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #eef2f7; box-shadow: 0 20px 50px rgba(15,23,42,.16); }
+.stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; font-family: var(--font); color: #0f172a; background: #eef2f7; }
+.bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bar button { font: 600 14px var(--font); height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.bar button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; min-width: 120px; justify-content: center; }
+.bar button:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.bar label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+.bar .sp { flex: 1; }
+.scrub { position: relative; height: 8px; border-radius: 4px; background: var(--line); cursor: pointer; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #0ea5e9; }
+.scrub b { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); opacity: .45; }
+.chaps { display: flex; flex-wrap: wrap; gap: 8px; }
+.chaps button { font: 500 13.5px var(--font); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.chaps button.on { border-color: #0ea5e9; color: var(--brand-ink); background: var(--brand-soft); font-weight: 700; }
+
+/* ===== stage ===== */
+.bgx { position: absolute; inset: 0; background:
+  radial-gradient(900px 700px at 78% 45%, rgba(14,165,233,.10), transparent 70%),
+  radial-gradient(700px 600px at 8% 95%, rgba(37,99,235,.07), transparent 70%), #eef2f7; }
+.brand { position: absolute; left: 120px; top: 84px; display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; z-index: 40; }
+.brand i { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #2563eb); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 17px; font-weight: 800; }
+.brand span { font-size: 19px; font-weight: 500; color: #64748b; margin-left: 6px; letter-spacing: -0.01em; }
+.cap { position: absolute; left: 120px; top: 262px; width: 600px; z-index: 40; }
+.cnum { height: 34px; position: relative; margin-bottom: 26px; }
+.cnum > div { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; color: #0369a1; white-space: nowrap; }
+.cnum > div b { font-variant-numeric: tabular-nums; }
+.cnum > div i { display: block; width: 46px; height: 2px; background: linear-gradient(90deg, #38bdf8, rgba(56,189,248,0)); }
+.cnum > div span { color: #0f172a; font-weight: 600; }
+.ctx { position: relative; }
+.ctx .tl { position: absolute; left: 0; top: 0; width: 600px; }
+.ch { font-size: 56px; font-weight: 750; letter-spacing: -0.038em; line-height: 1.08; margin: 0; }
+.cbd { font-size: 28px; line-height: 1.45; color: #475569; margin-top: 28px; letter-spacing: -0.01em; }
+.ch .w, .cbd .w { display: inline-block; white-space: pre; will-change: transform, filter, opacity; }
+.prog { position: absolute; left: 120px; bottom: 96px; z-index: 40; }
+.prog .pl { font-size: 18px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
+.prog .pl b { color: #0f172a; font-weight: 700; }
+.prog .pb { display: flex; gap: 7px; }
+.prog .pb i { display: block; width: 34px; height: 6px; border-radius: 3px; background: #d5dde8; overflow: hidden; }
+.prog .pb i b { display: block; height: 100%; width: 0; background: #0ea5e9; }
+
+.view { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 20; -webkit-mask-image: linear-gradient(90deg, transparent 735px, #000 800px); mask-image: linear-gradient(90deg, transparent 735px, #000 800px); }
+.scene { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 90; filter: drop-shadow(0 4px 8px rgba(15,23,42,.32)); opacity: 0; pointer-events: none; }
+.ring { position: absolute; left: 0; top: 0; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 3px solid #0ea5e9; opacity: 0; z-index: 89; pointer-events: none; }
+.kcap { position: absolute; z-index: 91; padding: 10px 18px; border-radius: 12px; background: #0f172a; color: #fff; font-size: 22px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,.3); opacity: 0; border-bottom: 4px solid #334155; }
+.hl { position: absolute; z-index: 60; border-radius: 12px; border: 2.5px solid #0ea5e9; box-shadow: 0 0 0 5px rgba(14,165,233,.16), 0 0 26px rgba(14,165,233,.35); opacity: 0; pointer-events: none; }
+
+
+/* ===== aplikacja: panel boczny (jak w serii) ===== */
+.scene svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ap { position: absolute; left: 0; top: 0; width: 1360px; height: 860px; border-radius: 20px; overflow: hidden; background: #eef2f7; border: 1px solid #d6dee9; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 30px 70px -20px rgba(15,23,42,.28); opacity: 0; }
+.asb { position: absolute; left: 0; top: 0; bottom: 0; width: 248px; background: #0f172a; display: flex; flex-direction: column; padding: 0 12px; overflow: hidden; }
+.asbB { display: flex; align-items: center; gap: 12px; padding: 20px 4px 18px; border-bottom: 1px solid rgba(255,255,255,.07); margin: 0 -12px 0; padding-left: 16px; }
+.asbL { width: 36px; height: 36px; border-radius: 10px; background: #1e293b; color: #e2e8f0; display: grid; place-items: center; font-size: 15px; font-weight: 700; }
+.asbN { color: #f1f5f9; font-size: 15px; font-weight: 600; }
+.asbS { padding: 14px 0 2px; }
+.asbS:first-of-type { padding-top: 6px; }
+.asbT { padding: 0 12px 5px; color: #64748b; font-size: 11.5px; font-weight: 600; }
+.asbI { display: flex; align-items: center; gap: 11px; padding: 9px 12px; margin-bottom: 1px; border-radius: 10px; color: #cbd5e1; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.asbI svg { width: 17px; height: 17px; stroke-width: 1.75; flex-shrink: 0; }
+.asbI.hov { background: rgba(255,255,255,.04); color: #f1f5f9; }
+.asbI.on { background: rgba(14,165,233,.11); color: #38bdf8; font-weight: 600; }
+.asbP { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 12px 14px; background: #0f172a; border-top: 1px solid rgba(255,255,255,.07); }
+.scrim { position: absolute; inset: 0; z-index: 30; background: rgba(15,23,42,.48); opacity: 0; visibility: hidden; }
+.ap .emp, .ap.who-m .own { display: none !important; }
+.ap.who-m .emp { display: flex !important; }
+
+/* ===== Tablica (DashboardView) ===== */
+.amn { position: absolute; left: 248px; top: 0; right: 0; bottom: 0; padding: 28px 32px; display: flex; flex-direction: column; gap: 22px; }
+.hero { position: relative; overflow: hidden; background: linear-gradient(135deg, #0f172a 0%, #1e293b 65%, #0c1f35 100%); border-radius: 16px; padding: 28px 32px; box-shadow: 0 1px 0 rgba(255,255,255,.06) inset, 0 8px 32px rgba(0,0,0,.16); }
+.hero::before { content: ''; position: absolute; top: -120px; right: -80px; width: 360px; height: 360px; border-radius: 50%; background: radial-gradient(circle, rgba(14,165,233,.35) 0%, rgba(14,165,233,0) 60%); }
+.heG { position: relative; margin: 0 0 20px; font-size: 32px; font-weight: 700; color: #fff; letter-spacing: -0.5px; line-height: 1.1; }
+.heA { position: relative; display: flex; gap: 10px; }
+.hb { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 9999px; font-size: 14px; font-weight: 600; }
+.hb svg { width: 16px; height: 16px; }
+.hb.pr { background: #0ea5e9; color: #fff; box-shadow: 0 2px 8px rgba(14,165,233,.28); }
+.hb.gh { background: rgba(255,255,255,.08); color: #f1f5f9; border: 1px solid rgba(255,255,255,.14); }
+.osc { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.ost { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px 18px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 1px 3px rgba(15,23,42,.06); }
+.ost span { font-size: 12.5px; font-weight: 600; color: #64748b; }
+.ost b { font-size: 26px; font-weight: 700; color: #0f172a; line-height: 1.1; }
+.ost small { font-size: 11px; color: #94a3b8; margin-top: -2px; }
+.g2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start; }
+.pn { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04); overflow: hidden; }
+.pnh { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 14px; border-bottom: 1px solid #f1f5f9; }
+.pnh h3 { margin: 0; white-space: nowrap; font-size: 16px; font-weight: 600; color: #0f172a; letter-spacing: -0.1px; }
+.pnl { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: #0284c7; }
+.pnl svg { width: 14px; height: 14px; }
+.uv { display: flex; align-items: center; gap: 14px; padding: 12px 22px; border-bottom: 1px solid #f8fafc; }
+.uvc { width: 56px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding: 5px 0; border-radius: 10px; background: #f0f9ff; color: #0369a1; font-size: 14px; font-weight: 700; line-height: 1.2; }
+.uvc small { font-size: 10.5px; font-weight: 600; color: #0284c7; text-transform: uppercase; letter-spacing: .04em; }
+.uv div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.uv b { font-size: 13.5px; font-weight: 600; color: #0f172a; }
+.uv div span { font-size: 12.5px; color: #64748b; }
+.ha { display: flex; align-items: center; gap: 6px; }
+.arB { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; background: #f1f5f9; color: #64748b; border-radius: 8px; font-size: 12px; font-weight: 600; }
+.arB svg, .adB svg { width: 13px; height: 13px; }
+.adB { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; background: #f0f9ff; color: #0369a1; border: 1px solid #bae6fd; border-radius: 8px; font-size: 12px; font-weight: 600; }
+.adB svg { stroke-width: 2.5; }
+.adB.hov { background: #e0f2fe; border-color: #7dd3fc; }
+.adB.prs { transform: scale(.95); }
+.tl2 { padding: 8px 0; }
+.tk { display: flex; gap: 12px; padding: 10px 22px; align-items: flex-start; }
+.tk.hov { background: #f8fafc; }
+#tkN { display: none; }
+.tcb { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid #cbd5e1; flex-shrink: 0; margin-top: 1px; display: grid; place-items: center; color: #fff; }
+.tcb svg { width: 11px; height: 11px; stroke-width: 3; opacity: 0; }
+.tcb.hov { border-color: #10b981; background: rgba(16,185,129,.08); }
+.tcb.on { border-color: #10b981; background: #10b981; }
+.tcb.on svg { opacity: 1; }
+.tkc { flex: 1; min-width: 0; }
+.tkt { font-size: 13px; font-weight: 500; color: #0f172a; margin: 0 0 2px; line-height: 1.4; }
+.tk.done .tkt { color: #64748b; text-decoration: line-through; }
+.tkm { font-size: 11px; color: #64748b; }
+.tkr { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+.tka { display: none; align-items: center; gap: 4px; margin-top: 2px; font-size: 11px; color: #94a3b8; }
+.tka svg { width: 11px; height: 11px; }
+.vb { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; padding: 2px 7px 2px 5px; border-radius: 9999px; font-size: 11px; font-weight: 600; width: fit-content; }
+.vb svg { width: 10px; height: 10px; }
+.vb.us { background: #f0f9ff; border: 1px solid #bae6fd; color: #0284c7; }
+.vb.ro { background: #f5f3ff; border: 1px solid #ddd6fe; color: #7c3aed; }
+
+/* ===== okno „Nowe zadanie” (ModalShell + TaskModal) ===== */
+.md { position: absolute; left: 564px; top: 120px; width: 480px; z-index: 31; background: #fff; border-radius: 24px; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 8px -2px rgba(0,0,0,.06), 0 16px 40px -8px rgba(0,0,0,.16); display: flex; flex-direction: column; overflow: hidden; opacity: 0; visibility: hidden; }
+.mdh { padding: 28px 28px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f1f5f9; }
+.mdi { width: 40px; height: 40px; border-radius: 12px; background: #f0f9ff; display: grid; place-items: center; color: #0ea5e9; flex-shrink: 0; }
+.mdi svg { width: 20px; height: 20px; }
+.mdh h2 { flex: 1; margin: 0; font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.2; }
+.mdx { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 50%; color: #64748b; }
+.mdx svg { width: 16px; height: 16px; }
+.mdc { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.fgp { display: flex; flex-direction: column; gap: 6px; }
+.lr { display: flex; align-items: baseline; gap: 8px; }
+.lr label { font-size: 13px; font-weight: 600; color: #374151; }
+.lr span { font-size: 11px; font-weight: 500; color: #94a3b8; }
+.fi { min-height: 42px; padding: 10px 14px; display: flex; align-items: center; font-size: 14px; color: #0f172a; border: 1.5px solid #e2e8f0; border-radius: 10px; background: #fff; white-space: nowrap; overflow: hidden; line-height: 1.4; }
+.fi.ta { min-height: 72px; align-items: flex-start; white-space: normal; }
+.fi.ph { color: #94a3b8; }
+.fi.focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.12); }
+.caret { display: inline-block; width: 2px; height: 18px; margin-left: 1px; background: #0ea5e9; vertical-align: middle; }
+.vt { display: flex; gap: 6px; padding: 3px; background: #f1f5f9; border-radius: 10px; }
+.vtb { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #64748b; }
+.vtb svg { width: 13px; height: 13px; }
+.vtb.on { background: #fff; color: #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.vtb.hov { color: #374151; }
+.pk { display: flex; flex-direction: column; gap: 4px; padding: 2px 0; overflow: hidden; }
+.pki { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; border: 1.5px solid transparent; font-size: 13px; color: #374151; }
+.pki.hov { background: #f8fafc; }
+.pki.sel { background: #f0f9ff; border-color: #bae6fd; font-weight: 600; }
+.pcb { width: 15px; height: 15px; border-radius: 3px; border: 1.5px solid #94a3b8; background: #fff; display: grid; place-items: center; color: #fff; flex-shrink: 0; }
+.pcb svg { width: 10px; height: 10px; stroke-width: 3.5; opacity: 0; }
+.pki.sel .pcb { background: #0ea5e9; border-color: #0ea5e9; }
+.pki.sel .pcb svg { opacity: 1; }
+.mdf { padding: 16px 28px; border-top: 1px solid #f1f5f9; background: #fafbfd; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.mb { padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.mb.gh { color: #64748b; border: 1.5px solid #e2e8f0; }
+.mb.pr { background: #0ea5e9; color: #fff; }
+.mb.pr.dis { opacity: .6; }
+.mb.pr.hov { background: #0284c7; }
+.mb.prs { transform: scale(.96); }
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DetailBoost, instrukcje</div>
+    <h1>Jak dodać zadanie dla zespołu lub pracownika?</h1>
+  </header>
+  <p class="lede">Panel „Do zrobienia” na Tablicy: nowe zadanie, wybór osób, które je zobaczą, i odhaczenie zadania przez pracownika. Kliknij rozdział niżej, żeby przejść od razu do niego.</p>
+
+  <div class="player" id="player" aria-label="Animacja: jak dodać zadanie dla zespołu lub pracownika">
+    <div class="stage" id="stage">
+      <div class="bgx"></div>
+      <div class="brand"><i>DB</i>DetailBoost<span>Instrukcja</span></div>
+      <div class="cap">
+        <div class="cnum" id="cnum"></div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+      <div class="prog"><div class="pl" id="pl"></div><div class="pb" id="pb"></div></div>
+
+      <div class="view" id="view"><div class="scene" id="scene">
+
+        <!-- Aplikacja (Layout + Sidebar + DashboardView, desktop) -->
+        <div class="ap" id="ap">
+          <aside class="asb" id="asb">
+            <div class="asbB"><span class="asbL">GL</span><span class="asbN">Gloss Lab</span></div>
+            <div class="asbS">
+              <div class="asbI" id="nvT"><svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Tablica</div>
+              <div class="asbI emp"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Czas pracy</div>
+              <div class="asbI emp"><svg viewBox="0 0 24 24"><path d="M4.2 4.2A2 2 0 0 0 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 1.82-1.18"/><path d="M21 15.5V6a2 2 0 0 0-2-2H9.5"/><path d="M16 2v4"/><path d="M3 10h7"/><path d="M21 10h-5.5"/><path d="m2 2 20 20"/></svg>Urlop</div>
+            </div>
+            <div class="asbS"><div class="asbT">Praca</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>Wizyty</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>Kalendarz</div>
+              <div class="asbI own"><svg viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>Zlecenia zbiorcze</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/></svg>Galeria</div>
+            </div>
+            <div class="asbS"><div class="asbT">Klienci i zapytania</div>
+              <div class="asbI own"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Zapytania</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Klienci</div>
+              <div class="asbI own"><svg viewBox="0 0 24 24"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>Zaplanowane treści</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>Pojazdy</div>
+            </div>
+            <div class="asbS own"><div class="asbT">Firma</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>Pracownicy</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Finanse</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Statystyki</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/></svg>Produkty</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>Aktywność</div>
+            </div>
+            <div class="asbS own"><div class="asbT">Marketing</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Kampanie</div>
+            </div>
+            <div class="asbP">
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Ustawienia</div>
+              <div class="asbI" id="nvZ"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>Zgłoś problem</div>
+            </div>
+          </aside>
+
+          <main class="amn" id="amn">
+            <!-- HeroCard -->
+            <div class="hero" id="hero">
+              <h1 class="heG" id="heG">Dzień dobry, Adam!</h1>
+              <div class="heA">
+                <span class="hb pr"><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="M16 19h6"/><path d="M19 16v6"/></svg>Nowa wizyta</span>
+                <span class="hb gh own"><svg viewBox="0 0 24 24"><path d="M9.94 14.06 4 20"/><path d="m12 3 1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/></svg>Generuj post</span>
+              </div>
+            </div>
+            <!-- OperationalScorecard (uproszczona) -->
+            <div class="osc" id="osc">
+              <div class="ost"><span>W trakcie</span><b>3</b></div>
+              <div class="ost"><span>Gotowe do odbioru</span><b>1</b></div>
+              <div class="ost"><span>Do przyjęcia dzisiaj</span><b>2</b></div>
+              <div class="ost"><span>Porzucone rezerwacje</span><b>0</b><small>ostatnie 30 dni</small></div>
+            </div>
+            <div class="g2" id="g2">
+              <!-- UpcomingVisitsPanel -->
+              <div class="pn" id="pnV">
+                <div class="pnh"><h3>Najbliższe wizyty</h3><span class="pnl"><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>Pokaż w kalendarzu</span></div>
+                <div class="uv"><span class="uvc"><small>dziś</small>10:00</span><div><b>Korekta lakieru i powłoka ceramiczna</b><span>Audi A6 · Tomasz Wiśniewski</span></div></div>
+                <div class="uv"><span class="uvc"><small>dziś</small>12:30</span><div><b>Mycie detailingowe</b><span>Tesla Model 3 · Anna Zielińska</span></div></div>
+                <div class="uv"><span class="uvc"><small>dziś</small>15:00</span><div><b>Folia PPF na przód</b><span>BMW X5 · Krzysztof Lewandowski</span></div></div>
+                <div class="uv"><span class="uvc"><small>jutro</small>9:00</span><div><b>Pranie tapicerki</b><span>Skoda Superb · Magdalena Kowalczyk</span></div></div>
+              </div>
+              <!-- TasksPanel -->
+              <div class="pn" id="pnT">
+                <div class="pnh" id="pnTh"><h3>Do zrobienia</h3><span class="ha">
+                  <span class="arB"><svg viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>Archiwum</span>
+                  <span class="adB own" id="adB"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Dodaj</span></span></div>
+                <div class="tl2" id="tl2">
+                  <div class="tk" id="tkN"><span class="tcb" id="tkNc"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div class="tkc">
+                    <div class="tkt">Zrób zdjęcia Audi A6 po korekcie</div><div class="tkm">Do galerii i na Instagram, do piątku</div>
+                    <div class="tkr">Dodane przez: Adam Krawczyk, dziś, 9:14</div>
+                    <div class="tka" id="tkNa"><svg viewBox="0 0 24 24"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>Do archiwum 22 paź o 11:40</div>
+                    <div class="vb us" id="tkNb"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Marek Nowak</div></div></div>
+                  <div class="tk"><span class="tcb"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div class="tkc">
+                    <div class="tkt">Uzupełnij płyn do mycia wstępnego</div><div class="tkm">Kanister jest w magazynie</div>
+                    <div class="tkr">Dodane przez: Ewa Pawlak, dziś, 8:05</div></div></div>
+                  <div class="tk own" id="tkR"><span class="tcb"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><div class="tkc">
+                    <div class="tkt">Potwierdź jutrzejsze wizyty telefonicznie</div>
+                    <div class="tkr">Dodane przez: Adam Krawczyk, wczoraj, 16:20</div>
+                    <div class="vb ro"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>Rola: Recepcja</div></div></div>
+                </div>
+              </div>
+            </div>
+          </main>
+
+          <div class="scrim" id="scrim"></div>
+
+          <!-- okno „Nowe zadanie” (TaskModal) -->
+          <div class="md" id="md">
+            <div class="mdh"><span class="mdi"><svg viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span><h2>Nowe zadanie</h2><span class="mdx"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></div>
+            <div class="mdc" id="mdc">
+              <div class="fgp" id="fgT"><div class="lr"><label>Tytuł</label><span>Obowiązkowe</span></div><div class="fi" id="fT"></div></div>
+              <div class="fgp" id="fgM"><div class="lr"><label>Szczegóły</label><span>Opcjonalne</span></div><div class="fi ta" id="fM"></div></div>
+              <div class="fgp" id="fgV"><div class="lr"><label>Kto widzi</label></div>
+                <div class="vt" id="vt">
+                  <span class="vtb" id="vtA"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>Wszyscy</span>
+                  <span class="vtb" id="vtU"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Osoby</span>
+                  <span class="vtb" id="vtR"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>Rola</span>
+                </div>
+                <div class="pk" id="pk">
+                  <div class="pki" id="pu1"><span class="pcb"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span>Adam Krawczyk</span></div>
+                  <div class="pki" id="pu2"><span class="pcb"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span>Marek Nowak</span></div>
+                  <div class="pki" id="pu3"><span class="pcb"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span>Ewa Pawlak</span></div>
+                  <div class="pki" id="pu4"><span class="pcb"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span>Bartosz Kaczmarek</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="mdf"><span class="mb gh">Anuluj</span><span class="mb pr" id="mdSave">Dodaj zadanie</span></div>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="hl" id="hl"></div>
+      <div class="ring" id="ring"></div>
+      <div class="kcap" id="kcap">Z</div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.2 6.9z" fill="#0f172a" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="scrub" id="scrub"><i id="scrubI"></i></div>
+  <div class="bar">
+    <button type="button" id="bPrev">‹ Poprzedni krok</button>
+    <button type="button" class="pri" id="bPlay">Odtwórz</button>
+    <button type="button" id="bNext">Następny krok ›</button>
+    <span class="sp"></span>
+    <label><input type="checkbox" id="optStop"> Zatrzymuj po każdym kroku</label>
+    <button type="button" id="bRate">Tempo 1×</button>
+  </div>
+  <div class="chaps" id="chaps"></div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const out3 = k => 1 - Math.pow(1 - k, 3);
+  const io3 = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const back = k => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.5; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+  const type = (s, k) => s.slice(0, Math.round(s.length * clamp(k, 0, 1)));
+  const W = 1920, H = 1080, CX = 1290, CY = 540;
+
+  const stage = $('stage'), scene = $('scene'), ap = $('ap');
+  // ---------- dane przykładowe ----------
+  window.DATA = { title: 'Zrób zdjęcia Audi A6 po korekcie', meta: 'Do galerii i na Instagram, do piątku' };
+
+  // ---------- chapters and beats ----------
+  const CH = ['Gdzie są zadania', 'Nowe zadanie', 'Kto je zobaczy', 'U pracownika', 'Gotowe'];
+  const beats = [];
+  const words = s => (s || '').split(/\s+/).filter(Boolean).length;
+  window.beat = (ch, o, f) => beats.push({ ch, h: o.h, b: o.b, lead: o.lead ?? .6, act: o.act ?? 1, hold: o.hold ?? .6, f: f || (() => {}) });
+
+  window.H = {
+    P, lerp, out3, io3, back, type, clamp,
+    mv: (S, to, k, o = {}) => { S.cur = { to, k, dx: o.dx || 0, dy: o.dy || 0, from: o.from || null, fdx: o.fdx || 0, fdy: o.fdy || 0, vis: S.cur.vis }; },
+    tap: (S, a, at, id) => { const k = P(S._s, S._lead + at * S._act, S._lead + at * S._act + .6); if (k > 0 && k < 1) S.tap = k; if (id && a > at && a < at + .14) S.press = id; },
+    cam: (S, to, k) => { S.cam = { to, k }; },
+    hl: (S, el, k = 1, pad = 6) => { S.hl = { el, k, pad }; },
+    foc: (S, sec) => { S.foc = sec; },
+  };
+
+  const fresh = () => ({
+    ap: 0, navHov: 0, navAct: 0, mainK: 0, who: 'a', zHov: 0,
+    addHov: 0, mdK: 0, title: '', meta: '', fF: null, typing: false,
+    vis: 'ALL', vtHov: null, pkK: 0, puHov: null, puSel: 0, saveHov: 0, saving: 0,
+    tkNK: 0, tkHov: 0, cbHov: 0, done: 0, doneK: 0,
+    hl: null, hlLast: null, foc: null, focPrev: null,
+    cam: { to: 'ap', k: 1 }, cur: { to: null, k: 1, vis: 0, dx: 0, dy: 0 },
+    tap: 0, key: 0, press: null, _s: 0,
+  });
+
+  let DUR = 0, chStart = [];
+  const layout = () => {
+    let t = 0, lastText = null;
+    beats.forEach((b, i) => {
+      const txt = b.h + '|' + b.b;
+      b.newText = txt !== lastText; lastText = txt;
+      b.textIdx = b.newText ? i : beats[i - 1].textIdx;
+      if (b.newText) b.lead = Math.max(b.lead, .7);
+      const read = b.newText ? 1.5 + words(b.h) * .26 + words(b.b) * .24 : 0;
+      const slack = read - (b.lead + b.act + b.hold);
+      if (slack > 0) b.act = Math.min(b.act * 1.7, b.act + slack * .5);
+      b.d = Math.max(b.lead + b.act + b.hold, read);
+      b.t0 = t; t += b.d;
+      if (chStart[b.ch] === undefined) chStart[b.ch] = b.t0;
+    });
+    DUR = t;
+  };
+
+  const beatAt = t => { let i = 0; while (i < beats.length - 1 && beats[i + 1].t0 <= t) i++; return i; };
+  const runBeat = (S, i, s) => {
+    const b = beats[i];
+    S.hlLast = S.hl; S.hl = null; S.focPrev = S.foc; S.tap = 0; S.key = 0; S.press = null; S._s = s; S._i = i; S._lead = b.lead; S._act = b.act; S._T = b.t0 + s;
+    b.f(S, P(s, b.lead, b.lead + b.act), s);
+  };
+  const stateAtBeat = (i, s) => { const S = fresh(); for (let j = 0; j < i; j++) runBeat(S, j, beats[j].d); runBeat(S, i, s); return S; };
+
+  // ---------- geometry ----------
+  const sRect = el => { const r = el.getBoundingClientRect(), s0 = stage.getBoundingClientRect(), k = s0.width / W; return { x: (r.left - s0.left) / k, y: (r.top - s0.top) / k, w: r.width / k, h: r.height / k }; };
+  // layout position in scene coordinates (offsets ignore flow-in transforms)
+  const geo = el => { let x = 0, y = 0, n = el; while (n && n !== scene) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+
+  // ---------- flow-in ----------
+  const enter = (el, k, dy = 22, sc = .975, blur = 7) => {
+    k = clamp(k, 0, 1);
+    el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden';
+    if (k >= 1) { el.style.transform = ''; el.style.filter = ''; return; }
+    el.style.transform = `translateY(${(1 - out3(k)) * dy}px) scale(${lerp(sc, 1, out3(k))})`;
+    el.style.filter = `blur(${(1 - k) * blur}px)`;
+  };
+  const stag = (els, k, st = .12, dy = 14) => { const n = els.length, span = 1 + st * (n - 1); els.forEach((el, i) => enter(el, clamp(k * span - i * st, 0, 1), dy, .99, 5)); };
+  const clear = els => els.forEach(p => { if (p.style.transform || p.style.filter || p.style.opacity !== '') { p.style.transform = ''; p.style.filter = ''; p.style.opacity = ''; p.style.visibility = ''; } });
+  const pop = (el, k) => { k = clamp(k, 0, 1); el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden'; el.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * -8}px) scale(${lerp(.97, 1, out3(k))})`; el.style.filter = k >= 1 ? '' : `blur(${(1 - k) * 5}px)`; };
+
+  // ---------- caption text (style B: words flow in from below with blur) ----------
+  const ctx = $('ctx'), cnum = $('cnum');
+  const textEls = {}, chEls = {};
+  const mkWords = s => s.split(' ').reduce((a, w) => { const p = a[a.length - 1]; if (p !== undefined && /^\p{L}$/u.test(p)) a[a.length - 1] = p + ' ' + w; else a.push(w); return a; }, []).map(w => `<span class="w">${w} </span>`).join('');
+  const textEl = i => {
+    if (textEls[i]) return textEls[i];
+    const b = beats[i], d = document.createElement('div'); d.className = 'tl';
+    d.innerHTML = `<h2 class="ch">${mkWords(b.h)}</h2>` + (b.b ? `<div class="cbd">${mkWords(b.b)}</div>` : '');
+    d.style.display = 'none'; ctx.appendChild(d);
+    textEls[i] = { el: d, hw: Array.from(d.querySelectorAll('.ch .w')), bw: Array.from(d.querySelectorAll('.cbd .w')) };
+    return textEls[i];
+  };
+  const chEl = c => {
+    if (chEls[c]) return chEls[c];
+    const d = document.createElement('div'); d.innerHTML = `<b>${String(c + 1).padStart(2, '0')}</b><i></i><span>${CH[c]}</span>`;
+    d.style.display = 'none'; cnum.appendChild(d); return (chEls[c] = d);
+  };
+  const wIn = (w, k, dy = 32, bl = 9) => { w.style.opacity = k; w.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * dy}px)`; w.style.filter = k >= 1 ? '' : `blur(${(1 - k) * bl}px)`; };
+  const wOut = (w, k) => { w.style.opacity = 1 - k; w.style.transform = `translateY(${-io3(k) * 26}px)`; w.style.filter = `blur(${k * 7}px)`; };
+  let shownT = [], shownC = [];
+  const paintText = (i, t) => {
+    const cur = beats[i].textIdx, tS = beats[cur].t0, tau = t - tS;
+    const prevIdx = cur > 0 ? beats[cur - 1].textIdx : -1;
+    const want = [cur]; if (prevIdx >= 0 && tau < .75) want.push(prevIdx);
+    shownT.forEach(j => { if (!want.includes(j)) textEls[j].el.style.display = 'none'; });
+    shownT = want;
+    const T = textEl(cur); T.el.style.display = 'block';
+    const nh = T.hw.length;
+    T.hw.forEach((w, j) => wIn(w, P(tau, .3 + j * .05, .3 + j * .05 + .65)));
+    const b0 = .3 + nh * .05 + .25;
+    T.bw.forEach((w, j) => wIn(w, P(tau, b0 + j * .018, b0 + j * .018 + .6), 18, 6));
+    if (want[1] !== undefined) { const O = textEl(prevIdx); O.el.style.display = 'block'; [...O.hw, ...O.bw].forEach((w, j) => wOut(w, P(tau, j * .01, j * .01 + .42))); }
+    const c = beats[i].ch, cS = chStart[c], ct = t - cS, wantC = [c]; if (c > 0 && ct < .6) wantC.push(c - 1);
+    shownC.forEach(j => { if (!wantC.includes(j)) chEls[j].style.display = 'none'; });
+    shownC = wantC;
+    const C = chEl(c); C.style.display = 'flex'; wIn(C, c === 0 && t < .3 ? 0 : P(ct, .15, .75), 20, 6);
+    if (wantC[1] !== undefined) { const O = chEl(c - 1); O.style.display = 'flex'; wOut(O, P(ct, 0, .4)); }
+    $('pl').innerHTML = `Rozdział <b>${c + 1}</b> z ${CH.length}`;
+    const bars = $('pb').children;
+    for (let j = 0; j < CH.length; j++) { const a = chStart[j], b = j + 1 < CH.length ? chStart[j + 1] : DUR; bars[j].firstChild.style.width = (P(t, a, b) * 100) + '%'; }
+  };
+  $('pb').innerHTML = CH.map(() => '<i><b></b></i>').join('');
+
+  // ---------- camera targets ----------
+  const fitS = (w, h, mx = 1.5) => Math.min(mx, 1060 / w, 1000 / h);
+  const camTarget = to => {
+    if (to === 'ap') return { fx: 650, fy: 430, s: fitS(1360, 860) };
+    // zoomed on the modal, the dark sidebar under the scrim stays behind the caption mask
+    const noSide = (fx, s) => Math.max(fx, 248 + 570 / s);
+    if (to === 'md') { const m = geo($('md')); const s = Math.min(1.3, 960 / m.h); return { fx: noSide(m.x + m.w / 2, s), fy: m.y + m.h / 2, s }; }
+    // panel „Do zrobienia”: wąska kolumna, więc mocniejsze przybliżenie
+    if (to === 'tasks') { const p = geo($('pnT')); const s = Math.min(1.75, 940 / p.h, 1000 / p.w); return { fx: p.x + p.w / 2 - 60 / s, fy: p.y + p.h / 2, s }; }
+    return { fx: 650, fy: 430, s: 1 };
+  };
+
+  const navParts = Array.from($('asb').children);
+  const mainParts = Array.from($('amn').children);
+  const FOCUS = ['asb', 'hero', 'osc', 'pnV', 'pnT', 'fgT', 'fgM', 'fgV'];
+  const MD_PARTS = ['fgT', 'fgM', 'fgV'];
+
+  const field = (id, val, ph, focus, T, typing) => {
+    const el = $(id); el.classList.toggle('focus', !!focus);
+    const shown = val || (focus ? '' : ph);
+    el.classList.toggle('ph', !val && !focus && !!ph);
+    el.innerHTML = '';
+    el.appendChild(document.createTextNode(shown));
+    if (focus) el.insertAdjacentHTML('beforeend', `<span class="caret" style="opacity:${Math.floor(T * 2.2) % 2 && !typing ? 0 : 1}"></span>`);
+  };
+
+  let lastCur = { x: 1500, y: 1180 };
+  function paint(S, prev) {
+    const s = S._s, T = S._T || 0;
+    // --- app frame, sidebar, main content; who = whose account is on screen (a: właściciel, m: Marek)
+    enter(ap, S.ap, 30, .96, 8);
+    ap.classList.toggle('who-m', S.who === 'm');
+    $('heG').textContent = S.who === 'm' ? 'Dzień dobry, Marek!' : 'Dzień dobry, Adam!';
+    if (S.ap < 1) stag(navParts, S.ap * 1.1, .06, 14); else clear(navParts);
+    $('nvT').classList.toggle('on', !!S.navAct); $('nvT').classList.toggle('hov', !!S.navHov && !S.navAct);
+    $('nvZ').classList.toggle('hov', !!S.zHov);
+    if (S.mainK < 1) stag(mainParts, S.mainK, .14, 18); else clear(mainParts);
+    $('adB').classList.toggle('hov', !!S.addHov); $('adB').classList.toggle('prs', S.press === 'adB');
+
+    // --- new task in „Do zrobienia” (optimistic insert at the top)
+    { const r = $('tkN'); r.style.display = S.tkNK > 0 ? 'flex' : 'none'; if (S.tkNK > 0) enter(r, S.tkNK, 18, .975, 7);
+      r.classList.toggle('hov', !!S.tkHov); r.classList.toggle('done', !!S.done);
+      const c = $('tkNc'); c.classList.toggle('on', !!S.done); c.classList.toggle('hov', !!S.cbHov && !S.done);
+      c.style.transform = S.done && S.doneK < .4 ? `scale(${lerp(.8, 1, back(P(S.doneK, 0, .4)))})` : '';
+      const h = $('tkNa'); h.style.display = S.done ? 'inline-flex' : 'none'; if (S.done && S.doneK < 1) enter(h, P(S.doneK, .2, 1), 8, .98, 4); else clear([h]); }
+
+    // --- modal „Nowe zadanie”
+    { const sc = $('scrim'), k = clamp(S.mdK, 0, 1); sc.style.opacity = k; sc.style.visibility = k > .001 ? 'visible' : 'hidden'; }
+    const md = $('md');
+    enter(md, S.mdK, 16, .96, 8);
+    if (S.mdK < 1 && S.mdK > 0 && !S.saving) stag(MD_PARTS.map($), S.mdK, .07, 18); else if (S.mdK >= 1) clear(MD_PARTS.map($));
+    field('fT', S.title, 'np. Zadzwoń do klienta', S.fF === 'fT', T, S.typing);
+    field('fM', S.meta, 'np. Pilne, termin do piątku', S.fF === 'fM', T, S.typing);
+    [['vtA', 'ALL'], ['vtU', 'USERS'], ['vtR', 'ROLE']].forEach(([id, v]) => { $(id).classList.toggle('on', S.vis === v); $(id).classList.toggle('hov', S.vtHov === id && S.vis !== v); });
+    { const p = $('pk'), full = p.scrollHeight, k = out3(clamp(S.pkK, 0, 1)); p.style.maxHeight = (k * full) + 'px'; p.style.opacity = k; p.style.display = S.pkK > 0 ? 'flex' : 'none'; }
+    ['pu1', 'pu2', 'pu3', 'pu4'].forEach(id => { $(id).classList.toggle('hov', S.puHov === id); });
+    $('pu2').classList.toggle('sel', !!S.puSel);
+    { const b = $('mdSave'); b.textContent = S.saving ? 'Zapisywanie…' : 'Dodaj zadanie'; b.classList.toggle('dis', !S.title); b.classList.toggle('hov', !!S.saveHov); b.classList.toggle('prs', S.press === 'mdSave'); }
+    md.style.top = Math.round((860 - md.offsetHeight) / 2) + 'px';
+
+    // --- focus: the active section stays sharp, the rest softens
+    const fk = io3(P(s, 0, .7));
+    const dimOf = (f, id) => (f && !(Array.isArray(f) ? f.includes(id) : f === id) ? 1 : 0);
+    FOCUS.forEach(id => {
+      const el = $(id);
+      const inMd = MD_PARTS.includes(id);
+      if (inMd ? S.mdK < 1 : (mainParts.includes(el) ? S.mainK < 1 : S.ap < 1)) return;
+      // a focus set for the modal does not dim the app behind it, and the other way round
+      const rel = f => (f && (Array.isArray(f) ? f : [f]).some(x => MD_PARTS.includes(x)) === inMd ? f : null);
+      const d = lerp(dimOf(rel(S.focPrev), id), dimOf(rel(S.foc), id), fk);
+      el.style.opacity = d > .001 ? 1 - d * .6 : ''; el.style.filter = d > .001 ? `blur(${d * 1.8}px)` : '';
+    });
+
+    // --- camera
+    const tg2 = camTarget(S.cam.to);
+    let cam = tg2;
+    if (prev && S.cam.k < 1) { const k = io3(S.cam.k); cam = { fx: lerp(prev.cam.fx, tg2.fx, k), fy: lerp(prev.cam.fy, tg2.fy, k), s: Math.exp(lerp(Math.log(prev.cam.s), Math.log(tg2.s), k)) }; }
+    // gentle drift: translation only (a breathing scale makes small boxes shimmer); whole pixels while the camera rests
+    const ds = cam.s, still = !(prev && S.cam.k < 1);
+    let tx = CX - cam.fx * ds + 9 * Math.sin(T * .29), ty = CY - cam.fy * ds + 6 * Math.sin(T * .21 + 1);
+    if (still) { tx = Math.round(tx); ty = Math.round(ty); }
+    scene.style.transform = `translate(${tx}px, ${ty}px) scale(${ds})`;
+
+    // --- highlight ring (glides from the previous one)
+    const hlEl = $('hl');
+    const rr = h => { const r = sRect($(h.el)), p = (h.pad ?? 6) * 1.3; return { x: r.x - p, y: r.y - p, w: r.w + 2 * p, h: r.h + 2 * p }; };
+    let hr = null, ho = 0;
+    if (S.hl) {
+      const b = rr(S.hl);
+      if (S.hlLast && S.hlLast.el !== S.hl.el) { const a = rr(S.hlLast), k = io3(P(s, 0, .6)); hr = { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), w: lerp(a.w, b.w, k), h: lerp(a.h, b.h, k) }; ho = 1; }
+      else { hr = b; ho = S.hlLast && S.hlLast.el === S.hl.el && S.hl.k >= 1 ? 1 : out3(S.hl.k); }
+    } else if (S.hlLast && s < .35) { hr = rr(S.hlLast); ho = 1 - s / .35; }
+    if (hr && ho > .001) { hlEl.style.opacity = ho; hlEl.style.left = hr.x + 'px'; hlEl.style.top = hr.y + 'px'; hlEl.style.width = hr.w + 'px'; hlEl.style.height = hr.h + 'px'; hlEl.style.borderRadius = '14px'; } else hlEl.style.opacity = 0;
+
+    // --- cursor (arc between targets)
+    let cur = { x: 1500, y: 1180 };
+    const ctr = (id, dx, dy) => { const r = sRect($(id)); if (r.w < 1 && r.h < 1) return null; return { x: r.x + r.w / 2 + dx * ds, y: r.y + r.h / 2 + dy * ds }; };
+    if (S.cur.to) cur = ctr(S.cur.to, S.cur.dx, S.cur.dy) || lastCur;
+    if (S.cur.k < 1 && (prev || S.cur.from)) {
+      const a = (S.cur.from && ctr(S.cur.from, S.cur.fdx, S.cur.fdy)) || (prev ? prev.cur : cur), k = io3(S.cur.k), dx = cur.x - a.x, dy = cur.y - a.y, d = Math.hypot(dx, dy) || 1, bend = Math.sin(Math.PI * k) * Math.min(70, d * .14);
+      cur = { x: lerp(a.x, cur.x, k) - dy / d * bend, y: lerp(a.y, cur.y, k) + dx / d * bend };
+    }
+    lastCur = cur;
+    const cv2 = $('cursor'), press = S.tap > 0 ? Math.sin(Math.PI * clamp(S.tap * 2.2, 0, 1)) : 0;
+    cv2.style.opacity = S.cur.vis; cv2.style.transform = `translate(${cur.x - 7}px, ${cur.y - 5}px) scale(${1 - press * .16})`;
+    const ring = $('ring'); if (S.tap > 0 && S.tap < 1) { ring.style.opacity = (1 - S.tap) * S.cur.vis; ring.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${.35 + S.tap * .9})`; } else ring.style.opacity = 0;
+    const kc = $('kcap'); kc.style.opacity = S.key; kc.style.left = (cur.x + 40) + 'px'; kc.style.top = (cur.y + 18) + 'px';
+    return { cam, cur };
+  }
+
+  // ---------- timeline driver with memo of each beat's end ----------
+  const ends = [];
+  const endOf = i => {
+    if (i < 0) return null;
+    if (ends[i]) return ends[i];
+    const S = stateAtBeat(i, beats[i].d);
+    ends[i] = paint(S, i > 0 ? endOf(i - 1) : null);
+    return ends[i];
+  };
+  const draw = t => {
+    t = clamp(t, 0, DUR - .001);
+    const i = beatAt(t), b = beats[i];
+    const prev = endOf(i - 1);
+    const S = stateAtBeat(i, t - b.t0);
+    paint(S, prev);
+    paintText(i, t);
+    window.__t = t;
+  };
+
+  // ---------- player ----------
+  const player = $('player');
+  const fit = () => { stage.style.transform = `scale(${player.clientWidth / W})`; };
+  let t = 0, playing = false, rate = 1;
+  const bPlay = $('bPlay');
+  const syncBtn = () => { bPlay.textContent = playing ? 'Pauza' : (t >= DUR - .01 ? 'Od początku' : 'Odtwórz'); };
+  const chapAt = tt => { let c = 0; for (let j = 0; j < CH.length; j++) if (chStart[j] <= tt + .001) c = j; return c; };
+  const go = nt => { t = clamp(nt, 0, DUR - .001); draw(t); $('scrubI').style.width = (t / DUR * 100) + '%'; const c = chapAt(t); Array.from($('chaps').children).forEach((e, j) => e.classList.toggle('on', j === c)); };
+  bPlay.addEventListener('click', () => { if (t >= DUR - .01) go(0); playing = !playing; syncBtn(); });
+  const textStarts = () => beats.filter(b => b.newText).map(b => b.t0);
+  $('bNext').addEventListener('click', () => { const n = textStarts().find(x => x > t + .05); if (n !== undefined) go(n + .01); });
+  $('bPrev').addEventListener('click', () => { const ts = textStarts().filter(x => x < t - .4); go(ts.length ? ts[ts.length - 1] + .01 : 0); });
+  $('bRate').addEventListener('click', () => { rate = rate === 1 ? .75 : 1; $('bRate').textContent = `Tempo ${rate === 1 ? '1' : '0,75'}×`; });
+  $('scrub').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); go((e.clientX - r.left) / r.width * DUR); });
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (playing) {
+      let nt = t + dt * rate;
+      if ($('optStop').checked) { const n = textStarts().find(x => x > t + .001); if (n !== undefined && nt >= n) { nt = n - .001; playing = false; syncBtn(); } }
+      if (nt >= DUR) { nt = DUR - .001; playing = false; syncBtn(); }
+      go(nt);
+    }
+    requestAnimationFrame(frame);
+  };
+  window.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input')) return; if (e.key === ' ') { e.preventDefault(); bPlay.click(); } if (e.key === 'ArrowRight') $('bNext').click(); if (e.key === 'ArrowLeft') $('bPrev').click(); });
+
+  window.__start = () => {
+    layout();
+    $('chaps').innerHTML = CH.map((c, j) => `<button type="button">${j + 1}. ${c}</button>`).join('');
+    Array.from($('chaps').children).forEach((e, j) => e.addEventListener('click', () => go(chStart[j] + .01)));
+    fit(); try { new ResizeObserver(() => { fit(); ends.length = 0; go(t); }).observe(player); } catch (e) { window.addEventListener('resize', () => { fit(); ends.length = 0; go(t); }); }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    go(reduce ? chStart[1] + 2 : .01); syncBtn();
+    requestAnimationFrame(frame);
+    window.__seek = tt => { playing = false; syncBtn(); go(tt); };
+    window.__dur = DUR; window.__chStart = chStart; window.__beats = beats.map(b => [b.t0, b.d, b.ch, b.h, b.newText]);
+  };
+})();
+
+(() => {
+  const { P, out3, type, mv, tap, cam, hl, foc } = window.H;
+  const B = window.beat;
+  const D = window.DATA;
+  const show = (S, s, a = 0, b = .45) => { S.cur.vis = P(s, a, b); };
+  const hide = (S, s) => { S.cur.vis = 1 - P(s, 0, .35); };
+
+  // 1 Gdzie są zadania
+  B(0, { h: 'Jak dodać zadanie dla zespołu lub pracownika?', b: '', lead: .2, act: 1.4, hold: .5 }, (S, a, s) => { S.ap = P(s, .3, 1.5); cam(S, 'ap', 1); });
+  B(0, { h: 'Zlecaj zadania w programie zamiast na kartkach.', b: 'Każdy pracownik widzi swoje zadania na „Tablicy”.', lead: .6, act: 2.4, hold: .6 }, (S, a, s) => {
+    S.ap = 1; show(S, s); mv(S, 'nvT', P(a, 0, .42), { dx: -30 }); S.navHov = a > .36 ? 1 : 0; tap(S, a, .44);
+    if (a > .47) S.navAct = 1; S.mainK = P(a, .5, 1);
+  });
+  B(0, { h: 'Zadania są w panelu „Do zrobienia”.', b: '', lead: .7, act: 2.4, hold: .7 }, (S, a, s) => {
+    S.navAct = 1; S.mainK = 1; cam(S, 'tasks', P(a, 0, .85)); foc(S, 'pnT'); mv(S, 'adB', P(a, .3, 1), { dx: -40, dy: 40 }); hl(S, 'pnT', P(a, .5, .9), 2);
+  });
+
+  // 2 Nowe zadanie
+  B(1, { h: 'Kliknij „Dodaj”.', b: 'To samo okno otwiera klawisz Z na każdym ekranie.', lead: .7, act: 3.4, hold: .2 }, (S, a) => {
+    foc(S, 'pnT'); mv(S, 'adB', P(a, 0, .3), { from: 'adB', fdx: -40, fdy: 40 }); S.addHov = a > .25 && a < .45 ? 1 : 0; tap(S, a, .36, 'adB');
+    S.mdK = P(a, .42, .7); if (a > .42) { foc(S, null); cam(S, 'md', P(a, .42, 1)); }
+  });
+  B(1, { h: 'Wpisz, co trzeba zrobić.', b: '', lead: .7, act: 3.4, hold: .3 }, (S, a) => {
+    S.mdK = 1; foc(S, 'fgT'); mv(S, 'fT', P(a, 0, .26), { dx: -80 }); tap(S, a, .28); if (a > .3) S.fF = 'fT';
+    S.title = type(D.title, P(a, .35, .95)); S.typing = a > .35 && a < .95;
+  });
+  B(1, { h: 'Dopisz szczegóły, na przykład termin.', b: 'To pole możesz pominąć.', lead: .7, act: 3.4, hold: .3 }, (S, a) => {
+    S.title = D.title; S.typing = false; foc(S, 'fgM'); mv(S, 'fM', P(a, 0, .18), { dx: -80, dy: -10 }); tap(S, a, .2); if (a > .22) S.fF = 'fM';
+    S.meta = type(D.meta, P(a, .28, .95)); S.typing = a > .28 && a < .95;
+  });
+
+  // 3 Kto je zobaczy
+  B(2, { h: 'Wybierz, kto zobaczy zadanie.', b: 'Cały zespół, wybrane osoby albo jedna rola.', lead: .7, act: 2.4, hold: .6 }, (S, a) => {
+    S.meta = D.meta; S.typing = false; S.fF = null; foc(S, 'fgV'); hl(S, 'vt', P(a, 0, .3), 4);
+    mv(S, 'vtA', P(a, 0, .3)); if (a > .35) mv(S, 'vtR', P(a, .35, .85), { from: 'vtA' });
+    S.vtHov = a > .55 && a < .7 ? 'vtU' : a > .8 ? 'vtR' : null;
+  });
+  B(2, { h: 'Zaznacz pracownika, któremu zlecasz zadanie.', b: 'Na liście są osoby, które mają konto w programie.', lead: .7, act: 3.2, hold: .3 }, (S, a) => {
+    foc(S, 'fgV'); S.vtHov = a < .2 ? 'vtU' : null; mv(S, 'vtU', P(a, 0, .2), { from: 'vtR' }); tap(S, a, .22);
+    if (a > .25) { S.vis = 'USERS'; S.pkK = P(a, .25, .45); }
+    if (a > .5) mv(S, 'pu2', P(a, .5, .72), { from: 'vtU', dx: -90 }); S.puHov = a > .68 && a < .8 ? 'pu2' : null; tap(S, a, .78);
+    if (a > .8) S.puSel = 1;
+  });
+  B(2, { h: 'Zaznacz pracownika, któremu zlecasz zadanie.', b: 'Na liście są osoby, które mają konto w programie.', lead: 0, act: 1.2, hold: .6 }, (S, a) => {
+    S.vis = 'USERS'; S.pkK = 1; S.puSel = 1; foc(S, 'fgV'); hl(S, 'pk', P(a, 0, .5), 4);
+  });
+
+  // dodanie zadania
+  B(2, { h: 'Dodaj zadanie.', b: 'Osoby, które je zobaczą, wybierasz tylko przy dodawaniu.', lead: .7, act: 3.8, hold: .2 }, (S, a) => {
+    foc(S, null); mv(S, 'mdSave', P(a, 0, .3)); S.saveHov = a > .25 && a < .45 ? 1 : 0; tap(S, a, .36, 'mdSave');
+    S.saving = a > .4 && a < .55 ? 1 : 0; S.mdK = 1 - out3(P(a, .52, .72)); if (a > .52) cam(S, 'tasks', P(a, .52, 1));
+    S.tkNK = P(a, .66, .95);
+  });
+  B(2, { h: 'Na liście widać, dla kogo jest zadanie.', b: 'Jako właściciel widzisz zadania całego zespołu.', lead: .7, act: 1.8, hold: .8 }, (S, a, s) => {
+    S.mdK = 0; S.saving = 0; S.saveHov = 0; S.tkNK = 1; hide(S, s); foc(S, 'pnT'); hl(S, 'tkNb', P(a, 0, .4), 4);
+  });
+
+  // 4 U pracownika
+  B(3, { h: 'Marek widzi zadanie na swojej „Tablicy”.', b: 'Zadania dla innych osób i ról są przed nim ukryte.', lead: .7, act: 2.6, hold: .2 }, (S, a) => {
+    S.tkNK = 1; S.cur.vis = 0; foc(S, null);
+    S.ap = a < .35 ? 1 - P(a, 0, .3) : P(a, .4, .75); if (a > .35) { S.who = 'm'; cam(S, 'ap', 1); } else cam(S, 'tasks', 1);
+  });
+  B(3, { h: 'Marek widzi zadanie na swojej „Tablicy”.', b: 'Zadania dla innych osób i ról są przed nim ukryte.', lead: 0, act: 2.4, hold: .8 }, (S, a) => {
+    S.ap = 1; S.who = 'm'; cam(S, 'tasks', P(a, 0, 1)); foc(S, 'pnT');
+  });
+  B(3, { h: 'Po wykonaniu pracownik odhacza zadanie.', b: 'Po 48 godzinach wykonane zadanie trafia do „Archiwum”.', lead: .7, act: 2.4, hold: .9 }, (S, a, s) => {
+    show(S, s); foc(S, 'pnT'); mv(S, 'tkNc', P(a, 0, .35), { from: 'tkNc', fdx: 140, fdy: 90 }); S.tkHov = a > .2 ? 1 : 0; S.cbHov = a > .3 && a < .42 ? 1 : 0; tap(S, a, .4);
+    if (a > .43) { S.done = 1; S.doneK = P(a, .43, .75); } hl(S, 'tkNa', P(a, .7, 1), 4);
+  });
+
+  // 5 Gotowe
+  B(4, { h: 'Odhaczone zadanie widzisz na swojej „Tablicy”.', b: '', lead: .7, act: 2.6, hold: .8 }, (S, a, s) => {
+    S.done = 1; S.doneK = 1; S.tkHov = 0; S.cbHov = 0; hide(S, s); foc(S, null);
+    S.ap = a < .35 ? 1 - P(a, 0, .3) : P(a, .4, .75); S.who = a > .35 ? 'a' : 'm'; cam(S, 'tasks', 1);
+    if (a > .8) hl(S, 'tkN', P(a, .8, 1), 3);
+  });
+  B(4, { h: 'Jeśli coś nie działa, napisz do nas.', b: 'Kliknij „Zgłoś problem” w menu. Pomożemy ustawić zadania dla zespołu.', lead: .7, act: 3.0, hold: 6 }, (S, a, s) => {
+    S.ap = 1; S.who = 'a'; S.done = 1; S.doneK = 1; cam(S, 'ap', P(a, 0, .8)); S.zHov = a > .6 ? 1 : 0; if (a > .6) hl(S, 'nvZ', P(a, .6, 1), 3);
+  });
+})();
+window.__start();
+</script>
+
+</body>
+</html>

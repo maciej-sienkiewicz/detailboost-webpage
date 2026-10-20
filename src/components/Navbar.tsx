@@ -1,6 +1,14 @@
 import { useEffect, useId, useState } from 'react';
 
-const LINKS = ['Funkcje', 'Cennik', 'Integracje', 'Kontakt'] as const;
+const LINKS = [
+    { id: 'funkcje', label: 'Funkcje', href: '/#' },
+    { id: 'poznaj', label: 'Poznaj program', href: '/poznaj-program/' },
+    { id: 'cennik', label: 'Cennik', href: '/#' },
+    { id: 'integracje', label: 'Integracje', href: '/#' },
+    { id: 'kontakt', label: 'Kontakt', href: '/#' },
+] as const;
+
+type Strona = (typeof LINKS)[number]['id'];
 
 /**
  * Pasek ma trzy strefy w siatce 1fr / auto / 1fr, a nie flex z `justify-between`.
@@ -13,8 +21,10 @@ const LINKS = ['Funkcje', 'Cennik', 'Integracje', 'Kontakt'] as const;
  * pod paskiem zaczyna przesuwać się treść.
  *
  * Na telefonie menu otwiera słowo „Menu", nie hamburger: strona nie używa ikon.
+ *
+ * `current` to podstrona, na której stoi pasek - jej link jest jasny i ma `aria-current`.
  */
-export function Navbar() {
+export function Navbar({ current }: { current?: Strona }) {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const panelId = useId();
@@ -50,16 +60,19 @@ export function Navbar() {
                 aria-label="Główna"
                 className="mx-auto grid h-16 max-w-[100rem] grid-cols-[1fr_auto] items-center px-5 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:px-12"
             >
-                <a href="#" className="justify-self-start text-[1.0625rem] font-[680] tracking-[-0.04em] text-paper">
+                <a href="/" className="justify-self-start text-[1.0625rem] font-[680] tracking-[-0.04em] text-paper">
                     DetailBoost
                 </a>
 
                 <ul className="hidden items-center gap-9 lg:flex">
-                    {LINKS.map((label) => (
-                        <li key={label}>
+                    {LINKS.map(({ id, label, href }) => (
+                        <li key={id}>
                             <a
-                                href="#"
-                                className="text-[0.8125rem] font-[450] tracking-[-0.01em] text-mute transition-colors duration-150 hover:text-paper"
+                                href={href}
+                                aria-current={id === current ? 'page' : undefined}
+                                className={`text-[0.8125rem] font-[450] tracking-[-0.01em] transition-colors duration-150 hover:text-paper ${
+                                    id === current ? 'text-paper' : 'text-mute'
+                                }`}
                             >
                                 {label}
                             </a>
@@ -96,13 +109,14 @@ export function Navbar() {
 
             <div id={panelId} hidden={!open} className="border-t border-line lg:hidden">
                 <ul className="mx-auto max-w-[100rem] px-5 sm:px-8">
-                    {[...LINKS, 'Zaloguj'].map((label) => (
-                        <li key={label} className="border-b border-line last:border-b-0">
+                    {[...LINKS, { id: 'zaloguj', label: 'Zaloguj', href: '/#' }].map(({ id, label, href }) => (
+                        <li key={id} className="border-b border-line last:border-b-0">
                             <a
-                                href="#"
+                                href={href}
                                 onClick={() => setOpen(false)}
+                                aria-current={id === current ? 'page' : undefined}
                                 className={`flex h-14 items-center text-[1.0625rem] font-[520] tracking-[-0.02em] ${
-                                    label === 'Zaloguj' ? 'text-mute' : 'text-paper'
+                                    id === 'zaloguj' ? 'text-mute' : 'text-paper'
                                 }`}
                             >
                                 {label}

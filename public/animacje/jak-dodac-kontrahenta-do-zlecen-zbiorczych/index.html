@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../osadzenie.css">
+<script>if (window.self !== window.top) { document.documentElement.classList.add('osadzona'); document.documentElement.dataset.theme = 'dark'; }</script>
+</head>
+<body>
+<title>Jak dodać kontrahenta</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-ext-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Page: help-centre look. Stage: style B, caption column on the left, the campaign screens on the right. */
+:root {
+  --bg: #eef2f7; --surface: #ffffff; --ink: #0f172a; --ink-2: #475569; --muted: #64748b; --line: #e2e8f0;
+  --brand: #0ea5e9; --brand-ink: #0369a1; --brand-soft: #e0f2fe;
+  --font: 'InterDB', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  padding: 36px max(16px, env(safe-area-inset-right, 0px)) 72px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-ink); }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 800; margin: 6px 0 0; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--ink-2); margin: 0; max-width: 760px; }
+
+.player { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #eef2f7; box-shadow: 0 20px 50px rgba(15,23,42,.16); }
+.stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; font-family: var(--font); color: #0f172a; background: #eef2f7; }
+.bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bar button { font: 600 14px var(--font); height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.bar button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; min-width: 120px; justify-content: center; }
+.bar button:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.bar label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+.bar .sp { flex: 1; }
+.scrub { position: relative; height: 8px; border-radius: 4px; background: var(--line); cursor: pointer; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #0ea5e9; }
+.scrub b { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); opacity: .45; }
+.chaps { display: flex; flex-wrap: wrap; gap: 8px; }
+.chaps button { font: 500 13.5px var(--font); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.chaps button.on { border-color: #0ea5e9; color: var(--brand-ink); background: var(--brand-soft); font-weight: 700; }
+
+/* ===== stage ===== */
+.bgx { position: absolute; inset: 0; background:
+  radial-gradient(900px 700px at 78% 45%, rgba(14,165,233,.10), transparent 70%),
+  radial-gradient(700px 600px at 8% 95%, rgba(37,99,235,.07), transparent 70%), #eef2f7; }
+.brand { position: absolute; left: 120px; top: 84px; display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; z-index: 40; }
+.brand i { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #2563eb); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 17px; font-weight: 800; }
+.brand span { font-size: 19px; font-weight: 500; color: #64748b; margin-left: 6px; letter-spacing: -0.01em; }
+.cap { position: absolute; left: 120px; top: 262px; width: 600px; z-index: 40; }
+.cnum { height: 34px; position: relative; margin-bottom: 26px; }
+.cnum > div { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; color: #0369a1; white-space: nowrap; }
+.cnum > div b { font-variant-numeric: tabular-nums; }
+.cnum > div i { display: block; width: 46px; height: 2px; background: linear-gradient(90deg, #38bdf8, rgba(56,189,248,0)); }
+.cnum > div span { color: #0f172a; font-weight: 600; }
+.ctx { position: relative; }
+.ctx .tl { position: absolute; left: 0; top: 0; width: 600px; }
+.ch { font-size: 56px; font-weight: 750; letter-spacing: -0.038em; line-height: 1.08; margin: 0; }
+.cbd { font-size: 28px; line-height: 1.45; color: #475569; margin-top: 28px; letter-spacing: -0.01em; }
+.ch .w, .cbd .w { display: inline-block; white-space: pre; will-change: transform, filter, opacity; }
+.prog { position: absolute; left: 120px; bottom: 96px; z-index: 40; }
+.prog .pl { font-size: 18px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
+.prog .pl b { color: #0f172a; font-weight: 700; }
+.prog .pb { display: flex; gap: 7px; }
+.prog .pb i { display: block; width: 34px; height: 6px; border-radius: 3px; background: #d5dde8; overflow: hidden; }
+.prog .pb i b { display: block; height: 100%; width: 0; background: #0ea5e9; }
+
+.view { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 20; -webkit-mask-image: linear-gradient(90deg, transparent 735px, #000 800px); mask-image: linear-gradient(90deg, transparent 735px, #000 800px); }
+.scene { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 90; filter: drop-shadow(0 4px 8px rgba(15,23,42,.32)); opacity: 0; pointer-events: none; }
+.ring { position: absolute; left: 0; top: 0; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 3px solid #0ea5e9; opacity: 0; z-index: 89; pointer-events: none; }
+.kcap { position: absolute; z-index: 91; padding: 10px 18px; border-radius: 12px; background: #0f172a; color: #fff; font-size: 22px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,.3); opacity: 0; border-bottom: 4px solid #334155; }
+.hl { position: absolute; z-index: 60; border-radius: 12px; border: 2.5px solid #0ea5e9; box-shadow: 0 0 0 5px rgba(14,165,233,.16), 0 0 26px rgba(14,165,233,.35); opacity: 0; pointer-events: none; }
+
+
+/* ===== floating layers (all live in the scene, placed by the engine) ===== */
+.lay { position: absolute; left: 0; top: 0; opacity: 0; visibility: hidden; z-index: 50; }
+.caret { display: inline-block; width: 2px; height: 1.15em; background: #0ea5e9; margin-left: 1px; vertical-align: -.2em; }
+
+/* ===== app page: sidebar + "Zlecenia zbiorcze" (BatchOrdersView) ===== */
+.pg { position: absolute; left: 0; top: 0; width: 1190px; height: 900px; background: #eef2f7; border-radius: 18px; overflow: hidden; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 30px 70px -20px rgba(15,23,42,.25); opacity: 0; visibility: hidden; font-size: 14px; color: #0f172a; display: flex; }
+.sbr { width: 248px; flex-shrink: 0; background: #0f172a; display: flex; flex-direction: column; color: #cbd5e1; }
+.sbh { display: flex; align-items: center; gap: 10px; padding: 20px 16px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.sblg { width: 36px; height: 36px; border-radius: 10px; background: #1e293b; color: #e2e8f0; font-size: 15px; font-weight: 800; display: grid; place-items: center; }
+.sbn { color: #f1f5f9; font-size: 15px; font-weight: 700; }
+.sbm { flex: 1; padding: 6px 8px; overflow: hidden; }
+.sbs { padding: 14px 0 2px; }
+.sbs:first-child { padding-top: 6px; }
+.sbt { padding: 0 12px 4px; color: #64748b; font-size: 11.5px; font-weight: 600; }
+.sbi { position: relative; display: flex; align-items: center; gap: 11px; padding: 9px 12px; margin-bottom: 1px; border-radius: 10px; font-size: 13px; font-weight: 500; color: #cbd5e1; white-space: nowrap; transition: background-color 180ms ease, color 180ms ease; }
+.sbi .sbic { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; }
+.sbi::before { content: ''; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); height: 22px; width: 3px; background: #0ea5e9; border-radius: 0 3px 3px 0; opacity: 0; transition: opacity 180ms ease; }
+.sbi.hov { background: rgba(255,255,255,.04); color: #f1f5f9; }
+.sbi.on { background: rgba(14,165,233,.11); color: #38bdf8; font-weight: 600; }
+.sbi.on::before { opacity: 1; }
+.sbp { padding: 8px 8px 10px; border-top: 1px solid rgba(255,255,255,.07); }
+.mn { position: relative; flex: 1; min-width: 0; }
+.mnin { padding: 32px 32px; }
+.phd { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px 16px; padding: 4px 0 2px; margin-bottom: 20px; }
+.pht { display: flex; flex-direction: column; gap: 6px; }
+.pht h1 { margin: 0; font-size: 28px; font-weight: 700; color: #0f172a; letter-spacing: -0.4px; line-height: 1.15; }
+.phs { font-size: 14px; color: #64748b; font-weight: 500; }
+.pha { display: flex; gap: 8px; align-items: center; }
+.pgb, .ppb { padding: 10px 20px; border-radius: 9999px; font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; transition: all 180ms ease; white-space: nowrap; }
+.pgb { background: #fff; color: #0f172a; border: 1px solid #e2e8f0; }
+.ppb { background: #0ea5e9; color: #fff; box-shadow: 0 1px 2px rgba(14,165,233,.24); }
+.ppb.hov { background: #0284c7; box-shadow: 0 2px 8px rgba(14,165,233,.28); }
+.cls { display: block; }
+.nwc { overflow: hidden; }
+.nwi { padding-bottom: 24px; }
+/* contractor card (ContractorEntriesSection) */
+.crd { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+.crh { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid #e2e8f0; gap: 12px; }
+.crhl { min-width: 0; }
+.crtr { display: flex; align-items: center; gap: 4px; }
+.crtr h3 { margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; white-space: nowrap; }
+.crib { width: 28px; height: 28px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; color: #94a3b8; transition: background 150ms ease, color 150ms ease; }
+.crib.hov { background: #f1f5f9; color: #0f172a; }
+.crmt { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 12px; color: #94a3b8; margin-top: 2px; }
+.cra { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+.crb { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 9999px; border: 1px solid #e2e8f0; color: #475569; font-size: 13px; font-weight: 600; white-space: nowrap; transition: background 150ms ease, border-color 150ms ease; }
+.crb.ok { border-color: #86efac; background: #f0fdf4; color: #15803d; }
+.crb.pr { border-color: rgba(14,165,233,.32); background: rgba(14,165,233,.10); color: #0ea5e9; }
+.crb.pr.hov { border-color: #0ea5e9; background: rgba(14,165,233,.18); }
+.crf { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-bottom: 1px solid #e2e8f0; background: #f1f5f9; }
+.crfl { font-size: 12px; color: #94a3b8; white-space: nowrap; }
+.crch { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid #e2e8f0; color: #94a3b8; white-space: nowrap; line-height: 18px; }
+.crch.on { border-color: #0ea5e9; background: rgba(14,165,233,.12); color: #0ea5e9; }
+.crt { width: 100%; border-collapse: collapse; }
+.crt thead { background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+.crt th { padding: 12px 20px; text-align: left; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+.crt td { padding: 12px 20px; font-size: 13px; color: #475569; vertical-align: middle; }
+.crt .r { text-align: right; }
+.crt .crmn { width: 40px; padding-left: 4px; }
+.crt tbody tr { border-bottom: 1px solid #f1f5f9; }
+.crt tbody tr:last-child { border-bottom: none; }
+.crv { font-size: 13px; font-weight: 600; color: #0f172a; line-height: 1.4; }
+.crpl { display: inline-block; margin-top: 3px; padding: 3px 8px; background: #1e293b; color: #e2e8f0; border-radius: 5px; font-size: 11px; font-weight: 700; letter-spacing: .07em; font-family: 'JetBrains Mono', Consolas, monospace; line-height: 1.5; }
+.crsn { font-size: 13px; color: #0f172a; font-weight: 500; line-height: 1.35; }
+.crsp { font-size: 12px; color: #94a3b8; white-space: nowrap; }
+.crm { font-weight: 500; white-space: nowrap; color: #475569; }
+.crg { font-weight: 600; white-space: nowrap; color: #0f172a; }
+.crn { color: #94a3b8; }
+.crdt { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 16px; color: #94a3b8; }
+.crs { display: flex; align-items: center; background: #f1f5f9; border-top: 1px solid #e2e8f0; }
+.crs > span { display: flex; align-items: baseline; gap: 8px; padding: 12px 20px; }
+.crs > span + span { padding-left: 0; }
+.crs i { font-style: normal; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; }
+.crs b { font-size: 14px; font-weight: 600; color: #0f172a; }
+.cre { padding: 28px 20px; text-align: center; color: #94a3b8; font-size: 14px; }
+/* toast (common/components/Toast), bottom-right */
+.tst { position: absolute; right: 24px; bottom: 24px; z-index: 30; display: flex; align-items: center; gap: 16px; padding: 16px 24px; min-width: 320px; background: #16a34a; color: #fff; border-radius: 12px; box-shadow: 0 20px 25px -5px rgb(0 0 0 / .1), 0 8px 10px -6px rgb(0 0 0 / .1); opacity: 0; visibility: hidden; }
+.tsi { width: 24px; height: 24px; display: flex; }
+.tsc { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.tsc b { font-size: 16px; font-weight: 600; line-height: 1.4; }
+.tsc small { font-size: 14px; opacity: .9; line-height: 1.4; }
+.tsx { opacity: .8; display: flex; }
+/* modal (ModalShell md + ContractorFormModal) */
+.mov { position: absolute; inset: 0; z-index: 40; background: rgba(15,23,42,.48); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); opacity: 0; pointer-events: none; }
+.mdl { position: absolute; left: 0; top: 0; z-index: 41; width: 560px; background: #fff; border-radius: 24px; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 8px -2px rgba(0,0,0,.06), 0 16px 40px -8px rgba(0,0,0,.16); display: flex; flex-direction: column; overflow: hidden; opacity: 0; visibility: hidden; }
+.mdh { padding: 28px 28px 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #f1f5f9; }
+.mdh h2 { margin: 0; font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.2; }
+.mdx { width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; border: 1px solid #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.mdc { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.mff { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.mff label { font-size: 13px; font-weight: 600; color: #374151; letter-spacing: -0.01em; line-height: 1; }
+.mfg { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.mfi { position: relative; display: flex; align-items: center; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 10px; transition: border-color .2s ease, box-shadow .2s ease; }
+.mfi.focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.1); }
+.mfv { flex: 1; min-width: 0; padding: 12px 14px; font-size: 14px; color: #0f172a; line-height: 1.5; white-space: nowrap; overflow: hidden; height: 45px; box-sizing: border-box; }
+.mfv.ph { color: #94a3b8; }
+.mfv mark { background: #b4d7fb; color: #0f172a; }
+.mfi.ta { align-items: flex-start; }
+.mfi.ta .mfv { height: 96px; }
+.gus { display: flex; align-items: center; gap: 6px; padding: 0 14px; align-self: stretch; border-left: 1px solid #e2e8f0; font-size: 12px; font-weight: 600; color: #0ea5e9; white-space: nowrap; border-radius: 0 10px 10px 0; transition: background .15s ease; }
+.gus.hov { background: #f0f9ff; }
+.gus.dis { color: #94a3b8; background: none; }
+.mdf { padding: 16px 28px; border-top: 1px solid #f1f5f9; background: #fafbfd; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.mbs, .mbp { display: inline-flex; align-items: center; padding: 10px 22px; font-size: 14px; font-weight: 600; border-radius: 999px; line-height: 1; white-space: nowrap; transition: all 180ms ease; }
+.mbs { color: #475569; background: #f1f5f9; border: 1.5px solid #e2e8f0; }
+.mbp { color: #fff; background: #0ea5e9; box-shadow: 0 2px 8px rgba(14,165,233,.28); }
+.mbp.hov { background: #0284c7; box-shadow: 0 4px 14px rgba(14,165,233,.38); }
+.mbp.dis { background: #bae6fd; box-shadow: none; }
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DetailBoost, instrukcje</div>
+    <h1>Jak dodać kontrahenta do zleceń zbiorczych?</h1>
+  </header>
+  <p class="lede">Kontrahent krok po kroku: NIP i dane z GUS, e-mail do rozliczeń, osoba kontaktowa i zapis. Opis po lewej mówi, po co jest każdy krok, a ekran po prawej pokazuje gdzie. Kliknij rozdział niżej, żeby przejść od razu do niego.</p>
+
+  <div class="player" id="player" aria-label="Animacja: jak dodać kontrahenta do zleceń zbiorczych">
+    <div class="stage" id="stage">
+      <div class="bgx"></div>
+      <div class="brand"><i>DB</i>DetailBoost<span>Instrukcja</span></div>
+      <div class="cap">
+        <div class="cnum" id="cnum"></div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+      <div class="prog"><div class="pl" id="pl"></div><div class="pb" id="pb"></div></div>
+
+      <div class="view" id="view"><div class="scene" id="scene"></div></div>
+
+      <div class="hl" id="hl"></div>
+      <div class="ring" id="ring"></div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.2 6.9z" fill="#0f172a" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="scrub" id="scrub"><i id="scrubI"></i></div>
+  <div class="bar">
+    <button type="button" id="bPrev">‹ Poprzedni krok</button>
+    <button type="button" class="pri" id="bPlay">Odtwórz</button>
+    <button type="button" id="bNext">Następny krok ›</button>
+    <span class="sp"></span>
+    <label><input type="checkbox" id="optStop"> Zatrzymuj po każdym kroku</label>
+    <button type="button" id="bRate">Tempo 1×</button>
+  </div>
+  <div class="chaps" id="chaps"></div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const out3 = k => 1 - Math.pow(1 - k, 3);
+  const io3 = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const back = k => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.5; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+  const type = (s, k) => s.slice(0, Math.round(s.length * clamp(k, 0, 1)));
+  const W = 1920, H = 1080, CX = 1345, CY = 540;
+
+  const stage = $('stage'), scene = $('scene');
+
+  // ---------- icons (lucide, as in the app) ----------
+  const sv = (p, s = 15, sw = 2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const I = {
+    dash: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+    calChk: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
+    cal: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+    layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    images: '<path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/>',
+    inbox: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    calClock: '<path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/>',
+    car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+    idCard: '<path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>',
+    file: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    trend: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    pkg: '<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/>',
+    act: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    msgSq: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+    gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    alert: '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
+    building: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+    pencil: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    trash: '<path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6"/>',
+    dl: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    x: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+    ok: '<path d="M5 13l4 4L19 7"/>',
+  };
+
+  // ---------- data: Gloss Lab, 20 October 2026 ----------
+  const FN = { name: 'Flota Nord Sp. z o.o.', nip: '584-276-31-09', person: 'Marta Zielińska', phone: '+48 512 340 118', email: 'ksiegowosc@flotanord.pl' };
+  const GUS_NAME = 'FLOTA NORD SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ';
+  const GUS_ADDR = 'ul. Grunwaldzka 211, 80-266 Gdańsk';
+  const RC = { name: 'Rent Car Trójmiasto Sp. z o.o.', nip: '957-108-44-21', person: 'Tomasz Lewandowski', phone: '+48 501 220 874' };
+  // VAT 23%: 150,00 brutto = 121,95 netto, 400,00 brutto = 325,20 netto
+  const RC_ROWS = [
+    ['1.10.2026', 'Skoda Octavia', 'GD 4K217', 'Mycie zewnętrzne + wnętrze', '121,95 zł', '150,00 zł'],
+    ['8.10.2026', 'Toyota Corolla', 'GD 7M552', 'Pranie tapicerki', '325,20 zł', '400,00 zł'],
+    ['15.10.2026', 'Volkswagen Passat', 'GD 2P904', 'Mycie zewnętrzne + wnętrze', '121,95 zł', '150,00 zł'],
+  ];
+  const RC_SUM = ['3', '569,10 zł', '700,00 zł'];
+
+  // ---------- scene ----------
+  const sbItem = (ic, label, id = '', on = false) => `<div class="sbi${on ? ' on' : ''}"${id ? ` id="${id}"` : ''}><span class="sbic">${sv(I[ic], 17, 1.75)}</span><span>${label}</span></div>`;
+  const sbSec = (title, items) => `<div class="sbs">${title ? `<div class="sbt">${title}</div>` : ''}${items}</div>`;
+  const chips = `<span class="crfl">Okres:</span><span class="crch on">Bieżący miesiąc</span><span class="crch">Poprzedni miesiąc</span><span class="crch">Wybierz miesiąc</span><span class="crch">Wybierz zakres</span>`;
+  const card = (p, c, rows) => `<div class="crd" id="${p}">
+    <div class="crh"><div class="crhl"><div class="crtr"><h3>${c.name}</h3><span class="crib" id="${p}Ed">${sv(I.pencil, 15)}</span><span class="crib">${sv(I.trash, 15)}</span></div>
+      <div class="crmt"><span>NIP ${c.nip}</span><span>${c.person}</span><span>${c.phone}</span></div></div>
+      <div class="cra"><span class="crb">${sv(I.dl, 14)}PDF</span><span class="crb">${sv(I.clock, 14)}Historia</span><span class="crb ok">Nowe zestawienie</span><span class="crb pr" id="${p}Add">+ Dodaj auto</span></div></div>
+    <div class="crf">${chips}</div>
+    ${rows ? `<table class="crt"><thead><tr><th>Data</th><th>Pojazd</th><th>Usługi</th><th class="r">Netto</th><th class="r">Brutto</th><th>Uwagi</th><th class="crmn"></th></tr></thead><tbody>
+      ${rows.map(r => `<tr><td>${r[0]}</td><td><div class="crv">${r[1]}</div><span class="crpl">${r[2]}</span></td><td><div class="crsn">${r[3]}</div><div class="crsp">${r[4]} / ${r[5]} 23%</div></td><td class="r"><span class="crm">${r[4]}</span></td><td class="r"><span class="crg">${r[5]}</span></td><td><span class="crn">-</span></td><td class="crmn"><span class="crdt">⋮</span></td></tr>`).join('')}
+      </tbody></table>
+      <div class="crs"><span><i>Do rozliczenia</i><b>${RC_SUM[0]}</b></span><span><i>Netto</i><b>${RC_SUM[1]}</b></span><span><i>Brutto</i><b>${RC_SUM[2]}</b></span></div>`
+      : `<div class="cre">W tym okresie nie ma jeszcze aut. Dodaj pierwsze przyciskiem „+ Dodaj auto”.</div>`}
+  </div>`;
+  const fld = (id, label, inner) => `<div class="mff" id="${id}"><label>${label}</label>${inner}</div>`;
+  const inp = (id, ph, extra = '') => `<div class="mfi" id="${id}B"><span class="mfv ph" id="${id}">${ph}</span>${extra}</div>`;
+
+  scene.innerHTML = `
+  <div class="pg" id="pg">
+    <aside class="sbr" id="sbr">
+      <div class="sbh"><span class="sblg">GL</span><span class="sbn">Gloss Lab</span></div>
+      <div class="sbm">
+        ${sbSec('', sbItem('dash', 'Tablica', 'sbDash', true))}
+        ${sbSec('Praca', sbItem('calChk', 'Wizyty') + sbItem('cal', 'Kalendarz') + sbItem('layers', 'Zlecenia zbiorcze', 'sbZl') + sbItem('images', 'Galeria'))}
+        ${sbSec('Klienci i zapytania', sbItem('inbox', 'Zapytania') + sbItem('users', 'Klienci') + sbItem('calClock', 'Zaplanowane treści') + sbItem('car', 'Pojazdy'))}
+        ${sbSec('Firma', sbItem('idCard', 'Pracownicy') + sbItem('file', 'Finanse') + sbItem('trend', 'Statystyki') + sbItem('pkg', 'Produkty') + sbItem('act', 'Aktywność'))}
+        ${sbSec('Marketing', sbItem('msgSq', 'Kampanie') + sbItem('camera', 'Instagram'))}
+      </div>
+      <div class="sbp">${sbItem('gear', 'Ustawienia')}${sbItem('alert', 'Zgłoś problem')}</div>
+    </aside>
+    <div class="mn" id="mn"><div class="mnin" id="mnin">
+      <div class="phd" id="phd"><div class="pht"><h1>Zlecenia zbiorcze</h1><div class="phs">Kontrahenci flotowi i ich miesięczne zestawienia</div></div>
+        <div class="pha"><span class="pgb">Usługi</span><span class="ppb" id="bNew">+ Kontrahent</span></div></div>
+      <div class="cls" id="cls">
+        <div class="nwc" id="nwc"><div class="nwi" id="nwi">${card('cFn', FN, null)}</div></div>
+        ${card('cRc', RC, RC_ROWS)}
+      </div>
+    </div></div>
+    <div class="tst" id="tst"><span class="tsi">${sv(I.ok, 24, 2)}</span><span class="tsc"><b>Kontrahent dodany</b><small>${FN.name}</small></span><span class="tsx">${sv(I.x, 18)}</span></div>
+    <div class="mov" id="mov"></div>
+    <div class="mdl" id="mdl">
+      <div class="mdh" id="mdh"><h2>Nowy kontrahent</h2><span class="mdx">${sv(I.x, 16)}</span></div>
+      <div class="mdc">
+        ${fld('rNm', 'Nazwa kontrahenta *', inp('vNm', 'np. Salon AUDI Warszawa'))}
+        ${fld('rNip', 'NIP', inp('vNip', '000-000-00-00', `<span class="gus" id="bGus">${sv(I.building, 13)}<span id="gusT">Pobierz z GUS</span></span>`))}
+        <div class="mfg" id="rKt">${fld('rEm', 'E-mail', inp('vEm', 'kontakt@firma.pl'))}${fld('rTel', 'Telefon', inp('vTel', '+48 000 000 000'))}</div>
+        ${fld('rOs', 'Osoba kontaktowa', inp('vOs', 'Jan Kowalski'))}
+        ${fld('rAd', 'Adres', inp('vAd', 'ul. Przykładowa 1, 00-000 Warszawa'))}
+        ${fld('rUw', 'Uwagi', '<div class="mfi ta"><span class="mfv ph">Dodatkowe informacje…</span></div>')}
+      </div>
+      <div class="mdf" id="mdf"><span class="mbs">Anuluj</span><span class="mbp" id="bSave">Zapisz</span></div>
+    </div>
+  </div>`;
+
+  // ---------- chapters and beats ----------
+  const CH = ['Zlecenia zbiorcze', 'Dane z GUS', 'Kontakt', 'Zapis', 'Co dalej'];
+  const beats = [];
+  const words = s => (s || '').split(/\s+/).filter(Boolean).length;
+  window.beat = (ch, o, f) => beats.push({ ch, h: o.h, b: o.b, lead: o.lead ?? .6, act: o.act ?? 1, hold: o.hold ?? .6, f: f || (() => {}) });
+
+  window.H = {
+    P, lerp, out3, io3, back, type, clamp, FN, GUS_NAME, GUS_ADDR,
+    mv: (S, to, k, o = {}) => { S.cur = { to, k, dx: o.dx || 0, dy: o.dy || 0, from: o.from || null, fdx: o.fdx || 0, fdy: o.fdy || 0, vis: S.cur.vis }; },
+    tap: (S, a, at, id) => { const k = P(S._s, S._lead + at * S._act, S._lead + at * S._act + .6); if (k > 0 && k < 1) S.tap = k; if (id && a > at && a < at + .14) S.press = id; },
+    cam: (S, to, k) => { S.cam = { to, k }; },
+    hl: (S, el, k = 1, pad = 6) => { S.hl = { el, k, pad }; },
+    foc: (S, sec) => { S.foc = sec; },
+  };
+
+  const fresh = () => ({
+    pg: 0, mainK: 0, navAct: 0,
+    ov: 0, md: 0,
+    nip: '', nipF: 0, gus: 0, fill: 0,
+    nm: '', nmF: 0, nmSel: 0, em: '', emF: 0, tel: '', telF: 0, os: '', osF: 0, ad: '',
+    saving: 0, nw: 0, nwK: 0, tst: 0,
+    foc: null, focPrev: null, hov: null,
+    hl: null, hlLast: null,
+    cam: { to: 'pg', k: 1 }, cur: { to: null, k: 1, vis: 0, dx: 0, dy: 0 },
+    tap: 0, press: null, _s: 0,
+  });
+
+  let DUR = 0, chStart = [];
+  const layout = () => {
+    let t = 0, lastText = null;
+    beats.forEach((b, i) => {
+      const txt = b.h + '|' + b.b;
+      b.newText = txt !== lastText; lastText = txt;
+      b.textIdx = b.newText ? i : beats[i - 1].textIdx;
+      if (b.newText) b.lead = Math.max(b.lead, .7);
+      const read = b.newText ? 1.5 + words(b.h) * .26 + words(b.b) * .24 : 0;
+      const slack = read - (b.lead + b.act + b.hold);
+      if (slack > 0) b.act = Math.min(b.act * 1.7, b.act + slack * .5);
+      b.d = Math.max(b.lead + b.act + b.hold, read);
+      b.t0 = t; t += b.d;
+      if (chStart[b.ch] === undefined) chStart[b.ch] = b.t0;
+    });
+    DUR = t;
+  };
+
+  const beatAt = t => { let i = 0; while (i < beats.length - 1 && beats[i + 1].t0 <= t) i++; return i; };
+  const runBeat = (S, i, s) => {
+    const b = beats[i];
+    S.hlLast = S.hl; S.hl = null; S.focPrev = S.foc; S.tap = 0; S.press = null; S.hov = null; S._s = s; S._i = i; S._lead = b.lead; S._act = b.act; S._T = b.t0 + s;
+    b.f(S, P(s, b.lead, b.lead + b.act), s);
+  };
+  const stateAtBeat = (i, s) => { const S = fresh(); for (let j = 0; j < i; j++) runBeat(S, j, beats[j].d); runBeat(S, i, s); return S; };
+
+  // ---------- geometry ----------
+  const sRect = el => { const r = el.getBoundingClientRect(), s0 = stage.getBoundingClientRect(), k = s0.width / W; return { x: (r.left - s0.left) / k, y: (r.top - s0.top) / k, w: r.width / k, h: r.height / k }; };
+  const offR = el => { let x = 0, y = 0, n = el; while (n && n !== scene) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+
+  // ---------- flow-in ----------
+  const enter = (el, k, dy = 22, sc = .975, blur = 7) => {
+    k = clamp(k, 0, 1);
+    el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden';
+    if (k >= 1) { el.style.transform = ''; el.style.filter = ''; return; }
+    el.style.transform = `translateY(${(1 - out3(k)) * dy}px) scale(${lerp(sc, 1, out3(k))})`;
+    el.style.filter = `blur(${(1 - k) * blur}px)`;
+  };
+  const stag = (els, k, st = .07, dy = 18) => { const n = els.length, span = 1 + st * (n - 1); els.forEach((el, i) => enter(el, clamp(k * span - i * st, 0, 1), dy, .99, 5)); };
+
+  // ---------- caption text (style B: words flow in from below with blur) ----------
+  const ctx = $('ctx'), cnum = $('cnum');
+  const textEls = {}, chEls = {};
+  // single-letter words (z, w, i, a, o, u) never end a line in Polish typesetting: glue them to the next word
+  const mkWords = s => s.split(' ').reduce((a, w) => { const p = a[a.length - 1]; if (p !== undefined && /^\p{L}$/u.test(p)) a[a.length - 1] = p + ' ' + w; else a.push(w); return a; }, []).map(w => `<span class="w">${w} </span>`).join('');
+  const textEl = i => {
+    if (textEls[i]) return textEls[i];
+    const b = beats[i], d = document.createElement('div'); d.className = 'tl';
+    d.innerHTML = `<h2 class="ch">${mkWords(b.h)}</h2>` + (b.b ? `<div class="cbd">${mkWords(b.b)}</div>` : '');
+    d.style.display = 'none'; ctx.appendChild(d);
+    textEls[i] = { el: d, hw: Array.from(d.querySelectorAll('.ch .w')), bw: Array.from(d.querySelectorAll('.cbd .w')) };
+    return textEls[i];
+  };
+  const chEl = c => {
+    if (chEls[c]) return chEls[c];
+    const d = document.createElement('div'); d.innerHTML = `<b>${String(c + 1).padStart(2, '0')}</b><i></i><span>${CH[c]}</span>`;
+    d.style.display = 'none'; cnum.appendChild(d); return (chEls[c] = d);
+  };
+  const wIn = (w, k, dy = 32, bl = 9) => { w.style.opacity = k; w.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * dy}px)`; w.style.filter = k >= 1 ? '' : `blur(${(1 - k) * bl}px)`; };
+  const wOut = (w, k) => { w.style.opacity = 1 - k; w.style.transform = `translateY(${-io3(k) * 26}px)`; w.style.filter = `blur(${k * 7}px)`; };
+  let shownT = [], shownC = [];
+  const paintText = (i, t) => {
+    const cur = beats[i].textIdx, tS = beats[cur].t0, tau = t - tS;
+    const prevIdx = cur > 0 ? beats[cur - 1].textIdx : -1;
+    const want = [cur]; if (prevIdx >= 0 && tau < .75) want.push(prevIdx);
+    shownT.forEach(j => { if (!want.includes(j)) textEls[j].el.style.display = 'none'; });
+    shownT = want;
+    const T = textEl(cur); T.el.style.display = 'block';
+    const nh = T.hw.length;
+    T.hw.forEach((w, j) => wIn(w, P(tau, .3 + j * .05, .3 + j * .05 + .65)));
+    const b0 = .3 + nh * .05 + .25;
+    T.bw.forEach((w, j) => wIn(w, P(tau, b0 + j * .018, b0 + j * .018 + .6), 18, 6));
+    if (want[1] !== undefined) { const O = textEl(prevIdx); O.el.style.display = 'block'; [...O.hw, ...O.bw].forEach((w, j) => wOut(w, P(tau, j * .01, j * .01 + .42))); }
+    const c = beats[i].ch, cS = chStart[c], ct = t - cS, wantC = [c]; if (c > 0 && ct < .6) wantC.push(c - 1);
+    shownC.forEach(j => { if (!wantC.includes(j)) chEls[j].style.display = 'none'; });
+    shownC = wantC;
+    const C = chEl(c); C.style.display = 'flex'; wIn(C, c === 0 && t < .3 ? 0 : P(ct, .15, .75), 20, 6);
+    if (wantC[1] !== undefined) { const O = chEl(c - 1); O.style.display = 'flex'; wOut(O, P(ct, 0, .4)); }
+    $('pl').innerHTML = `Rozdział <b>${c + 1}</b> z ${CH.length}`;
+    const bars = $('pb').children;
+    for (let j = 0; j < CH.length; j++) { const a = chStart[j], b = j + 1 < CH.length ? chStart[j + 1] : DUR; bars[j].firstChild.style.width = (P(t, a, b) * 100) + '%'; }
+  };
+  $('pb').innerHTML = CH.map(() => '<i><b></b></i>').join('');
+
+  // ---------- paint ----------
+  const pg = $('pg'), mdl = $('mdl'), mov = $('mov'), tst = $('tst');
+  const boxCam = (rs, cap = 1) => { const x0 = Math.min(...rs.map(r => r.x)), y0 = Math.min(...rs.map(r => r.y)), x1 = Math.max(...rs.map(r => r.x + r.w)), y1 = Math.max(...rs.map(r => r.y + r.h)); return { fx: (x0 + x1) / 2, fy: (y0 + y1) / 2, s: Math.min(cap, 1070 / (x1 - x0), 1000 / (y1 - y0)) }; };
+  const camTarget = to => {
+    if (to === 'pg') return boxCam([offR(pg)], .96);
+    if (to === 'mdl') { const c = boxCam([offR(mdl)], 1.5); return { fx: c.fx, fy: c.fy, s: c.s * .94 }; }
+    if (to === 'mn') return boxCam([offR($('mn'))], 1.2);
+    if (to === 'fin') { const c = boxCam([offR(pg)], .96); return { fx: c.fx, fy: c.fy, s: c.s * 1.012 }; }
+    const r = offR($(to.el));
+    return { fx: r.x + r.w / 2 + (to.dx || 0), fy: r.y + r.h / 2 + (to.dy || 0), s: to.s };
+  };
+  const FPG = ['sbr', 'phd', 'nwc', 'cRc'];
+  const FMD = ['rNm', 'rNip', 'rKt', 'rOs', 'rAd', 'rUw', 'mdf'];
+  const dimFx = (ids, from, to, k, on, amt = .6, bl = 1.8) => ids.forEach(id => {
+    const r = $(id); if (!on) { r.style.opacity = ''; r.style.filter = ''; return; }
+    const d = lerp(from && !from.includes(id) ? 1 : 0, to && !to.includes(id) ? 1 : 0, k);
+    r.style.opacity = d > .001 ? 1 - d * amt : ''; r.style.filter = d > .001 ? `blur(${d * bl}px)` : '';
+  });
+  const setV = (id, v, ph, focus, sel) => {
+    const e = $(id); e.classList.toggle('ph', !v); $(id + 'B').classList.toggle('focus', !!focus);
+    e.innerHTML = '';
+    if (v) { const t = document.createElement(sel ? 'mark' : 'span'); t.textContent = v; e.appendChild(t); } else e.textContent = ph;
+    if (focus && !sel) e.insertAdjacentHTML(v ? 'beforeend' : 'afterbegin', '<span class="caret"></span>');
+  };
+  let lastCur = { x: 1500, y: 1180 }, hovEl = [], pressEl = null;
+
+  function paint(S, prev) {
+    const s = S._s, T = S._T || 0;
+    // --- page
+    { const k = clamp(S.pg, 0, 1); pg.style.visibility = k > .001 ? 'visible' : 'hidden'; pg.style.opacity = k; pg.style.filter = k < 1 ? `blur(${(1 - k) * 10}px)` : ''; pg.style.transform = k < 1 ? `scale(${lerp(.9, 1, out3(k))})` : ''; }
+    $('sbDash').classList.toggle('on', !S.navAct); $('sbZl').classList.toggle('on', !!S.navAct);
+    stag([$('phd'), $('nwc'), $('cRc')], S.mainK);
+    // --- new contractor card grows in at the top (list sorted by name)
+    { const w = $('nwc'), k = io3(clamp(S.nwK, 0, 1)); w.style.height = S.nw ? (k >= 1 ? '' : ($('nwi').offsetHeight * k) + 'px') : '0px'; enter($('nwi'), S.nw ? P(S.nwK, .35, 1) : 0, 18, .985, 6); }
+    // --- toast, bottom-right
+    { const k = clamp(S.tst, 0, 1); tst.style.visibility = k > .001 ? 'visible' : 'hidden'; tst.style.opacity = k; tst.style.transform = k < 1 ? `translateY(${(1 - out3(k)) * 60}px)` : ''; }
+    // --- modal
+    mov.style.opacity = clamp(S.ov, 0, 1);
+    at(mdl, (pg.offsetWidth - mdl.offsetWidth) / 2, (pg.offsetHeight - mdl.offsetHeight) / 2);
+    enter(mdl, S.md, 14, .9, 10);
+    setV('vNip', S.nip, '000-000-00-00', S.nipF);
+    setV('vNm', S.nm, 'np. Salon AUDI Warszawa', S.nmF, S.nmSel);
+    setV('vEm', S.em, 'kontakt@firma.pl', S.emF);
+    setV('vTel', S.tel, '+48 000 000 000', S.telF);
+    setV('vOs', S.os, 'Jan Kowalski', S.osF);
+    setV('vAd', S.ad, 'ul. Przykładowa 1, 00-000 Warszawa', 0);
+    $('gusT').textContent = S.gus === 1 ? 'Pobieranie…' : 'Pobierz z GUS'; $('bGus').classList.toggle('dis', S.gus === 1);
+    { const f = Math.sin(Math.PI * clamp(S.fill, 0, 1)); ['vNmB', 'vAdB'].forEach(id => { $(id).style.background = f > .01 ? `rgba(14,165,233,${.1 * f})` : ''; }); }
+    $('bSave').textContent = S.saving ? 'Zapisywanie…' : 'Zapisz'; $('bSave').classList.toggle('dis', !!S.saving);
+    ['bNew', 'bGus', 'bSave', 'sbZl', 'cFnAdd', 'cFnEd'].forEach(id => $(id).classList.toggle('hov', S.hov === id));
+    if (pressEl && pressEl.id !== S.press) pressEl.style.transform = '';
+    pressEl = S.press ? $(S.press) : null; if (pressEl) pressEl.style.transform = 'scale(.94)';
+
+    // --- focus: the part with the action stays sharp, the rest softens
+    const fk = io3(P(s, 0, .7));
+    dimFx(FPG, S.focPrev, S.foc, fk, S.mainK >= 1 && S.ov <= 0);
+    dimFx(FMD, S.focPrev, S.foc, fk, S.md >= 1);
+
+    // --- camera
+    const tg2 = camTarget(S.cam.to);
+    let cam = tg2;
+    if (prev && S.cam.k < 1) { const k = io3(S.cam.k); cam = { fx: lerp(prev.cam.fx, tg2.fx, k), fy: lerp(prev.cam.fy, tg2.fy, k), s: Math.exp(lerp(Math.log(prev.cam.s), Math.log(tg2.s), k)) }; }
+    const ds2 = cam.s, still = !(prev && S.cam.k < 1);
+    let tx = CX - cam.fx * ds2 + 9 * Math.sin(T * .29), ty = CY - cam.fy * ds2 + 6 * Math.sin(T * .21 + 1);
+    if (still) { tx = Math.round(tx); ty = Math.round(ty); }
+    scene.style.transform = `translate(${tx}px, ${ty}px) scale(${ds2})`;
+    // --- highlight ring (glides from the previous one)
+    const hlEl = $('hl');
+    const rr = (h) => { const r = sRect($(h.el)), p = (h.pad ?? 6) * 1.3; return { x: r.x - p, y: r.y - p, w: r.w + 2 * p, h: r.h + 2 * p }; };
+    let hr = null, ho = 0;
+    if (S.hl) {
+      const b = rr(S.hl);
+      if (S.hlLast && S.hlLast.el !== S.hl.el && S.hlLast.k >= 1) { const a = rr(S.hlLast), k = io3(S.hl.k >= 1 ? P(s, 0, .6) : clamp(S.hl.k, 0, 1)); hr = { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), w: lerp(a.w, b.w, k), h: lerp(a.h, b.h, k) }; ho = 1; }
+      else { hr = b; ho = S.hlLast && S.hlLast.el === S.hl.el && S.hl.k >= 1 ? 1 : out3(S.hl.k); }
+    } else if (S.hlLast && S.hlLast.k > 0 && s < .35) { hr = rr(S.hlLast); ho = 1 - s / .35; }
+    if (hr && ho > .001) { hlEl.style.opacity = ho; hlEl.style.left = hr.x + 'px'; hlEl.style.top = hr.y + 'px'; hlEl.style.width = hr.w + 'px'; hlEl.style.height = hr.h + 'px'; hlEl.style.borderRadius = '14px'; } else hlEl.style.opacity = 0;
+
+    // --- cursor (arc between targets)
+    let cur = { x: 1500, y: 1180 };
+    const ctr = (id, dx, dy) => { const r = sRect($(id)); if (r.w < 1 && r.h < 1) return null; return { x: r.x + r.w / 2 + dx * ds2, y: r.y + r.h / 2 + dy * ds2 }; };
+    if (S.cur.to) cur = ctr(S.cur.to, S.cur.dx, S.cur.dy) || lastCur;
+    if (S.cur.k < 1 && (prev || S.cur.from)) {
+      const a = (S.cur.from && ctr(S.cur.from, S.cur.fdx, S.cur.fdy)) || (prev ? prev.cur : cur), k = io3(S.cur.k), dx = cur.x - a.x, dy = cur.y - a.y, d = Math.hypot(dx, dy) || 1, bend = Math.sin(Math.PI * k) * Math.min(70, d * .14);
+      cur = { x: lerp(a.x, cur.x, k) - dy / d * bend, y: lerp(a.y, cur.y, k) + dx / d * bend };
+    }
+    lastCur = cur;
+    const cv2 = $('cursor'), press = S.tap > 0 ? Math.sin(Math.PI * clamp(S.tap * 2.2, 0, 1)) : 0;
+    cv2.style.opacity = S.cur.vis; cv2.style.transform = `translate(${cur.x - 7}px, ${cur.y - 5}px) scale(${1 - press * .16})`;
+    const ring = $('ring'); if (S.tap > 0 && S.tap < 1) { ring.style.opacity = (1 - S.tap) * S.cur.vis; ring.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${.35 + S.tap * .9})`; } else ring.style.opacity = 0;
+    return { cam, cur };
+  }
+  const at = (el, x, y) => { el.style.left = Math.round(x) + 'px'; el.style.top = Math.round(y) + 'px'; };
+
+  // ---------- timeline driver with memo of each beat's end ----------
+  const ends = [];
+  const endOf = i => {
+    if (i < 0) return null;
+    if (ends[i]) return ends[i];
+    const S = stateAtBeat(i, beats[i].d);
+    ends[i] = paint(S, i > 0 ? endOf(i - 1) : null);
+    return ends[i];
+  };
+  const draw = t => {
+    t = clamp(t, 0, DUR - .001);
+    const i = beatAt(t), b = beats[i];
+    const prev = endOf(i - 1);
+    const S = stateAtBeat(i, t - b.t0);
+    paint(S, prev);
+    paintText(i, t);
+    window.__t = t;
+  };
+
+  // ---------- player ----------
+  const player = $('player');
+  const fit = () => { stage.style.transform = `scale(${player.clientWidth / W})`; };
+  let t = 0, playing = false, rate = 1;
+  const bPlay = $('bPlay');
+  const syncBtn = () => { bPlay.textContent = playing ? 'Pauza' : (t >= DUR - .01 ? 'Od początku' : 'Odtwórz'); };
+  const chapAt = tt => { let c = 0; for (let j = 0; j < CH.length; j++) if (chStart[j] <= tt + .001) c = j; return c; };
+  const go = nt => { t = clamp(nt, 0, DUR - .001); draw(t); $('scrubI').style.width = (t / DUR * 100) + '%'; const c = chapAt(t); Array.from($('chaps').children).forEach((e, j) => e.classList.toggle('on', j === c)); };
+  bPlay.addEventListener('click', () => { if (t >= DUR - .01) go(0); playing = !playing; syncBtn(); });
+  const textStarts = () => beats.filter(b => b.newText).map(b => b.t0);
+  $('bNext').addEventListener('click', () => { const n = textStarts().find(x => x > t + .05); if (n !== undefined) go(n + .01); });
+  $('bPrev').addEventListener('click', () => { const ts = textStarts().filter(x => x < t - .4); go(ts.length ? ts[ts.length - 1] + .01 : 0); });
+  $('bRate').addEventListener('click', () => { rate = rate === 1 ? .75 : 1; $('bRate').textContent = `Tempo ${rate === 1 ? '1' : '0,75'}×`; });
+  $('scrub').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); go((e.clientX - r.left) / r.width * DUR); });
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (playing) {
+      let nt = t + dt * rate;
+      if ($('optStop').checked) { const n = textStarts().find(x => x > t + .001); if (n !== undefined && nt >= n) { nt = n - .001; playing = false; syncBtn(); } }
+      if (nt >= DUR) { nt = DUR - .001; playing = false; syncBtn(); }
+      go(nt);
+    }
+    requestAnimationFrame(frame);
+  };
+  window.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input')) return; if (e.key === ' ') { e.preventDefault(); bPlay.click(); } if (e.key === 'ArrowRight') $('bNext').click(); if (e.key === 'ArrowLeft') $('bPrev').click(); });
+
+  window.__start = () => {
+    layout();
+    $('chaps').innerHTML = CH.map((c, j) => `<button type="button">${j + 1}. ${c}</button>`).join('');
+    Array.from($('chaps').children).forEach((e, j) => e.addEventListener('click', () => go(chStart[j] + .01)));
+    $('scrub').insertAdjacentHTML('beforeend', textStarts().slice(1).map(x => `<b style="left:${(x / DUR * 100).toFixed(3)}%"></b>`).join(''));
+    fit(); try { new ResizeObserver(() => { fit(); ends.length = 0; go(t); }).observe(player); } catch (e) { window.addEventListener('resize', () => { fit(); ends.length = 0; go(t); }); }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    go(reduce ? chStart[1] + 2 : .01); syncBtn();
+    requestAnimationFrame(frame);
+    window.__seek = tt => { playing = false; syncBtn(); go(tt); };
+    window.__dur = DUR; window.__chStart = chStart; window.__beats = beats.map(b => [b.t0, b.d, b.ch, b.h, b.newText]);
+  };
+})();
+
+(() => {
+  const { P, type, mv, tap, cam, hl, foc, FN, GUS_NAME, GUS_ADDR } = window.H;
+  const B = window.beat;
+  const show = (S, s, a = 0, b = .45) => { S.cur.vis = P(s, a, b); };
+  const hide = (S, s, a = 0, b = .4) => { S.cur.vis = 1 - P(s, a, b); };
+  const gusDone = S => { S.nip = FN.nip; S.gus = 2; S.nm = GUS_NAME; S.ad = GUS_ADDR; };
+
+  // ===== 1 Zlecenia zbiorcze =====
+  B(0, { h: 'Jak dodać kontrahenta do zleceń zbiorczych?', b: '', lead: .2, act: 1.4, hold: .5 }, (S, a, s) => { S.pg = P(s, .3, 1.5); cam(S, 'pg', 1); });
+  B(0, { h: 'Otwórz „Zlecenia zbiorcze” w menu.', b: '', act: 2.2 }, (S, a, s) => {
+    S.pg = 1; foc(S, ['sbr']); show(S, s); mv(S, 'sbZl', P(a, 0, .45), { dx: -30, from: 'sbZl', fdx: 260, fdy: 300 });
+    S.hov = a > .4 && a < .52 ? 'sbZl' : null; tap(S, a, .5, 'sbZl'); if (a > .52) S.navAct = 1; S.mainK = P(a, .55, 1);
+  });
+  B(0, { h: 'Kontrahent to firma, której auta rozliczasz zbiorczo.', b: 'Auta z całego miesiąca trafiają do jednego zestawienia.', act: 1.8 }, (S, a, s) => {
+    S.pg = 1; S.navAct = 1; S.mainK = 1; foc(S, ['cRc']); hide(S, s); hl(S, 'cRc', P(a, .2, .5), 4);
+  });
+
+  // ===== 2 Dane z GUS =====
+  const T1 = 'Dodaj nowego kontrahenta.', B1 = 'Wymagana jest tylko nazwa.';
+  B(1, { h: T1, b: B1, act: 1.8 }, (S, a, s) => {
+    foc(S, ['phd']); show(S, s); mv(S, 'bNew', P(a, 0, .6), { dx: -20, from: 'cRc', fdx: 120, fdy: 40 }); S.hov = a > .55 ? 'bNew' : null; tap(S, a, .78, 'bNew');
+  });
+  B(1, { h: T1, b: B1, lead: 0, act: 1.3, hold: .3 }, (S, a, s) => {
+    foc(S, null); S.ov = P(s, 0, .45); S.md = P(s, .15, .75); cam(S, 'mdl', P(s, 0, 1.2)); hide(S, s, 0, .3);
+  });
+  B(1, { h: 'Wpisz NIP i pobierz dane z GUS.', b: 'Nazwa i adres firmy są od razu w formularzu.', act: 3.6 }, (S, a, s) => {
+    S.ov = 1; S.md = 1; foc(S, ['rNip']); show(S, s);
+    mv(S, a < .5 ? 'vNipB' : 'bGus', a < .5 ? P(a, 0, .24) : P(a, .5, .62), a < .5 ? { dx: -120 } : { from: 'vNipB', fdx: -120 });
+    tap(S, a, .25); S.nipF = a > .27 && a < .64 ? 1 : 0; S.nip = type(FN.nip, P(a, .3, .48));
+    S.hov = a > .58 && a < .72 ? 'bGus' : null; tap(S, a, .66, 'bGus');
+    if (a > .68) S.gus = 1;
+    if (a > .84) { gusDone(S); S.fill = P(a, .84, 1); }
+    if (a > .84) foc(S, ['rNip', 'rNm', 'rAd']);
+  });
+  B(1, { h: 'Skróć długą nazwę z GUS.', b: 'Nazwa i NIP są na zestawieniu PDF dla kontrahenta.', act: 2.8 }, (S, a, s) => {
+    gusDone(S); foc(S, ['rNm']); mv(S, 'vNmB', P(a, 0, .25), { from: 'bGus', dx: 40 }); tap(S, a, .28);
+    S.nmF = a > .3 ? 1 : 0; S.nmSel = a > .32 && a < .42 ? 1 : 0; if (a > .42) S.nm = type(FN.name, P(a, .44, .9));
+  });
+
+  // ===== 3 Kontakt =====
+  B(2, { h: 'Wpisz e-mail do rozliczeń.', b: 'Na ten adres wysyłasz kontrahentowi zestawienie.', act: 2.6 }, (S, a, s) => {
+    gusDone(S); S.nm = FN.name; S.nmF = 0; foc(S, ['rKt']); mv(S, 'vEmB', P(a, 0, .3), { from: 'vNmB', fdx: 40, dx: -40 }); tap(S, a, .33);
+    S.emF = a > .35 ? 1 : 0; S.em = type(FN.email, P(a, .42, .9));
+  });
+  B(2, { h: 'Dodaj telefon i osobę kontaktową.', b: 'Oba widać na karcie kontrahenta, obok NIP-u.', act: 4.0 }, (S, a, s) => {
+    gusDone(S); S.nm = FN.name; S.em = FN.email; S.emF = 0; foc(S, ['rKt', 'rOs']);
+    if (a < .48) mv(S, 'vTelB', P(a, 0, .14), { from: 'vEmB', fdx: -40, dx: -40 }); else mv(S, 'vOsB', P(a, .5, .62), { from: 'vTelB', fdx: -40, dx: -150 });
+    tap(S, a, .16); S.telF = a > .18 && a < .52 ? 1 : 0; S.tel = type(FN.phone, P(a, .2, .46));
+    tap(S, a, .64); S.osF = a > .66 ? 1 : 0; S.os = type(FN.person, P(a, .7, .95));
+  });
+
+  // ===== 4 Zapis =====
+  const T2 = 'Zapisz kontrahenta.';
+  const filled = S => { gusDone(S); S.nm = FN.name; S.em = FN.email; S.tel = FN.phone; S.os = FN.person; S.osF = 0; };
+  B(3, { h: T2, b: '', act: 1.6 }, (S, a, s) => {
+    filled(S); foc(S, ['mdf']); mv(S, 'bSave', P(a, 0, .55), { from: 'vOsB', fdx: -150 }); S.hov = a > .5 ? 'bSave' : null; tap(S, a, .7, 'bSave'); if (a > .74) S.saving = 1;
+  });
+  B(3, { h: T2, b: '', lead: 0, act: 1.6, hold: .4 }, (S, a, s) => {
+    filled(S); S.saving = 1; foc(S, null); hide(S, s, 0, .3);
+    S.md = 1 - P(s, .1, .5); S.ov = 1 - P(s, .2, .65); cam(S, 'pg', P(s, .1, 1.3));
+    S.nw = s > .55 ? 1 : 0; S.nwK = P(s, .55, 1.5); S.tst = P(s, .7, 1.1);
+  });
+  B(3, { h: 'Lista kontrahentów jest ułożona alfabetycznie.', b: 'Nowy kontrahent nie zawsze trafia na koniec listy.', act: 1.8 }, (S, a, s) => {
+    S.nw = 1; S.nwK = 1; S.tst = 1 - P(s, 2.0, 2.4); foc(S, ['nwc', 'cRc']); hl(S, 'cFn', P(a, .1, .4), 3);
+  });
+
+  // ===== 5 Co dalej =====
+  B(4, { h: 'Dodawaj auta kontrahenta na jego karcie.', b: 'Karta pokazuje auta z bieżącego miesiąca.', act: 2.0 }, (S, a, s) => {
+    S.nw = 1; S.nwK = 1; foc(S, ['nwc']); cam(S, { el: 'cFn', s: 1.3 }, P(a, 0, .5)); show(S, s); mv(S, 'cFnAdd', P(a, 0, .55), { from: 'cFn', fdx: 200, fdy: 120 }); S.hov = a > .5 ? 'cFnAdd' : null; hl(S, 'cFnAdd', P(a, .5, .75), 5);
+  });
+  B(4, { h: 'Popraw dane kontrahenta ikoną ołówka.', b: 'NIP i e-mail możesz uzupełnić także później.', act: 1.8 }, (S, a, s) => {
+    S.nw = 1; S.nwK = 1; foc(S, ['nwc']); mv(S, 'cFnEd', P(a, 0, .55), { from: 'cFnAdd' }); S.hov = a > .5 ? 'cFnEd' : null; hl(S, 'cFnEd', P(a, .5, .75), 4);
+  });
+  B(4, { h: 'Kontrahent jest na liście zleceń zbiorczych.', b: '', act: 1.6, hold: 5.2 }, (S, a, s) => {
+    S.nw = 1; S.nwK = 1; foc(S, null); hide(S, s, 0, .5); cam(S, 'fin', P(s, 0, 2.6));
+  });
+})();
+window.__start();
+</script>
+
+</body>
+</html>

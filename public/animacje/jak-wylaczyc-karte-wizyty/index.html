@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../osadzenie.css">
+<script>if (window.self !== window.top) { document.documentElement.classList.add('osadzona'); document.documentElement.dataset.theme = 'dark'; }</script>
+</head>
+<body>
+<title>Jak wyłączyć kartę wizyty</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-ext-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Page: help-centre look. Stage: style B, caption column on the left, the app with its menu and settings on the right. */
+:root {
+  --bg: #eef2f7; --surface: #ffffff; --ink: #0f172a; --ink-2: #475569; --muted: #64748b; --line: #e2e8f0;
+  --brand: #0ea5e9; --brand-ink: #0369a1; --brand-soft: #e0f2fe;
+  --font: 'InterDB', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  padding: 36px max(16px, env(safe-area-inset-right, 0px)) 72px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-ink); }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 800; margin: 6px 0 0; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--ink-2); margin: 0; max-width: 760px; }
+
+.player { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #eef2f7; box-shadow: 0 20px 50px rgba(15,23,42,.16); }
+.stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; font-family: var(--font); color: #0f172a; background: #eef2f7; }
+.bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bar button { font: 600 14px var(--font); height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.bar button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; min-width: 120px; justify-content: center; }
+.bar button:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.bar label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+.bar .sp { flex: 1; }
+.scrub { position: relative; height: 8px; border-radius: 4px; background: var(--line); cursor: pointer; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #0ea5e9; }
+.scrub b { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); opacity: .45; }
+.chaps { display: flex; flex-wrap: wrap; gap: 8px; }
+.chaps button { font: 500 13.5px var(--font); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.chaps button.on { border-color: #0ea5e9; color: var(--brand-ink); background: var(--brand-soft); font-weight: 700; }
+
+/* ===== stage ===== */
+.bgx { position: absolute; inset: 0; background:
+  radial-gradient(900px 700px at 78% 45%, rgba(14,165,233,.10), transparent 70%),
+  radial-gradient(700px 600px at 8% 95%, rgba(37,99,235,.07), transparent 70%), #eef2f7; }
+.brand { position: absolute; left: 120px; top: 84px; display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; z-index: 40; }
+.brand i { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #2563eb); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 17px; font-weight: 800; }
+.brand span { font-size: 19px; font-weight: 500; color: #64748b; margin-left: 6px; letter-spacing: -0.01em; }
+.cap { position: absolute; left: 120px; top: 262px; width: 600px; z-index: 40; }
+.cnum { height: 34px; position: relative; margin-bottom: 26px; }
+.cnum > div { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; color: #0369a1; white-space: nowrap; }
+.cnum > div b { font-variant-numeric: tabular-nums; }
+.cnum > div i { display: block; width: 46px; height: 2px; background: linear-gradient(90deg, #38bdf8, rgba(56,189,248,0)); }
+.cnum > div span { color: #0f172a; font-weight: 600; }
+.ctx { position: relative; }
+.ctx .tl { position: absolute; left: 0; top: 0; width: 600px; }
+.ch { font-size: 56px; font-weight: 750; letter-spacing: -0.038em; line-height: 1.08; margin: 0; }
+.cbd { font-size: 28px; line-height: 1.45; color: #475569; margin-top: 28px; letter-spacing: -0.01em; }
+.ch .w, .cbd .w { display: inline-block; white-space: pre; will-change: transform, filter, opacity; }
+.prog { position: absolute; left: 120px; bottom: 96px; z-index: 40; }
+.prog .pl { font-size: 18px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
+.prog .pl b { color: #0f172a; font-weight: 700; }
+.prog .pb { display: flex; gap: 7px; }
+.prog .pb i { display: block; width: 34px; height: 6px; border-radius: 3px; background: #d5dde8; overflow: hidden; }
+.prog .pb i b { display: block; height: 100%; width: 0; background: #0ea5e9; }
+
+.view { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 20; -webkit-mask-image: linear-gradient(90deg, transparent 735px, #000 800px); mask-image: linear-gradient(90deg, transparent 735px, #000 800px); }
+.scene { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 90; filter: drop-shadow(0 4px 8px rgba(15,23,42,.32)); opacity: 0; pointer-events: none; }
+.ring { position: absolute; left: 0; top: 0; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 3px solid #0ea5e9; opacity: 0; z-index: 89; pointer-events: none; }
+.kcap { position: absolute; z-index: 91; padding: 10px 18px; border-radius: 12px; background: #0f172a; color: #fff; font-size: 22px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,.3); opacity: 0; border-bottom: 4px solid #334155; }
+.hl { position: absolute; z-index: 60; border-radius: 12px; border: 2.5px solid #0ea5e9; box-shadow: 0 0 0 5px rgba(14,165,233,.16), 0 0 26px rgba(14,165,233,.35); opacity: 0; pointer-events: none; }
+
+
+.touch { position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(15,23,42,.18); border: 2px solid rgba(255,255,255,.85); box-shadow: 0 4px 12px rgba(15,23,42,.25); opacity: 0; z-index: 88; pointer-events: none; }
+
+/* ===== settings page (modules/settings/views/SettingsView) ===== */
+.scr { position: absolute; }
+.pgw { width: 1420px; height: 860px; border-radius: 22px; background: #eef2f7; border: 1px solid #dbe3ec; box-shadow: 0 30px 70px -20px rgba(15,23,42,.35); overflow: hidden; font-size: 14px; line-height: 1.5; color: #0f172a; }
+.sgrid { position: absolute; left: 32px; top: 28px; right: 32px; bottom: 0; display: grid; grid-template-columns: 248px minmax(0, 1fr); gap: 28px; }
+.snav { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.snav h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; }
+.ssrch { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; color: #94a3b8; font-size: 13.5px; }
+.sgrp { display: flex; flex-direction: column; gap: 1px; }
+.sgrp h2 { margin: 0; padding: 0 10px 6px; font-size: 13px; font-weight: 600; color: #475569; line-height: 1.3; }
+.sni { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #334155; line-height: 1.35; }
+.sni svg { flex-shrink: 0; color: #64748b; }
+.sni span { flex: 1; min-width: 0; white-space: nowrap; }
+.sni em { font-style: normal; font-size: 12px; font-weight: 600; color: #64748b; }
+.sni.on { background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.08); font-weight: 600; color: #0369a1; }
+.sni.on svg { color: #0369a1; }
+.smain { position: relative; min-width: 0; overflow: hidden; }
+.smi { display: flex; flex-direction: column; gap: 18px; padding-bottom: 300px; }
+.shead { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px 20px; }
+.shead .ht { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 240px; }
+.shead h2 { margin: 0; font-size: 26px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.25; }
+.shead p { margin: 0; max-width: 680px; font-size: 14px; line-height: 1.5; color: #475569; }
+.shead .hs { display: flex; align-items: center; gap: 8px; }
+
+/* ui/Button (buttonStyles.ts) */
+.bt { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px; border: 1px solid transparent; border-radius: 999px; font-size: 13.5px; font-weight: 600; line-height: 1; white-space: nowrap; transition: none; }
+.bt.sm { height: 30px; padding: 0 11px; font-size: 12.5px; }
+.bt.lg { height: 40px; padding: 0 18px; font-size: 14px; }
+.bt.primary { background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; box-shadow: 0 4px 12px rgba(3,105,161,.25); }
+.bt.tinted { border-color: #7dd3fc; background: #f0f9ff; color: #075985; }
+.bt.ghost { background: transparent; color: #475569; }
+.bt.outline { border-color: #e2e8f0; background: #fff; color: #334155; }
+.bt.danger { background: transparent; color: #b91c1c; }
+.bt.dis { opacity: .5; }
+.bt.hov.tinted { background: #e0f2fe; }
+.bt.hov.ghost { background: #f1f5f9; color: #0f172a; }
+
+/* ui/Surface: Card (one lifted surface), Panel (flat) */
+.uCard { background: #fff; border-radius: 20px; border-top: 4px solid #0ea5e9; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 16px 40px rgba(15,23,42,.08); overflow: hidden; min-width: 0; }
+.uPan { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; min-width: 0; }
+.stit { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -0.005em; line-height: 1.35; }
+.stit small { font-size: 13px; font-weight: 500; color: #64748b; }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border: 1px solid #e2e8f0; border-radius: 999px; background: #f8fafc; color: #475569; font-size: 12px; font-weight: 600; line-height: 1.4; white-space: nowrap; flex-shrink: 0; }
+.pill.ok { border-color: #86efac; background: #f0fdf4; color: #15803d; }
+
+/* toast (common/components/Toast), top right of the page */
+.tst { position: absolute; z-index: 70; display: flex; align-items: center; gap: 16px; padding: 16px 24px; min-width: 320px; max-width: 500px; border-radius: 12px; background: #16a34a; color: #fff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.1), 0 10px 10px -5px rgba(0,0,0,.04); opacity: 0; visibility: hidden; }
+.tst .ti { width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center; }
+.tst b { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; }
+.tst small { display: block; font-size: 14px; line-height: 1.4; opacity: .95; white-space: nowrap; }
+.tst .tx { margin-left: 8px; opacity: .85; display: grid; place-items: center; }
+
+/* modal (ModalShell sm, sharedModalStyles) over the page */
+.ovl { position: absolute; inset: 0; z-index: 50; background: rgba(15,23,42,.48); opacity: 0; visibility: hidden; }
+.lm { position: absolute; z-index: 55; width: 480px; background: #fff; border-radius: 24px; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 8px -2px rgba(0,0,0,.06), 0 24px 56px -12px rgba(0,0,0,.3); overflow: hidden; opacity: 0; visibility: hidden; }
+.lmh { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 28px 28px 20px; border-bottom: 1px solid #f1f5f9; }
+.lmh b { display: block; font-size: 22px; font-weight: 700; line-height: 1.25; letter-spacing: -.01em; }
+.lmh small { display: block; font-size: 14px; color: #64748b; margin-top: 4px; line-height: 1.45; }
+.lmh .x { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: #f1f5f9; border: 1px solid #e2e8f0; color: #64748b; display: grid; place-items: center; }
+
+/* app shell: dark menu (widgets/Sidebar) and the page */
+.app { position: absolute; inset: 0; display: flex; }
+.anv { width: 232px; flex: 0 0 auto; background: #0f172a; color: #cbd5e1; padding: 18px 12px 14px; display: flex; flex-direction: column; gap: 1px; }
+.anb { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: #fff; padding: 0 8px 12px; letter-spacing: -.2px; }
+.anb i { width: 30px; height: 30px; border-radius: 9px; background: #1e293b; display: grid; place-items: center; font-style: normal; font-size: 13px; color: #38bdf8; }
+.ans { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #64748b; padding: 10px 10px 3px; }
+.ani { display: flex; align-items: center; gap: 10px; padding: 6px 10px; border-radius: 9px; font-size: 13.5px; font-weight: 500; line-height: 1.35; white-space: nowrap; }
+.ani svg { opacity: .8; flex-shrink: 0; }
+.ani.on { background: rgba(14,165,233,.11); color: #38bdf8; font-weight: 600; }
+.ani.on svg { opacity: 1; }
+.ani.hov { background: rgba(255,255,255,.06); color: #f1f5f9; }
+.apin { margin-top: auto; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.07); display: flex; flex-direction: column; gap: 1px; }
+.apm { position: relative; flex: 1; min-width: 0; }
+.sni.hov { background: rgba(255,255,255,.7); }
+
+/* Tablica: a background page only */
+.dash { position: absolute; left: 32px; top: 28px; right: 32px; display: flex; flex-direction: column; gap: 18px; }
+.dash h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; }
+.dtl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.dtl .uPan, .dbig { padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+.dash small { font-size: 13px; color: #64748b; font-weight: 500; }
+.dash b { font-size: 26px; font-weight: 700; letter-spacing: -.01em; }
+.dbig i { display: block; height: 44px; border-radius: 10px; background: #f1f5f9; margin-top: 8px; }
+
+/* Dane firmy (background section) */
+.sec { position: relative; display: flex; flex-direction: column; gap: 18px; }
+.cco { padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+.cfl label { display: block; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 6px; }
+.cfl .inp { height: 40px; padding: 0 12px; display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; background: #fff; }
+
+/* VisitCardSection: Card with intro, SettingSwitchRow, intro */
+.vcb { padding: 20px 24px 8px; }
+.vci { margin: 0 0 4px; max-width: 68ch; font-size: 13.5px; line-height: 1.55; color: #475569; }
+.vcr { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-top: 1px solid #f1f5f9; margin-top: 12px; }
+.vcr + .vci { border-top: 1px solid #f1f5f9; padding-top: 12px; padding-bottom: 12px; }
+.vct { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.vct b { font-size: 14px; font-weight: 600; color: #0f172a; }
+.vct span { font-size: 13px; line-height: 1.5; color: #475569; max-width: 68ch; }
+.tgS { flex-shrink: 0; display: flex; align-items: center; min-height: 44px; }
+.tgl { position: relative; width: 48px; height: 26px; border-radius: 999px; flex-shrink: 0; --k: 1; background: linear-gradient(180deg, #f1f5f9 0%, #e2e8f0 100%); box-shadow: inset 0 1px 2px rgba(15,23,42,.08); }
+.tgl::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); opacity: var(--k); }
+.tgl::before { content: ''; position: absolute; z-index: 1; top: 3px; left: calc(3px + 22px * var(--k)); width: 20px; height: 20px; border-radius: 50%; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); box-shadow: 0 1px 3px rgba(15,23,42,.25); }
+
+/* QuickEventModal: SMS row of "Nowa rezerwacja" */
+.bkm { position: absolute; z-index: 55; width: 520px; background: #fff; border-radius: 20px; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 8px -2px rgba(0,0,0,.06), 0 24px 56px -12px rgba(0,0,0,.3); overflow: hidden; opacity: 0; visibility: hidden; }
+.bkh { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #f1f5f9; }
+.bkh b { font-size: 18px; font-weight: 700; }
+.bkh .x { width: 32px; height: 32px; border-radius: 50%; background: #f1f5f9; color: #64748b; display: grid; place-items: center; }
+.bkr { display: flex; gap: 14px; padding: 22px 24px; }
+.bki { width: 36px; height: 36px; flex-shrink: 0; border-radius: 10px; background: #f1f5f9; color: #64748b; display: grid; place-items: center; }
+.bkl { display: flex; flex-direction: column; gap: 8px; padding-top: 7px; }
+.smi2 { display: flex; align-items: center; gap: 9px; height: 22px; font-size: 13px; color: #334155; line-height: 1.45; overflow: hidden; white-space: nowrap; }
+.cbx { width: 15px; height: 15px; flex-shrink: 0; border-radius: 4px; border: 1.5px solid #cbd5e1; display: grid; place-items: center; color: #fff; }
+.cbx.on { background: #0ea5e9; border-color: #0ea5e9; }
+.bkf { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid #f1f5f9; background: #f8fafc; }
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DetailBoost, instrukcje</div>
+    <h1>Jak wyłączyć kartę wizyty?</h1>
+  </header>
+  <p class="lede">Animacja pokazuje, gdzie w ustawieniach wyłączyć kartę wizyty i co się wtedy zmienia przy rezerwacji i przyjęciu auta. Wybierz rozdział pod animacją, żeby przejść od razu do niego.</p>
+
+  <div class="player" id="player" aria-label="Animacja: jak wyłączyć kartę wizyty">
+    <div class="stage" id="stage">
+      <div class="bgx"></div>
+      <div class="brand"><i>DB</i>DetailBoost<span>Instrukcja</span></div>
+      <div class="cap">
+        <div class="cnum" id="cnum"></div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+      <div class="prog"><div class="pl" id="pl"></div><div class="pb" id="pb"></div></div>
+
+      <div class="view" id="view"><div class="scene" id="scene"></div></div>
+
+      <div class="hl" id="hl"></div>
+      <div class="ring" id="ring"></div>
+      <div class="touch" id="touch"></div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.2 6.9z" fill="#0f172a" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="scrub" id="scrub"><i id="scrubI"></i></div>
+  <div class="bar">
+    <button type="button" id="bPrev">‹ Poprzedni krok</button>
+    <button type="button" class="pri" id="bPlay">Odtwórz</button>
+    <button type="button" id="bNext">Następny krok ›</button>
+    <span class="sp"></span>
+    <label><input type="checkbox" id="optStop"> Zatrzymuj po każdym kroku</label>
+    <button type="button" id="bRate">Tempo 1×</button>
+  </div>
+  <div class="chaps" id="chaps"></div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const out3 = k => 1 - Math.pow(1 - k, 3);
+  const io3 = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const back = k => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.5; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+  const type = (s, k) => s.slice(0, Math.round(s.length * clamp(k, 0, 1)));
+  const W = 1920, H = 1080, CX = 1340, CY = 540;
+
+  const stage = $('stage'), scene = $('scene');
+
+  // ---------- icons (lucide, as in the app) ----------
+  const sv = (p, s = 16, sw = 2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const I = {
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    building: '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4M10 18h4"/>',
+    listChecks: '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8M13 12h8M13 18h8"/>',
+    tag: '<path d="M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.42l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/>',
+    fileSig: '<path d="M20 19.5v.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8.5L18 5.5"/><path d="M8 18h1"/><path d="M18.42 9.61a2.1 2.1 0 1 1 2.97 2.97L16.95 17 13 18l.99-3.95 4.43-4.44Z"/>',
+    userCog: '<circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="4"/><path d="M10 15H6a4 4 0 0 0-4 4v2"/><path d="m21.7 16.4-.9-.3M15.2 13.9l-.9-.3M16.6 18.7l.3-.9M19.1 12.2l.3-.9M19.6 18.7l-.4-1M16.8 12.3l-.4-1M14.3 16.6l1-.4M20.7 13.8l1-.4"/>',
+    msg: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    idCard: '<path d="M16 10h2M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>',
+    filter: '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+    tablet: '<rect width="10" height="14" x="3" y="8" rx="2"/><path d="M5 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-2.4"/><path d="M8 18h.01"/>',
+    keyboard: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"/>',
+    crown: '<path d="M11.56 3.27a.5.5 0 0 1 .88 0l2.95 5.6a1 1 0 0 0 1.52.29l4.27-3.66a.5.5 0 0 1 .8.52l-2.83 10.24a1 1 0 0 1-.96.74H5.81a1 1 0 0 1-.96-.74L2.02 6.02a.5.5 0 0 1 .8-.52l4.27 3.66a1 1 0 0 0 1.52-.29z"/><path d="M5 21h14"/>',
+    wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+    receipt: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>',
+    shield: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+    shieldCheck: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    plus: '<path d="M5 12h14M12 5v14"/>',
+    fileText: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8M16 13H8M16 17H8"/>',
+    moreV: '<circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>',
+    penLine: '<path d="M12 20h9"/><path d="M16.38 3.62a1 1 0 0 1 3 3L7.37 18.64a2 2 0 0 1-.86.5l-2.87.84a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.85z"/>',
+    phone: '<rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/>',
+    trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><path d="M10 11v6M14 11v6"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+    okCircle: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  };
+
+  Object.assign(I, {
+    dash: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+    calCheck: '<path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
+    cal: '<path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+    layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    images: '<path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/>',
+    inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    calClock: '<path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4M8 2v4M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/>',
+    car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+    trend: '<path d="M22 7 13.5 15.5 8.5 10.5 2 17"/><path d="M16 7h6v6"/>',
+    pkg: '<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/>',
+    act: '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
+    camera: '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+    gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    alert: '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+  });
+
+  // ---------- app menu (widgets/Sidebar/menuSections.ts) ----------
+  const ANAV = [
+    ['', [['dash', 'Tablica', 'aniDash']]],
+    ['Praca', [['calCheck', 'Wizyty'], ['cal', 'Kalendarz'], ['layers', 'Zlecenia zbiorcze'], ['images', 'Galeria']]],
+    ['Klienci i zapytania', [['inbox', 'Zapytania'], ['users', 'Klienci'], ['calClock', 'Zaplanowane treści'], ['car', 'Pojazdy']]],
+    ['Firma', [['idCard', 'Pracownicy'], ['fileText', 'Finanse'], ['trend', 'Statystyki'], ['pkg', 'Produkty'], ['act', 'Aktywność']]],
+    ['Marketing', [['msg', 'Kampanie'], ['camera', 'Instagram']]],
+  ];
+  const ani = ([ic, l, id]) => `<span class="ani"${id ? ` id="${id}"` : ''}>${sv(I[ic], 16)}${l}</span>`;
+  const anavHTML = ANAV.map(([g, items]) => (g ? `<div class="ans">${g}</div>` : '') + items.map(ani).join('')).join('')
+    + `<div class="apin">${ani(['gear', 'Ustawienia', 'aniSet'])}${ani(['alert', 'Zgłoś problem', 'aniRep'])}</div>`;
+
+  // ---------- settings menu (SettingsView GROUPS) ----------
+  const NAV = [
+    ['Studio', [['building', 'Dane firmy', 'snCo'], ['listChecks', 'Cennik usług'], ['tag', 'Oznaczenia'], ['fileSig', 'Dokumenty i podpisy']]],
+    ['Zespół', [['userCog', 'Role i uprawnienia']]],
+    ['Komunikacja z klientem', [['msg', 'Wiadomości automatyczne'], ['idCard', 'Karta wizyty', 'snCard'], ['filter', 'Leady']]],
+    ['Urządzenia', [['tablet', 'Tablety, telefon, kontakty'], ['keyboard', 'Skróty klawiszowe']]],
+    ['Konto i płatności', [['crown', 'Pakiet'], ['wallet', 'Kredyty SMS i AI', null, '1 240'], ['receipt', 'KSeF'], ['shield', 'Bezpieczeństwo']]],
+  ];
+  const navHTML = NAV.map(([g, items]) => `<div class="sgrp"${g === 'Komunikacja z klientem' ? ' id="sgKom"' : ''}><h2>${g}</h2>${items.map(([ic, l, id, cnt]) => `<div class="sni"${id ? ` id="${id}"` : ''}>${sv(I[ic], 16)}<span>${l}</span>${cnt ? `<em>${cnt}</em>` : ''}</div>`).join('')}</div>`).join('');
+  const fld = (l, v) => `<div class="cfl"><label>${l}</label><div class="inp">${v}</div></div>`;
+  const smsItem = (id, t) => `<div class="smi2" id="${id}"><span class="cbx on">${sv(I.check, 11, 3)}</span><span>${t}</span></div>`;
+
+  scene.innerHTML = `
+  <div class="scr pgw" id="pg"><div class="app">
+    <nav class="anv" id="anv"><div class="anb"><i>G</i>Gloss Lab</div>${anavHTML}</nav>
+    <div class="apm">
+      <div class="dash" id="dash">
+        <h1>Tablica</h1>
+        <div class="dtl"><div class="uPan"><small>Dzisiaj w studiu</small><b>4 auta</b></div><div class="uPan"><small>Do wydania dzisiaj</small><b>2 auta</b></div><div class="uPan"><small>Rezerwacje w tym tygodniu</small><b>11</b></div></div>
+        <div class="uPan dbig"><small>Najbliższe wizyty</small><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div class="sgrid" id="sett">
+        <nav class="snav" id="snav">
+          <h1>Ustawienia</h1>
+          <div class="ssrch">${sv(I.search, 15)}Szukaj ustawienia</div>
+          ${navHTML}
+        </nav>
+        <div class="smain" id="smain"><div class="smi" id="smi">
+          <div class="sec" id="secCo">
+            <header class="shead">
+              <div class="ht"><h2>Dane firmy</h2><p>Pojawiają się na fakturach, protokołach przyjęcia i wydania oraz w stopce wiadomości do klientów.</p></div>
+              <div class="hs"><span class="bt ghost">${sv(I.help, 15)}Jak to działa</span></div>
+            </header>
+            <section class="uCard cco">${fld('Nazwa firmy', 'Gloss Lab')}${fld('NIP', '527-284-61-09')}${fld('Adres', 'ul. Grunwaldzka 120')}${fld('Miasto', '80-244 Gdańsk')}</section>
+          </div>
+          <div class="sec" id="secVc">
+            <header class="shead" id="shd">
+              <div class="ht"><h2>Karta wizyty</h2><p>Strona, na której klient śledzi swoją wizytę z linku w SMS-ie.</p></div>
+            </header>
+            <section class="uCard vcb" id="vcCard">
+              <p class="vci" id="vcI1">Strona dla klienta z podsumowaniem rezerwacji, zakresem usług i wyceną, a w trakcie wizyty także zdjęciami i dokumentami. Link wysyłamy SMS-em lub e-mailem.</p>
+              <div class="vcr" id="vcRow">
+                <div class="vct"><b>Karta wizyty dla klientów</b><span>Po wyłączeniu opcja wysyłki karty zniknie z tworzenia rezerwacji i przyjęcia pojazdu, a linki nie będą wysyłane.</span></div>
+                <span class="tgS"><span class="tgl" id="vcTgl"></span></span>
+              </div>
+              <p class="vci" id="vcI2">Czy link ma być domyślnie zaznaczony, ustawisz w Ustawienia → Wiadomości automatyczne (przełącznik „Domyślnie zaznacz”).</p>
+            </section>
+          </div>
+        </div></div>
+      </div>
+    </div>
+    </div>
+    <div class="tst" id="tst"><span class="ti">${sv(I.okCircle, 22)}</span><div><b id="tstT"></b><small id="tstM"></small></div><span class="tx">${sv(I.x, 16)}</span></div>
+    <div class="ovl" id="ovl"></div>
+    <div class="bkm" id="bkM">
+      <div class="bkh"><b>Nowa rezerwacja</b><span class="x">${sv(I.x, 16)}</span></div>
+      <div class="bkr"><span class="bki">${sv(I.msg, 18)}</span><div class="bkl" id="bkL">
+        ${smsItem('bkA', 'Wyślij SMS z potwierdzeniem rezerwacji')}
+        ${smsItem('bkB', 'Wyślij SMS przypominający przed wizytą')}
+        ${smsItem('bkC', 'Wyślij SMS z linkiem do karty wizyty')}
+      </div></div>
+      <div class="bkf"><span class="bt outline">Anuluj</span><span class="bt primary">Zapisz rezerwację</span></div>
+    </div>
+  </div>`;
+  const pg = $('pg');
+  pg.style.left = '0px'; pg.style.top = '0px';
+
+  // ---------- chapters and beats ----------
+  const CH = ['Ustawienia', 'Wyłączanie', 'Co się zmienia', 'Koniec'];
+  const beats = [];
+  const words = s => (s || '').split(/\s+/).filter(Boolean).length;
+  window.beat = (ch, o, f) => beats.push({ ch, h: o.h, b: o.b, lead: o.lead ?? .6, act: o.act ?? 1, hold: o.hold ?? .6, f: f || (() => {}) });
+
+  window.H = {
+    P, lerp, out3, io3, back, type, clamp,
+    mv: (S, to, k, o = {}) => { S.cur = { to, k, dx: o.dx || 0, dy: o.dy || 0, from: o.from || null, fdx: o.fdx || 0, fdy: o.fdy || 0, vis: S.cur.vis }; },
+    tc: (S, to, k, o = {}) => { S.tch = { to, k, dx: o.dx || 0, dy: o.dy || 0, vis: S.tch.vis }; },
+    tap: (S, a, at, id) => { const k = P(S._s, S._lead + at * S._act, S._lead + at * S._act + .6); if (k > 0 && k < 1) S.tap = k; if (id && a > at && a < at + .14) S.press = id; },
+    cam: (S, to, k) => { S.cam = { to, k }; },
+    scr: (S, to, at, k) => { S.scr = { to, at, k }; },
+    hl: (S, el, k = 1, pad = 6) => { S.hl = { el, k, pad }; },
+    foc: (S, sec) => { S.foc = sec; },
+  };
+
+  const fresh = () => ({
+    pg: 0, sec: 'dash', secK: 1, sn: 'co', snK: 1, on: 1, onK: 1, tst: 0, tstW: 'off', bk: 0, bkOff: 0,
+    foc: null, focPrev: null, hov: null,
+    hl: null, hlLast: null,
+    cam: { to: 'pg', k: 1 },
+    cur: { to: null, k: 1, vis: 0, dx: 0, dy: 0 }, tch: { to: null, k: 1, vis: 0, dx: 0, dy: 0 },
+    tap: 0, tapT: 0, press: null, _s: 0,
+  });
+
+  let DUR = 0, chStart = [];
+  const layout = () => {
+    let t = 0, lastText = null;
+    beats.forEach((b, i) => {
+      const txt = b.h + '|' + b.b;
+      b.newText = txt !== lastText; lastText = txt;
+      b.textIdx = b.newText ? i : beats[i - 1].textIdx;
+      if (b.newText) b.lead = Math.max(b.lead, .7);
+      const read = b.newText ? 1.5 + words(b.h) * .26 + words(b.b) * .24 : 0;
+      const slack = read - (b.lead + b.act + b.hold);
+      if (slack > 0) b.act = Math.min(b.act * 1.7, b.act + slack * .5);
+      b.d = Math.max(b.lead + b.act + b.hold, read);
+      b.t0 = t; t += b.d;
+      if (chStart[b.ch] === undefined) chStart[b.ch] = b.t0;
+    });
+    DUR = t;
+  };
+
+  const beatAt = t => { let i = 0; while (i < beats.length - 1 && beats[i + 1].t0 <= t) i++; return i; };
+  const runBeat = (S, i, s) => {
+    const b = beats[i];
+    S.hlLast = S.hl; S.hl = null; S.focPrev = S.foc; S.tap = 0; S.press = null; S.hov = null; S._s = s; S._i = i; S._lead = b.lead; S._act = b.act; S._T = b.t0 + s;
+    b.f(S, P(s, b.lead, b.lead + b.act), s);
+  };
+  const stateAtBeat = (i, s) => { const S = fresh(); for (let j = 0; j < i; j++) runBeat(S, j, beats[j].d); runBeat(S, i, s); return S; };
+
+  // ---------- geometry ----------
+  const sRect = el => { const r = el.getBoundingClientRect(), s0 = stage.getBoundingClientRect(), k = s0.width / W; return { x: (r.left - s0.left) / k, y: (r.top - s0.top) / k, w: r.width / k, h: r.height / k }; };
+  const offR = el => { let x = 0, y = 0, n = el; while (n && n !== scene) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+
+  // ---------- flow-in ----------
+  const enter = (el, k, dy = 22, sc = .975, blur = 7) => {
+    k = clamp(k, 0, 1);
+    el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden';
+    if (k >= 1) { el.style.transform = ''; el.style.filter = ''; return; }
+    el.style.transform = `translateY(${(1 - out3(k)) * dy}px) scale(${lerp(sc, 1, out3(k))})`;
+    el.style.filter = `blur(${(1 - k) * blur}px)`;
+  };
+  const stag = (els, k, st = .12, dy = 14) => { const n = els.length, span = 1 + st * (n - 1); els.forEach((el, i) => enter(el, clamp(k * span - i * st, 0, 1), dy, .99, 5)); };
+  const clear = el => { el.style.transform = ''; el.style.filter = ''; el.style.opacity = ''; el.style.visibility = ''; };
+  const screen = (el, k, recede = 0) => {
+    k = clamp(k, 0, 1); el.style.visibility = k > .001 ? 'visible' : 'hidden'; el.style.opacity = k;
+    const bl = (1 - k) * 9 + recede * 3.5; el.style.filter = bl > .01 ? `blur(${bl}px)` : '';
+    el.style.transform = k < 1 || recede > 0 ? `translateY(${(1 - out3(k)) * 30}px) scale(${lerp(.96, 1, out3(k)) * (1 - recede * .035)})` : '';
+  };
+  const show = (el, on, disp = '') => { el.style.display = on ? disp : 'none'; };
+
+  // ---------- caption text (style B: words flow in from below with blur) ----------
+  const ctx = $('ctx'), cnum = $('cnum');
+  const textEls = {}, chEls = {};
+  const mkWords = s => s.split(' ').map(w => `<span class="w">${w} </span>`).join('');
+  const textEl = i => {
+    if (textEls[i]) return textEls[i];
+    const b = beats[i], d = document.createElement('div'); d.className = 'tl';
+    d.innerHTML = `<h2 class="ch">${mkWords(b.h)}</h2>` + (b.b ? `<div class="cbd">${mkWords(b.b)}</div>` : '');
+    d.style.display = 'none'; ctx.appendChild(d);
+    textEls[i] = { el: d, hw: Array.from(d.querySelectorAll('.ch .w')), bw: Array.from(d.querySelectorAll('.cbd .w')) };
+    return textEls[i];
+  };
+  const chEl = c => {
+    if (chEls[c]) return chEls[c];
+    const d = document.createElement('div'); d.innerHTML = `<b>${String(c + 1).padStart(2, '0')}</b><i></i><span>${CH[c]}</span>`;
+    d.style.display = 'none'; cnum.appendChild(d); return (chEls[c] = d);
+  };
+  const wIn = (w, k, dy = 32, bl = 9) => { w.style.opacity = k; w.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * dy}px)`; w.style.filter = k >= 1 ? '' : `blur(${(1 - k) * bl}px)`; };
+  const wOut = (w, k) => { w.style.opacity = 1 - k; w.style.transform = `translateY(${-io3(k) * 26}px)`; w.style.filter = `blur(${k * 7}px)`; };
+  let shownT = [], shownC = [];
+  const paintText = (i, t) => {
+    const cur = beats[i].textIdx, tS = beats[cur].t0, tau = t - tS;
+    const prevIdx = cur > 0 ? beats[cur - 1].textIdx : -1;
+    const want = [cur]; if (prevIdx >= 0 && tau < .75) want.push(prevIdx);
+    shownT.forEach(j => { if (!want.includes(j)) textEls[j].el.style.display = 'none'; });
+    shownT = want;
+    const T = textEl(cur); T.el.style.display = 'block';
+    const nh = T.hw.length;
+    T.hw.forEach((w, j) => wIn(w, P(tau, .3 + j * .05, .3 + j * .05 + .65)));
+    const b0 = .3 + nh * .05 + .25;
+    T.bw.forEach((w, j) => wIn(w, P(tau, b0 + j * .018, b0 + j * .018 + .6), 18, 6));
+    if (want[1] !== undefined) { const O = textEl(prevIdx); O.el.style.display = 'block'; [...O.hw, ...O.bw].forEach((w, j) => wOut(w, P(tau, j * .01, j * .01 + .42))); }
+    const c = beats[i].ch, cS = chStart[c], ct = t - cS, wantC = [c]; if (c > 0 && ct < .6) wantC.push(c - 1);
+    shownC.forEach(j => { if (!wantC.includes(j)) chEls[j].style.display = 'none'; });
+    shownC = wantC;
+    const C = chEl(c); C.style.display = 'flex'; wIn(C, c === 0 && t < .3 ? 0 : P(ct, .15, .75), 20, 6);
+    if (wantC[1] !== undefined) { const O = chEl(c - 1); O.style.display = 'flex'; wOut(O, P(ct, 0, .4)); }
+    $('pl').innerHTML = `Rozdział <b>${c + 1}</b> z ${CH.length}`;
+    const bars = $('pb').children;
+    for (let j = 0; j < CH.length; j++) { const a = chStart[j], b = j + 1 < CH.length ? chStart[j + 1] : DUR; bars[j].firstChild.style.width = (P(t, a, b) * 100) + '%'; }
+  };
+  $('pb').innerHTML = CH.map(() => '<i><b></b></i>').join('');
+
+  // ---------- paint ----------
+  const SCR = { pg };
+  const camR = {};
+  const camTarget = to => {
+    if (typeof to === 'string') {
+      const el = SCR[to]; const s = Math.min(.95, 1040 / el.offsetWidth, 960 / el.offsetHeight);
+      return { fx: el.offsetLeft + el.offsetWidth / 2, fy: el.offsetTop + el.offsetHeight / 2, s };
+    }
+    const el = $(to.el); let r = offR(el);
+    if (el.offsetParent) camR[to.el] = r; else r = camR[to.el] || r;
+    return { fx: r.x + r.w / 2 + (to.dx || 0), fy: r.y + r.h / 2 + (to.dy || 0), s: to.s };
+  };
+  const FOC = ['anv', 'snav', 'shd', 'vcI1', 'vcRow', 'vcI2'];
+  let lastCur = { x: 1500, y: 1180 }, lastTch = { x: 1500, y: 1180 }, hovEl = null, pressEl = null;
+  function paint(S, prev) {
+    const s = S._s;
+    screen(pg, S.pg);
+
+    // --- hover and press
+    if (hovEl && hovEl.id !== S.hov) hovEl.classList.remove('hov');
+    hovEl = S.hov ? $(S.hov) : null; if (hovEl) hovEl.classList.add('hov');
+    if (pressEl && pressEl.id !== S.press) pressEl.style.transform = '';
+    pressEl = S.press ? $(S.press) : null; if (pressEl) pressEl.style.transform = 'scale(.96)';
+
+    // --- which page: Tablica, then Ustawienia; inside Ustawienia: Dane firmy, then Karta wizyty
+    const dash = $('dash'), sett = $('sett');
+    if (S.sec === 'dash') { dash.style.display = ''; clear(dash); sett.style.display = 'none'; }
+    else {
+      sett.style.display = ''; if (S.secK < 1) enter(sett, S.secK, 16, .99, 6); else clear(sett);
+      dash.style.display = S.secK < .5 ? '' : 'none'; dash.style.opacity = 1 - S.secK * 2;
+    }
+    $('aniDash').classList.toggle('on', S.sec === 'dash'); $('aniSet').classList.toggle('on', S.sec !== 'dash');
+    const co = $('secCo'), vc = $('secVc');
+    if (S.sn === 'co') { co.style.display = ''; clear(co); vc.style.display = 'none'; }
+    else {
+      vc.style.display = ''; if (S.snK < 1) enter(vc, S.snK, 16, .99, 6); else clear(vc);
+      co.style.display = S.snK < .5 ? '' : 'none'; co.style.opacity = 1 - S.snK * 2; co.style.position = S.snK < .5 ? 'absolute' : ''; co.style.top = '0'; co.style.width = '100%';
+    }
+    $('snCo').classList.toggle('on', S.sn === 'co'); $('snCard').classList.toggle('on', S.sn === 'vc');
+
+    // --- the switch: the knob slides, the track turns grey
+    { const t = $('vcTgl'), k = S.on ? out3(S.onK) : 1 - out3(S.onK); t.style.setProperty('--k', k); t.classList.toggle('off', k < .5); }
+
+    // --- focus: the part the text is about stays sharp, the rest softens
+    const fk = io3(P(s, 0, .7));
+    const dimOf = (f, id) => f && !f.includes(id) ? 1 : 0;
+    FOC.forEach(id => { const d = lerp(dimOf(S.focPrev, id), dimOf(S.foc, id), fk), r = $(id); r.style.opacity = d > .001 ? 1 - d * .6 : ''; r.style.filter = d > .001 ? `blur(${d * 1.8}px)` : ''; });
+
+    // --- "Nowa rezerwacja" (fragment: the SMS row), the card's line folds away
+    const bk = $('bkM'); bk.style.left = Math.round((pg.offsetWidth - bk.offsetWidth) / 2 + 110) + 'px'; bk.style.top = Math.round((pg.offsetHeight - 330) / 2) + 'px';
+    enter(bk, S.bk, 34, .95, 9); { const o = $('ovl'), k = clamp(S.bk * 1.4, 0, 1); o.style.opacity = k; o.style.visibility = k > .001 ? 'visible' : 'hidden'; }
+    { const c = $('bkC'), k = io3(S.bkOff); c.style.height = (22 * (1 - k)) + 'px'; c.style.marginTop = (-8 * k) + 'px'; c.style.opacity = 1 - clamp(k * 1.6, 0, 1); c.style.filter = k > 0 && k < 1 ? `blur(${k * 5}px)` : ''; }
+
+    // --- toast, top right of the page
+    const tw = { off: ['Karta wizyty wyłączona', 'Linki do karty nie będą wysyłane.'] }[S.tstW];
+    $('tstT').textContent = tw[0]; $('tstM').textContent = tw[1];
+    const ts = $('tst'); ts.style.left = (pg.offsetWidth - ts.offsetWidth - 24) + 'px'; ts.style.top = '24px'; enter(ts, S.tst, -18, .96, 6);
+
+    // --- camera
+    const tg2 = camTarget(S.cam.to);
+    let cam = tg2;
+    if (prev && S.cam.k < 1) { const k = io3(S.cam.k); cam = { fx: lerp(prev.cam.fx, tg2.fx, k), fy: lerp(prev.cam.fy, tg2.fy, k), s: Math.exp(lerp(Math.log(prev.cam.s), Math.log(tg2.s), k)) }; }
+    // gentle drift: translation only (a breathing scale makes small boxes shimmer); whole pixels while the camera rests
+    const T = S._T || 0, ds2 = cam.s, still = !(prev && S.cam.k < 1);
+    let tx = CX - cam.fx * ds2 + 9 * Math.sin(T * .29), ty = CY - cam.fy * ds2 + 6 * Math.sin(T * .21 + 1);
+    if (still) { tx = Math.round(tx); ty = Math.round(ty); }
+    scene.style.transform = `translate(${tx}px, ${ty}px) scale(${ds2})`;
+
+    // --- highlight ring (glides from the previous one)
+    const hlEl = $('hl');
+    const rr = h => { const r = sRect($(h.el)), p = (h.pad ?? 6) * 1.3; return { x: r.x - p, y: r.y - p, w: r.w + 2 * p, h: r.h + 2 * p }; };
+    let hr = null, ho = 0;
+    if (S.hl) {
+      const b = rr(S.hl);
+      if (S.hlLast && S.hlLast.el !== S.hl.el) { const a = rr(S.hlLast), k = io3(P(s, 0, .6)); hr = { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), w: lerp(a.w, b.w, k), h: lerp(a.h, b.h, k) }; ho = S.hl.k >= 1 ? 1 : Math.max(out3(S.hl.k), 1 - k); }
+      else { hr = b; ho = S.hlLast && S.hlLast.el === S.hl.el && S.hl.k >= 1 ? 1 : out3(S.hl.k); }
+    } else if (S.hlLast && s < .35) { hr = rr(S.hlLast); ho = 1 - s / .35; }
+    if (hr && ho > .001 && hr.w > 4) { hlEl.style.opacity = ho; hlEl.style.left = hr.x + 'px'; hlEl.style.top = hr.y + 'px'; hlEl.style.width = hr.w + 'px'; hlEl.style.height = hr.h + 'px'; hlEl.style.borderRadius = '14px'; } else hlEl.style.opacity = 0;
+
+    // --- mouse cursor (glides in an arc)
+    const ctr = (id, dx, dy) => { const r = sRect($(id)); if (r.w < 1 && r.h < 1) return null; return { x: r.x + r.w / 2 + dx * ds2, y: r.y + r.h / 2 + dy * ds2 }; };
+    const glide = (P0, prevPt, last) => {
+      let p = P0.to ? (ctr(P0.to, P0.dx, P0.dy) || last) : { x: 1500, y: 1180 };
+      if (P0.k < 1 && (prevPt || P0.from)) {
+        const a = (P0.from && ctr(P0.from, P0.fdx, P0.fdy)) || prevPt || p, k = io3(P0.k), dx = p.x - a.x, dy = p.y - a.y, d = Math.hypot(dx, dy) || 1, bend = Math.sin(Math.PI * k) * Math.min(70, d * .14);
+        p = { x: lerp(a.x, p.x, k) - dy / d * bend, y: lerp(a.y, p.y, k) + dx / d * bend };
+      }
+      return p;
+    };
+    const cur = glide(S.cur, prev && prev.cur, lastCur); lastCur = cur;
+    const tch = lastTch;
+    const cv2 = $('cursor'), press = S.tap > 0 && S.cur.vis > 0 ? Math.sin(Math.PI * clamp(S.tap * 2.2, 0, 1)) : 0;
+    cv2.style.opacity = S.cur.vis; cv2.style.transform = `translate(${cur.x - 7}px, ${cur.y - 5}px) scale(${1 - press * .16})`;
+    const ring = $('ring');
+    if (S.tap > 0 && S.tap < 1) { ring.style.opacity = (1 - S.tap) * S.cur.vis; ring.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${.35 + S.tap * .9})`; } else ring.style.opacity = 0;
+    return { cam, cur, tch };
+  }
+
+  // ---------- timeline driver with memo of each beat's end ----------
+  const ends = [];
+  const endOf = i => {
+    if (i < 0) return null;
+    if (ends[i]) return ends[i];
+    const S = stateAtBeat(i, beats[i].d);
+    ends[i] = paint(S, i > 0 ? endOf(i - 1) : null);
+    return ends[i];
+  };
+  const draw = t => {
+    t = clamp(t, 0, DUR - .001);
+    const i = beatAt(t), b = beats[i];
+    const prev = endOf(i - 1);
+    const S = stateAtBeat(i, t - b.t0);
+    paint(S, prev);
+    paintText(i, t);
+    window.__t = t;
+  };
+
+  // ---------- player ----------
+  const player = $('player');
+  const fit = () => { stage.style.transform = `scale(${player.clientWidth / W})`; };
+  let t = 0, playing = false, rate = 1;
+  const bPlay = $('bPlay');
+  const syncBtn = () => { bPlay.textContent = playing ? 'Pauza' : (t >= DUR - .01 ? 'Od początku' : 'Odtwórz'); };
+  const chapAt = tt => { let c = 0; for (let j = 0; j < CH.length; j++) if (chStart[j] <= tt + .001) c = j; return c; };
+  const go = nt => { t = clamp(nt, 0, DUR - .001); draw(t); $('scrubI').style.width = (t / DUR * 100) + '%'; const c = chapAt(t); Array.from($('chaps').children).forEach((e, j) => e.classList.toggle('on', j === c)); };
+  bPlay.addEventListener('click', () => { if (t >= DUR - .01) go(0); playing = !playing; syncBtn(); });
+  const textStarts = () => beats.filter(b => b.newText).map(b => b.t0);
+  $('bNext').addEventListener('click', () => { const n = textStarts().find(x => x > t + .05); if (n !== undefined) go(n + .01); });
+  $('bPrev').addEventListener('click', () => { const ts = textStarts().filter(x => x < t - .4); go(ts.length ? ts[ts.length - 1] + .01 : 0); });
+  $('bRate').addEventListener('click', () => { rate = rate === 1 ? .75 : 1; $('bRate').textContent = `Tempo ${rate === 1 ? '1' : '0,75'}×`; });
+  $('scrub').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); go((e.clientX - r.left) / r.width * DUR); });
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (playing) {
+      let nt = t + dt * rate;
+      if ($('optStop').checked) { const n = textStarts().find(x => x > t + .001); if (n !== undefined && nt >= n) { nt = n - .001; playing = false; syncBtn(); } }
+      if (nt >= DUR) { nt = DUR - .001; playing = false; syncBtn(); }
+      go(nt);
+    }
+    requestAnimationFrame(frame);
+  };
+  window.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input')) return; if (e.key === ' ') { e.preventDefault(); bPlay.click(); } if (e.key === 'ArrowRight') $('bNext').click(); if (e.key === 'ArrowLeft') $('bPrev').click(); });
+
+  window.__start = () => {
+    layout();
+    $('chaps').innerHTML = CH.map((c, j) => `<button type="button">${j + 1}. ${c}</button>`).join('');
+    Array.from($('chaps').children).forEach((e, j) => e.addEventListener('click', () => go(chStart[j] + .01)));
+    fit(); try { new ResizeObserver(() => { fit(); ends.length = 0; go(t); }).observe(player); } catch (e) { window.addEventListener('resize', () => { fit(); ends.length = 0; go(t); }); }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    go(reduce ? chStart[1] + 2 : .01); syncBtn();
+    requestAnimationFrame(frame);
+    window.__seek = tt => { playing = false; syncBtn(); go(tt); };
+    window.__dur = DUR; window.__chStart = chStart; window.__beats = beats.map(b => [b.t0, b.d, b.ch, b.h, b.newText]);
+  };
+})();
+
+(() => {
+  const { P, mv, tap, cam, hl, foc } = window.H;
+  const B = window.beat;
+  const show = (S, s, a = 0, b = .45) => { S.cur.vis = P(s, a, b); };
+  const hide = (S, k) => { S.cur.vis = Math.min(S.cur.vis, 1 - k); };
+  // one camera target per beat: a target that changes mid-beat makes the screen jump
+  const ZV = { el: 'vcCard', s: 1.22, dy: -30 };
+  // the app menu and the settings menu side by side, large enough to read
+  const ZA = { el: 'anv', s: 1.08, dx: 330 };
+
+  // ===== 1 Ustawienia =====
+  B(0, { h: 'Jak wyłączyć kartę wizyty?', b: '', lead: .2, act: 1.4, hold: .5 }, (S, a, s) => { S.pg = P(s, .3, 1.5); cam(S, 'pg', 1); });
+  B(0, { h: 'Otwórz „Ustawienia” na dole menu.', b: '', lead: .6, act: 2.2, hold: .3 }, (S, a, s) => {
+    S.pg = 1; cam(S, ZA, P(s, 0, 1.4)); foc(S, ['anv']); show(S, s, .6, 1.0);
+    mv(S, 'aniSet', P(a, .1, .6)); S.hov = a > .55 && a < .74 ? 'aniSet' : null; tap(S, a, .7, 'aniSet');
+    if (a > .74) { S.sec = 'set'; S.secK = P(a, .74, .95); }
+  });
+  B(0, { h: 'Wybierz „Karta wizyty”.', b: 'Jest w grupie „Komunikacja z klientem”.', lead: .6, act: 2.0, hold: .4 }, (S, a, s) => {
+    S.sec = 'set'; cam(S, ZA, 1); foc(S, ['snav']); hl(S, 'sgKom', P(a, 0, .3), 4);
+    mv(S, 'snCard', P(a, .25, .62), { from: 'aniSet' }); S.hov = a > .58 && a < .76 ? 'snCard' : null; tap(S, a, .72, 'snCard');
+    if (a > .76) { S.sn = 'vc'; S.snK = P(a, .76, .96); }
+  });
+
+  // ===== 2 Wyłączanie =====
+  B(1, { h: 'Karta wizyty to strona wizyty dla klienta.', b: 'Klient widzi na niej usługi, wycenę i zdjęcia.', lead: .6, act: 1.6, hold: .4 }, (S, a, s) => {
+    S.sec = 'set'; S.sn = 'vc'; hide(S, P(s, 0, .4)); cam(S, ZV, P(s, 0, 2.0)); foc(S, ['vcI1']); hl(S, 'vcI1', P(a, .3, .6), 6);
+  });
+  B(1, { h: 'Zostaw kartę, jeśli wysyłasz link tylko czasem.', b: 'Wtedy wyłącz „Domyślnie zaznacz” w „Wiadomościach automatycznych”.', lead: .6, act: 1.4, hold: .6 }, (S, a) => {
+    cam(S, ZV, 1); foc(S, ['vcI2']); hl(S, 'vcI2', 1, 6);
+  });
+  B(1, { h: 'Wyłącz „Kartę wizyty dla klientów”.', b: '', lead: .6, act: 2.4, hold: .3 }, (S, a, s) => {
+    cam(S, ZV, 1); foc(S, ['vcRow']); show(S, s, .6, 1.0);
+    mv(S, 'vcTgl', P(a, .05, .5), { from: 'vcRow', fdx: 120, fdy: 40 }); S.hov = a > .45 && a < .62 ? 'vcTgl' : null; tap(S, a, .58);
+    if (a > .62) { S.on = 0; S.onK = P(a, .62, .76); }
+    S.tst = P(a, .78, .95);
+  });
+  B(1, { h: 'Klienci nie dostają już linków do karty.', b: 'Ustawienie obowiązuje w całym studiu.', lead: .6, act: 1.6, hold: .5 }, (S, a, s) => {
+    S.on = 0; S.tst = 1 - P(a, .55, .85); cam(S, ZV, 1); foc(S, ['vcRow']); hide(S, P(s, 0, .4)); hl(S, 'vcRow', P(a, 0, .3), 4);
+  });
+
+  // ===== 3 Co się zmienia =====
+  B(2, { h: 'Pole z linkiem znika z rezerwacji.', b: 'Znika też przy przyjęciu auta.', lead: .6, act: 2.8, hold: .5 }, (S, a, s) => {
+    S.on = 0; S.bk = P(s, 0, .6); cam(S, { el: 'bkM', s: 1.3 }, P(s, 0, 1.2));
+    if (a < .45) hl(S, 'bkC', P(a, .15, .35), 4); S.bkOff = P(a, .5, .85);
+  });
+  B(2, { h: 'Wysłane wcześniej linki nadal działają.', b: 'Klient z takim linkiem dalej widzi swoją wizytę.', lead: .6, act: 1.4, hold: .6 }, (S, a, s) => {
+    S.on = 0; S.bkOff = 1; S.bk = 1 - P(s, 0, .5); cam(S, ZV, P(s, 0, 1.2)); foc(S, ['vcI1']);
+  });
+  B(2, { h: 'Włącz kartę tym samym przełącznikiem.', b: 'Pole z linkiem wraca do rezerwacji i przyjęcia.', lead: .6, act: 1.4, hold: .6 }, (S, a) => {
+    S.on = 0; S.bkOff = 1; cam(S, ZV, 1); foc(S, ['vcRow']); hl(S, 'vcTgl', P(a, 0, .3), 8);
+  });
+
+  // ===== 4 Koniec =====
+  B(3, { h: 'Karta wizyty jest wyłączona.', b: '', lead: .6, act: 1.6, hold: .6 }, (S, a, s) => {
+    S.on = 0; S.bkOff = 1; foc(S, null); cam(S, 'pg', P(s, 0, 1.6));
+  });
+  B(3, { h: 'Jeśli masz pytania, napisz do nas.', b: 'Kliknij „Zgłoś problem” w menu.', lead: .6, act: 1.4, hold: 6 }, (S, a) => {
+    S.on = 0; S.bkOff = 1; cam(S, 'pg', 1); foc(S, ['anv']); hl(S, 'aniRep', P(a, 0, .3), 4);
+  });
+})();
+
+window.__start();</script>
+
+</body>
+</html>
