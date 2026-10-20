@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../osadzenie.css">
+<script>if (window.self !== window.top) { document.documentElement.classList.add('osadzona'); document.documentElement.dataset.theme = 'dark'; }</script>
+</head>
+<body>
+<title>Jak stworzyć kampanię SMS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-ext-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Page: help-centre look. Stage: style B, caption column on the left, the campaign screens on the right. */
+:root {
+  --bg: #eef2f7; --surface: #ffffff; --ink: #0f172a; --ink-2: #475569; --muted: #64748b; --line: #e2e8f0;
+  --brand: #0ea5e9; --brand-ink: #0369a1; --brand-soft: #e0f2fe;
+  --font: 'InterDB', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  padding: 36px max(16px, env(safe-area-inset-right, 0px)) 72px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-ink); }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 800; margin: 6px 0 0; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--ink-2); margin: 0; max-width: 760px; }
+
+.player { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #eef2f7; box-shadow: 0 20px 50px rgba(15,23,42,.16); }
+.stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; font-family: var(--font); color: #0f172a; background: #eef2f7; }
+.bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bar button { font: 600 14px var(--font); height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.bar button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; min-width: 120px; justify-content: center; }
+.bar button:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.bar label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+.bar .sp { flex: 1; }
+.scrub { position: relative; height: 8px; border-radius: 4px; background: var(--line); cursor: pointer; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #0ea5e9; }
+.scrub b { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); opacity: .45; }
+.chaps { display: flex; flex-wrap: wrap; gap: 8px; }
+.chaps button { font: 500 13.5px var(--font); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.chaps button.on { border-color: #0ea5e9; color: var(--brand-ink); background: var(--brand-soft); font-weight: 700; }
+
+/* ===== stage ===== */
+.bgx { position: absolute; inset: 0; background:
+  radial-gradient(900px 700px at 78% 45%, rgba(14,165,233,.10), transparent 70%),
+  radial-gradient(700px 600px at 8% 95%, rgba(37,99,235,.07), transparent 70%), #eef2f7; }
+.brand { position: absolute; left: 120px; top: 84px; display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; z-index: 40; }
+.brand i { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #2563eb); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 17px; font-weight: 800; }
+.brand span { font-size: 19px; font-weight: 500; color: #64748b; margin-left: 6px; letter-spacing: -0.01em; }
+.cap { position: absolute; left: 120px; top: 262px; width: 600px; z-index: 40; }
+.cnum { height: 34px; position: relative; margin-bottom: 26px; }
+.cnum > div { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; color: #0369a1; white-space: nowrap; }
+.cnum > div b { font-variant-numeric: tabular-nums; }
+.cnum > div i { display: block; width: 46px; height: 2px; background: linear-gradient(90deg, #38bdf8, rgba(56,189,248,0)); }
+.cnum > div span { color: #0f172a; font-weight: 600; }
+.ctx { position: relative; }
+.ctx .tl { position: absolute; left: 0; top: 0; width: 600px; }
+.ch { font-size: 56px; font-weight: 750; letter-spacing: -0.038em; line-height: 1.08; margin: 0; }
+.cbd { font-size: 28px; line-height: 1.45; color: #475569; margin-top: 28px; letter-spacing: -0.01em; }
+.ch .w, .cbd .w { display: inline-block; white-space: pre; will-change: transform, filter, opacity; }
+.prog { position: absolute; left: 120px; bottom: 96px; z-index: 40; }
+.prog .pl { font-size: 18px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
+.prog .pl b { color: #0f172a; font-weight: 700; }
+.prog .pb { display: flex; gap: 7px; }
+.prog .pb i { display: block; width: 34px; height: 6px; border-radius: 3px; background: #d5dde8; overflow: hidden; }
+.prog .pb i b { display: block; height: 100%; width: 0; background: #0ea5e9; }
+
+.view { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 20; -webkit-mask-image: linear-gradient(90deg, transparent 735px, #000 800px); mask-image: linear-gradient(90deg, transparent 735px, #000 800px); }
+.scene { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 90; filter: drop-shadow(0 4px 8px rgba(15,23,42,.32)); opacity: 0; pointer-events: none; }
+.ring { position: absolute; left: 0; top: 0; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 3px solid #0ea5e9; opacity: 0; z-index: 89; pointer-events: none; }
+.kcap { position: absolute; z-index: 91; padding: 10px 18px; border-radius: 12px; background: #0f172a; color: #fff; font-size: 22px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,.3); opacity: 0; border-bottom: 4px solid #334155; }
+.hl { position: absolute; z-index: 60; border-radius: 12px; border: 2.5px solid #0ea5e9; box-shadow: 0 0 0 5px rgba(14,165,233,.16), 0 0 26px rgba(14,165,233,.35); opacity: 0; pointer-events: none; }
+
+
+/* ===== floating layers (all live in the scene, placed by the engine) ===== */
+.lay { position: absolute; left: 0; top: 0; opacity: 0; visibility: hidden; z-index: 50; }
+.caret { display: inline-block; width: 2px; height: 1.1em; background: #0ea5e9; margin-left: 1px; vertical-align: -.15em; }
+.ii { display: inline-grid; place-items: center; width: 14px; height: 14px; border-radius: 50%; border: 1.3px solid #94a3b8; color: #94a3b8; font-size: 9px; font-weight: 700; font-style: normal; margin-left: 4px; flex: 0 0 auto; }
+
+/* ===== app page frame: same card for the list and the wizard ===== */
+.pg { position: absolute; left: 0; top: 0; width: 1120px; height: 1010px; background: #eef2f7; border-radius: 18px; overflow: hidden; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 30px 70px -20px rgba(15,23,42,.25); opacity: 0; visibility: hidden; font-size: 14px; color: #0f172a; }
+
+/* ===== campaigns list (views/CampaignsListView, PageHeader, comms FilterChip/SurfaceCard) ===== */
+.clin { padding: 30px 32px; display: flex; flex-direction: column; gap: 20px; }
+.clhd { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.clhd h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.4px; line-height: 1.2; }
+.clst { display: flex; gap: 6px 18px; flex-wrap: wrap; margin-top: 6px; font-size: 14px; font-weight: 500; color: #64748b; }
+.clst b { color: #0f172a; font-weight: 600; font-variant-numeric: tabular-nums; }
+.clac { display: flex; gap: 10px; flex: 0 0 auto; }
+.clgh, .clpr { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 999px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.clgh { background: #fff; border: 1px solid #e2e8f0; color: #0f172a; }
+.clpr { background: #0ea5e9; color: #fff; box-shadow: 0 2px 8px rgba(14,165,233,.28); }
+.clpr.hov { background: #0284c7; }
+.clfr { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.clchip { border: 1px solid #e2e8f0; background: #fff; color: #475569; border-radius: 999px; font-size: 13px; font-weight: 500; padding: 7px 16px; white-space: nowrap; }
+.clchip.on { background: #0f172a; border-color: transparent; color: #fff; }
+.clsep { width: 1px; align-self: stretch; margin: 2px; background: #e2e8f0; }
+.clsrch { display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0; border-radius: 999px; padding: 7px 14px; color: #94a3b8; background: #fff; flex: 1 1 200px; max-width: 300px; font-size: 13px; white-space: nowrap; }
+.clcard { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04); overflow: hidden; }
+.clhr, .clrw { display: grid; grid-template-columns: 1.8fr .8fr .9fr .9fr 1.4fr 1fr; gap: 10px; padding: 12px 20px 12px 23px; align-items: center; }
+.clhr { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+.clrw { font-size: 13px; color: #475569; border-bottom: 1px solid #f1f5f9; background: #fff; }
+.clrw:last-child { border-bottom: none; }
+.clrw .who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.clrw .nm { font-weight: 600; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.km { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: #94a3b8; white-space: nowrap; }
+.clrw .num { font-variant-numeric: tabular-nums; }
+.stk { display: inline-flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+.stl { display: inline-flex; align-items: center; gap: 7px; color: #0f172a; font-weight: 500; white-space: nowrap; }
+.stl i { width: 8px; height: 8px; border-radius: 50%; }
+.smk { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+.smk.st { color: #d97706; font-weight: 600; }
+.clnw { overflow: hidden; }
+.clov { position: absolute; inset: 0; background: rgba(15,23,42,.45); opacity: 0; z-index: 5; }
+
+/* ===== campaign wizard (views/CampaignWizardView, WizardSteps, components/shared) ===== */
+.wzv { position: absolute; left: 0; top: 0; right: 0; bottom: 0; overflow: hidden; }
+.wzc { position: relative; top: 0; padding: 30px 32px 40px; display: flex; flex-direction: column; gap: 20px; }
+.wzhd { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.wzt { flex: 1; min-width: 0; }
+.wznm { max-width: 560px; border-bottom: 1px dashed #cbd5e1; padding: 0 0 5px; font-size: 28px; font-weight: 700; letter-spacing: -.5px; line-height: 1.15; color: #0f172a; white-space: nowrap; min-height: 38px; }
+.wznm.ph { color: #94a3b8; }
+.wznm.focus { border-bottom-color: #0ea5e9; }
+.wzfx { display: flex; gap: 6px 18px; flex-wrap: wrap; margin-top: 8px; font-size: 13.5px; color: #64748b; white-space: nowrap; }
+.wzfx b { color: #0f172a; font-weight: 600; font-variant-numeric: tabular-nums; }
+.wzgh { display: inline-flex; align-items: center; padding: 10px 20px; border-radius: 999px; background: #fff; border: 1px solid #e2e8f0; font-size: 14px; font-weight: 600; flex: 0 0 auto; }
+.wzrl { display: flex; align-items: center; gap: 4px; padding: 2px 0; }
+.wzri { display: inline-flex; align-items: center; gap: 7px; padding: 4px 8px; font-size: 13px; color: #94a3b8; white-space: nowrap; }
+.wzri.done { color: #475569; }
+.wzri.cur { color: #0f172a; font-weight: 600; }
+.wzmk { width: 16px; height: 16px; border-radius: 50%; box-sizing: border-box; border: 1px solid #e2e8f0; display: inline-grid; place-items: center; color: #fff; flex: 0 0 auto; }
+.wzri.done .wzmk, .wzri.cur .wzmk { background: #0ea5e9; border-color: transparent; }
+.wzri.cur .wzmk::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #fff; }
+.wzln { width: 28px; height: 1px; background: #e2e8f0; }
+.wzs { display: flex; flex-direction: column; gap: 20px; }
+.wzin { margin: 0; font-size: 13px; color: #475569; }
+.wzkg { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 760px; }
+.wzkc { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 22px; }
+.wzkc.hov { border-color: #0ea5e9; background: #f8fafc; }
+.wzkc svg { display: block; color: #94a3b8; margin-bottom: 12px; }
+.wzkc h3 { margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+.wzkc p { margin: 0; font-size: 13px; color: #475569; line-height: 1.55; }
+.wzp { display: flex; flex-direction: column; gap: 10px; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; background: #fff; min-width: 0; }
+.wzp.q { background: #f1f5f9; border-color: transparent; }
+.wzp h4 { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; white-space: nowrap; }
+.wzp h4 .sp { flex: 1; }
+.wznv { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; }
+.wznr { display: flex; align-items: center; gap: 14px; }
+.wzib, .wzpb { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.wzib { border: 1px solid #e2e8f0; background: #fff; color: #475569; }
+.wzpb { background: #0ea5e9; color: #fff; border: 1px solid transparent; box-shadow: 0 2px 8px rgba(14,165,233,.28); }
+.wzpb.hov { background: #0284c7; }
+.wzql { font-size: 12.5px; color: #0ea5e9; white-space: nowrap; }
+/* audience step */
+.wzal { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+.wzam { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.abs + .abs { border-top: 1px solid #f1f5f9; }
+.abh { display: flex; align-items: center; gap: 10px; padding: 11px 16px; margin: 0 -16px; }
+.abh.hov { background: #f8fafc; }
+.abh .abn { font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.abh .abe { font-size: 12.5px; color: #94a3b8; white-space: nowrap; }
+.abh .abe.on { color: #475569; }
+.abh svg { color: #94a3b8; flex: 0 0 auto; margin-left: auto; }
+.abd { width: 6px; height: 6px; border-radius: 50%; background: #0ea5e9; flex: 0 0 auto; }
+.abbw { overflow: hidden; }
+.abb { padding: 2px 0 16px; }
+.fgd { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; }
+.frw { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.flb { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 500; color: #0f172a; white-space: nowrap; }
+.cbx { display: flex; align-items: center; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; font-size: 13.5px; min-height: 38px; overflow: hidden; }
+.cbx.focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.12); }
+.cbx .iv { flex: 1; min-width: 0; padding: 8px 10px; color: #0f172a; white-space: nowrap; }
+.cbx .iv.ph { color: #94a3b8; }
+.cbx .un { flex: 0 0 auto; padding: 0 10px 0 2px; font-size: 12.5px; color: #94a3b8; white-space: nowrap; }
+.cbx .dsh { width: 1px; align-self: stretch; margin: 6px 0; background: #e2e8f0; }
+.ath { display: flex; align-items: center; gap: 10px; }
+.ath .cnt { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 12.5px; color: #475569; }
+.ath .cnt b { color: #0f172a; font-weight: 600; }
+.atb { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.atsb { display: flex; align-items: center; gap: 8px; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 12px; color: #94a3b8; font-size: 13px; width: 300px; white-space: nowrap; }
+.attg { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: #475569; white-space: nowrap; }
+.ck { width: 16px; height: 16px; border-radius: 4px; border: 1px solid #e2e8f0; background: #fff; display: inline-grid; place-items: center; color: #fff; flex: 0 0 auto; }
+.ck.on { background: #0ea5e9; border-color: #0ea5e9; }
+.ck.dis { background: #f1f5f9; }
+.att { width: 100%; border-collapse: collapse; font-size: 13px; }
+.att th { text-align: left; font-size: 10.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; padding: 0 8px 6px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+.att td { padding: 7px 8px; border-bottom: 1px solid #f1f5f9; color: #475569; vertical-align: middle; white-space: nowrap; }
+.att tr:last-child td { border-bottom: none; }
+.att .pk { width: 26px; padding-left: 2px; padding-right: 2px; }
+.att .wh { text-align: right; font-variant-numeric: tabular-nums; }
+.att .ct { font-variant-numeric: tabular-nums; }
+.att .nm { display: block; font-weight: 500; color: #0f172a; }
+.att .rs { display: block; font-size: 11.5px; color: #94a3b8; }
+.att tr.off td { opacity: .55; }
+.att tr.off td.pk { opacity: 1; }
+.atf { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12.5px; color: #94a3b8; white-space: nowrap; }
+.atpg { display: flex; align-items: center; gap: 6px; }
+.atpg span.b { width: 28px; height: 28px; border-radius: 999px; border: 1px solid #e2e8f0; display: grid; place-items: center; color: #94a3b8; background: #fff; }
+.aen { font-size: 40px; font-weight: 700; letter-spacing: -.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+.ael { display: flex; align-items: center; margin: 6px 0 14px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; white-space: nowrap; }
+.aeb { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.aeb li { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: #475569; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.aeb li span { display: inline-flex; align-items: center; }
+.aeb li b { font-weight: 600; color: #0f172a; }
+.aeb li.nw { overflow: hidden; }
+/* content step */
+.wztc { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
+.me { display: flex; flex-direction: column; gap: 16px; }
+.mech { display: flex; gap: 8px; }
+.mets { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; background: #f1f5f9; border-radius: 8px; }
+.mets .lb { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; white-space: nowrap; }
+.metr { display: flex; flex-wrap: wrap; gap: 6px; }
+.tok { border: 1px solid #e2e8f0; background: #fff; padding: 3px 9px; border-radius: 4px; font-size: 12px; font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color: #475569; white-space: nowrap; }
+.tok.hov { border-color: #0ea5e9; color: #0ea5e9; }
+.mecc { display: flex; flex-direction: column; gap: 12px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; }
+.mecc .hd { display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; color: #94a3b8; }
+.mecc .hd b { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
+.mefl { display: flex; flex-direction: column; gap: 6px; }
+.mefl > .lb { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; }
+.meta { min-height: 120px; padding: 12px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; line-height: 1.55; color: #0f172a; background: #fff; white-space: pre-wrap; word-break: break-word; }
+.meta.ph { color: #94a3b8; }
+.meta.focus { border-color: #0ea5e9; }
+.meta .tk { color: #0369a1; background: rgba(14,165,233,.1); border-radius: 3px; }
+.mecr { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: #94a3b8; white-space: nowrap; }
+.mecr.warn { color: #d97706; }
+.mecr .f { display: inline-flex; gap: 12px; }
+.metr2 { display: flex; align-items: center; gap: 8px; }
+.metr2 .in { width: 240px; padding: 9px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #94a3b8; background: #fff; }
+.metr2 .tb { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; font-weight: 500; opacity: .5; white-space: nowrap; }
+.cp { display: flex; flex-direction: column; gap: 12px; }
+.cp > h4 .ht { margin-left: auto; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 11.5px; color: #94a3b8; }
+.cpc { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+.cpc .hd { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #94a3b8; }
+.cpc .hd b { font-size: 13px; font-weight: 600; color: #0f172a; }
+.cppb { padding: 18px 14px 14px; background: #f1f5f9; display: flex; flex-direction: column; gap: 6px; }
+.cppb .sc { align-self: center; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; margin-bottom: 2px; }
+.cppb .bb { align-self: flex-start; max-width: 92%; padding: 11px 14px; background: #fff; border-radius: 18px 18px 18px 4px; font-size: 13.5px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; box-shadow: 0 1px 2px rgba(15,23,42,.06); }
+.cppb .bb.ph { color: #94a3b8; align-self: center; background: transparent; box-shadow: none; }
+.cppb .tm { padding-left: 8px; font-size: 11px; color: #94a3b8; }
+.cpm { display: flex; gap: 14px; padding: 8px 14px; border-top: 1px solid #e2e8f0; background: #f8fafc; font-size: 11.5px; color: #94a3b8; white-space: nowrap; }
+.cpm b { font-weight: 600; color: #475569; }
+/* summary step */
+.rc { margin: 0; display: grid; grid-template-columns: 180px minmax(0, 1fr); row-gap: 10px; font-size: 14px; }
+.rc dt { color: #94a3b8; }
+.rc dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chr { display: flex; flex-wrap: wrap; gap: 6px; }
+.chp { display: inline-flex; padding: 3px 10px; border-radius: 999px; background: #fff; border: 1px solid #e2e8f0; font-size: 11.5px; color: #475569; white-space: nowrap; }
+.sel { position: relative; max-width: 460px; }
+.sel .bx { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; background: #fff; }
+.sel .bx.focus { border-color: #0ea5e9; }
+.sel .bx svg { color: #475569; }
+.sdd { position: absolute; left: 0; right: 0; top: calc(100% + 4px); background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 12px 28px rgba(15,23,42,.16); padding: 4px; z-index: 5; opacity: 0; visibility: hidden; }
+.sdd div { padding: 8px 10px; border-radius: 6px; font-size: 14px; }
+.sdd div.on { font-weight: 600; }
+.sdd div.hov { background: #e0f2fe; color: #0369a1; }
+.scn { margin: 0; font-size: 13px; color: #475569; max-width: 620px; line-height: 1.55; }
+
+/* ===== campaign window (components/CampaignDetailModal on ModalShell) ===== */
+.dm { width: 1040px; background: #fff; border-radius: 16px; box-shadow: 0 30px 80px -20px rgba(15,23,42,.45), 0 2px 6px rgba(15,23,42,.08); overflow: hidden; z-index: 55; font-size: 14px; color: #0f172a; }
+.dmh { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 24px 18px; border-bottom: 1px solid #e2e8f0; }
+.dmh h2 { margin: 0 0 6px; font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.dmid { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #475569; }
+.dmst { display: flex; align-items: flex-start; gap: 12px; }
+.dmsc { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.dmpl { display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 12px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.dmpl i { width: 7px; height: 7px; border-radius: 50%; }
+.dmdu { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border-radius: 999px; border: 1px solid #e2e8f0; font-size: 12.5px; font-weight: 600; color: #475569; white-space: nowrap; }
+.dmx { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; color: #94a3b8; }
+.dmb { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; background: #fff; }
+.dmnt { display: flex; align-items: center; gap: 8px; font-size: 13px; border-radius: 8px; padding: 9px 12px; color: #16a34a; background: #f0fdf4; }
+.dmnt b { font-weight: 600; }
+.dmo { display: flex; flex-direction: column; gap: 12px; padding: 18px 20px; border: 1px solid #e2e8f0; border-radius: 12px; }
+.dmoh { display: flex; align-items: baseline; gap: 8px; font-size: 15px; font-weight: 500; color: #475569; white-space: nowrap; }
+.dmoh b { font-size: 30px; line-height: 1; font-weight: 700; letter-spacing: -.02em; color: #0f172a; font-variant-numeric: tabular-nums; }
+.dmoh .cr { color: #94a3b8; }
+.dmbar { display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: #f1f5f9; }
+.dmbar i { flex: none; min-width: 3px; background: #22c55e; }
+.dmlg { display: flex; gap: 6px 18px; font-size: 13px; color: #475569; }
+.dmlg span { display: inline-flex; align-items: center; gap: 6px; }
+.dmlg i { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; }
+.dmlg b { font-weight: 600; color: #0f172a; }
+.dmg { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 0 28px; align-items: start; }
+.dmcol { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.dmrp { position: relative; display: flex; flex-direction: column; gap: 12px; padding: 16px; border: 1px solid #e6edf6; border-radius: 16px; background: linear-gradient(160deg, #fff 0%, #fbfcfe 100%); box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 14px 30px -20px rgba(15,23,42,.45); }
+.dmrp::before { content: ''; position: absolute; top: -1px; left: -1px; right: -1px; height: 3px; border-radius: 16px 16px 0 0; background: #0ea5e9; }
+.dmsh { display: flex; align-items: center; gap: 9px; margin: 0; font-size: 13.5px; font-weight: 600; letter-spacing: -.01em; white-space: nowrap; }
+.dmsh .sp { flex: 1; }
+.dmsh .ht { margin-left: auto; font-size: 12.5px; font-weight: 400; color: #94a3b8; }
+.dmsh .mt { font-size: 12.5px; font-weight: 400; color: #94a3b8; }
+.dmsi { width: 26px; height: 26px; border-radius: 8px; display: inline-grid; place-items: center; background: #f1f5f9; color: #64748b; flex: 0 0 auto; }
+.dmsi.br { background: rgba(14,165,233,.12); color: #0ea5e9; }
+.dmfs { display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; min-width: 0; }
+.dmfs:last-child { border-bottom: none; padding-bottom: 0; }
+.dmsr { display: flex; gap: 8px; }
+.dmsr .in { width: 320px; padding: 9px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; color: #94a3b8; white-space: nowrap; }
+.dmt { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dmt th { text-align: left; font-size: 10.5px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: #94a3b8; padding: 0 8px 6px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+.dmt td { padding: 8px; border-bottom: 1px solid #f1f5f9; color: #475569; white-space: nowrap; }
+.dmt td.ch { width: 20px; color: #94a3b8; padding-right: 0; }
+.dmt td.nm { color: #0f172a; font-weight: 500; }
+.dmt td.wh { font-variant-numeric: tabular-nums; }
+.dmtg { display: flex; align-items: center; gap: 9px; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.dmtg .c { font-weight: 400; color: #94a3b8; }
+.dmtg svg.cv { margin-left: auto; color: #94a3b8; }
+.dmtl { display: flex; flex-direction: column; gap: 10px; padding-left: 4px; }
+.dmtl div { position: relative; padding-left: 18px; display: flex; flex-direction: column; font-size: 12.5px; color: #94a3b8; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dmtl div::before { content: ''; position: absolute; left: 0; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.dmtl b { font-size: 13px; font-weight: 600; color: #0f172a; }
+.dmf { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #fff; }
+.dmf .dg { margin-right: auto; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.dmf .ib { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; border: 1px solid #e2e8f0; background: #fff; color: #475569; font-size: 13px; font-weight: 500; }
+.dmf .pb { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: 999px; background: #0ea5e9; color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 2px 8px rgba(14,165,233,.28); white-space: nowrap; }
+
+/* ===== the client's phone: the SMS as it arrives ===== */
+.phn { width: 330px; height: 690px; border-radius: 50px; background: #0f172a; padding: 11px; box-shadow: 0 40px 80px -20px rgba(15,23,42,.5), inset 0 0 0 2px #334155; z-index: 66; }
+.phs { position: relative; width: 100%; height: 100%; border-radius: 40px; overflow: hidden; background: #fff; }
+.phsb { position: absolute; left: 0; right: 0; top: 0; height: 46px; display: flex; align-items: center; justify-content: space-between; padding: 0 26px; font-size: 14px; font-weight: 700; z-index: 5; }
+.phsb .isl { width: 92px; height: 27px; border-radius: 999px; background: #000; }
+.phh { padding: 52px 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+.phh .av { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, #0ea5e9, #2563eb); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 17px; }
+.phh b { font-size: 13px; font-weight: 600; }
+.phbd { padding: 14px 14px 0; display: flex; flex-direction: column; gap: 8px; }
+.phbd .dd { align-self: center; font-size: 11.5px; color: #94a3b8; font-weight: 600; margin-bottom: 4px; }
+.phbd .bin { align-self: flex-start; max-width: 84%; padding: 9px 13px; border-radius: 18px; border-bottom-left-radius: 6px; background: #e9e9eb; font-size: 14.5px; line-height: 1.42; color: #0f172a; }
+.phtag { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 8px 20px rgba(15,23,42,.1); font-size: 14px; font-weight: 600; color: #0f172a; white-space: nowrap; z-index: 66; }
+.phtag i { width: 8px; height: 8px; border-radius: 50%; background: #0ea5e9; }
+.metr2 .in { color: #0f172a; }
+.metr2 .in.ph { color: #94a3b8; }
+.metr2 .in.focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.12); }
+.metr2 .tb.en { opacity: 1; }
+.metr2 .tb.hov { border-color: #0ea5e9; color: #0284c7; }
+.metr2 .ts { font-size: 13px; color: #15803d; opacity: 0; white-space: nowrap; }
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DetailBoost, instrukcje</div>
+    <h1>Jak stworzyć kampanię SMS?</h1>
+  </header>
+  <p class="lede">Kampania SMS krok po kroku: nazwa, odbiorcy, treść z danymi klienta, koszt i wysyłka. Opis po lewej mówi, co się dzieje, a ekran po prawej pokazuje gdzie. Kliknij rozdział niżej, żeby przejść od razu do niego.</p>
+
+  <div class="player" id="player" aria-label="Animacja: jak stworzyć kampanię SMS">
+    <div class="stage" id="stage">
+      <div class="bgx"></div>
+      <div class="brand"><i>DB</i>DetailBoost<span>Instrukcja</span></div>
+      <div class="cap">
+        <div class="cnum" id="cnum"></div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+      <div class="prog"><div class="pl" id="pl"></div><div class="pb" id="pb"></div></div>
+
+      <div class="view" id="view"><div class="scene" id="scene"></div></div>
+
+      <div class="hl" id="hl"></div>
+      <div class="ring" id="ring"></div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.2 6.9z" fill="#0f172a" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="scrub" id="scrub"><i id="scrubI"></i></div>
+  <div class="bar">
+    <button type="button" id="bPrev">‹ Poprzedni krok</button>
+    <button type="button" class="pri" id="bPlay">Odtwórz</button>
+    <button type="button" id="bNext">Następny krok ›</button>
+    <span class="sp"></span>
+    <label><input type="checkbox" id="optStop"> Zatrzymuj po każdym kroku</label>
+    <button type="button" id="bRate">Tempo 1×</button>
+  </div>
+  <div class="chaps" id="chaps"></div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const out3 = k => 1 - Math.pow(1 - k, 3);
+  const io3 = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const back = k => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.5; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+  const type = (s, k) => s.slice(0, Math.round(s.length * clamp(k, 0, 1)));
+  const W = 1920, H = 1080, CX = 1340, CY = 540;
+
+  const stage = $('stage'), scene = $('scene');
+
+  // ---------- icons (lucide, as in the app) ----------
+  const sv = (p, s = 15, sw = 2, fill = 'none') => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="${fill}" stroke="${fill === 'none' ? 'currentColor' : 'none'}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const I = {
+    search: '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+    plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    set2: '<path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+    send: '<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>',
+    repeat: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
+    chevD: '<path d="m6 9 6 6 6-6"/>', chevL: '<path d="m15 18-6-6 6-6"/>', chevR: '<path d="m9 18 6-6-6-6"/>',
+    arrL: '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>', arrR: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    check: '<polyline points="20 6 9 17 4 12"/>', x: '<path d="M18 6L6 18M6 6l12 12"/>',
+    copy: '<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+    msgSq: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    calClock: '<path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/>',
+    square: '<rect width="18" height="18" x="3" y="3" rx="2"/>',
+    okC: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  };
+  const info = '<i class="ii">i</i>';
+  const kindMark = (k = 'ONE') => `<span class="km">${sv(k === 'ONE' ? I.send : I.repeat, 13)}${k === 'ONE' ? 'Jednorazowa' : 'Automatyczna'}</span>`;
+
+  // ---------- data: Gloss Lab, 20 October 2026 ----------
+  // list rows (CampaignsListView): name, kind, channel, recipients, credits, status label, colour, marker, marker tone, when
+  const CAMPS = [
+    ['Przypomnienie o odświeżeniu ceramiki', 'AUTO', 'SMS', '17', '17', 'Działa', '#15803d', 'Sprawdza codziennie', '', '06.10.2026'],
+    ['Zaproszenie na przegląd zimowy', 'ONE', 'SMS i e-mail', '-', '-', 'Szkic', '#94a3b8', 'Niedokończony szkic', 'st', 'wczoraj, 16:40'],
+    ['Życzenia urodzinowe z rabatem 10%', 'AUTO', 'SMS', '9', '9', 'Działa', '#15803d', 'Sprawdza codziennie', '', '02.09.2026'],
+    ['Wakacyjna promocja na powłokę ceramiczną', 'ONE', 'SMS', '61', '122', 'Wysłana', '#15803d', 'Zakończona', '', '24.06.2026'],
+    ['Dzień Matki: voucher na detailing wnętrza', 'ONE', 'SMS i e-mail', '84', '84', 'Wysłana', '#15803d', 'Zakończona', '', '22.05.2026'],
+    ['Wiosenne mycie i dezynfekcja klimatyzacji', 'ONE', 'SMS', '52', '104', 'Wysłana', '#15803d', 'Zakończona', '', '14.04.2026'],
+    ['Przegląd lakieru po zimie', 'ONE', 'SMS', '47', '47', 'Wysłana', '#15803d', 'Zakończona', '', '11.03.2026'],
+    ['Black Friday 2025: pakiet mycie i wosk', 'ONE', 'E-mail', '128', '-', 'Wysłana', '#15803d', 'Zakończona', '', '28.11.2025'],
+  ];
+  const campRow = (c, id = '') => `<div class="clrw"${id ? ` id="${id}"` : ''}><span class="who"><span class="nm">${c[0]}</span>${kindMark(c[1])}</span><span>${c[2]}</span><span class="num">${c[3]}</span><span class="num">${c[4]}</span>
+    <span class="stk"><span class="stl"><i style="background:${c[6]}"></i>${c[5]}</span><span class="smk ${c[8]}">${c[7]}</span></span><span>${c[9]}</span></div>`;
+  // audience table (AudienceTable): first page, before and after the filter
+  const RA = [['Jan Nowicki', '+48 600 112 334', '18 paź 2026'], ['Anna Kamińska', '+48 601 234 567', '2 kwi 2026'], ['Robert Kaczmarek', '+48 511 290 447', '15 paź 2026'], ['Barbara Wróbel', '+48 697 455 120', '9 paź 2026', 'NO'],
+    ['Krzysztof Górski', '+48 728 004 916', '3 paź 2026'], ['Piotr Wiśniewski', '+48 723 456 789', '14 mar 2026'], ['Monika Adamczyk', '+48 530 667 812', '26 wrz 2026'], ['Łukasz Pawlak', '-', '21 wrz 2026', 'NA'],
+    ['Joanna Michalska', '+48 662 381 095', '12 wrz 2026'], ['Adam Krawczyk', '+48 603 778 251', '4 wrz 2026']];
+  const RF = [['Piotr Wiśniewski', '+48 723 456 789', '14 mar 2026'], ['Anna Kamińska', '+48 601 234 567', '2 kwi 2026'], ['Tomasz Lewandowski', '+48 512 884 120', '28 lut 2026'], ['Katarzyna Wójcik', '+48 698 301 455', '11 sty 2026', 'NO'],
+    ['Marek Zieliński', '+48 784 220 913', '19 gru 2025'], ['Agnieszka Szymańska', '+48 505 672 018', '3 lis 2025'], ['Paweł Dąbrowski', '+48 607 145 832', '22 paź 2025'], ['Michał Jankowski', '-', '15 wrz 2025', 'NA'],
+    ['Magdalena Kozłowska', '+48 533 908 761', '30 sie 2025'], ['Ewa Mazur', '+48 691 337 204', '7 lip 2025']];
+  const REASON = { NO: 'Brak zgody marketingowej', NA: 'Brak numeru / adresu' };
+  // estimate per phase: matched, no consent, no address, unticked, eligible
+  const EST = [[412, 38, 11, 0, 363], [46, 5, 2, 0, 39], [46, 5, 2, 1, 38]];
+  const OFF_ROW = 4;
+  // the SMS, typed in pieces; tokens go in with one click each
+  const SMS = ['Cześć ', '{{imie}}', '! ', '{{marka}}', ' czeka na jesienne mycie z woskiem. Do 15.11 rabat 20%. Zadzwoń: 58 555 12 34'];
+  const SMS_FULL = SMS.join('');
+  const SAMPLE = { '{{imie}}': 'Anna', '{{marka}}': 'BMW' }, PIOTR = { '{{imie}}': 'Piotr', '{{marka}}': 'Porsche' };
+  const fillIn = (t, map) => Object.keys(map).reduce((s, k) => s.split(k).join(map[k]), t);
+  const GSM = new Set('@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !"#¤%&\'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà^{}\\[~]|€');
+  const smsMeta = t => { const gsm = [...t].every(c => GSM.has(c)), n = t.length; return { n, gsm, seg: n === 0 ? 0 : n <= (gsm ? 160 : 70) ? 1 : Math.ceil(n / (gsm ? 153 : 67)) }; };
+  const pl = (n, a, b, c) => { if (n === 1) return a; const d = n % 10, e = n % 100; return d >= 2 && d <= 4 && (e < 12 || e > 14) ? b : c; };
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+  // ---------- scene ----------
+  const rowHTML = (r, i, p) => `<tr id="${p}${i}"><td class="pk"><span class="ck${r[3] ? ' dis' : ' on'}" id="${p}c${i}">${r[3] ? '' : sv(I.check, 11, 3.5)}</span></td>
+    <td><span class="nm">${r[0]}</span>${r[3] ? `<span class="rs">${REASON[r[3]]}</span>` : ''}</td><td class="ct">${r[1]}</td><td class="wh">${r[2]}</td></tr>`;
+  const sec = (id, name, hint, body = '') => `<div class="abs" id="${id}"><div class="abh" id="${id}H"><i class="abd" id="${id}D" style="display:none"></i><span class="abn">${name}</span><span class="abe" id="${id}S">${hint}</span>${sv(I.chevD, 15)}</div>${body}</div>`;
+  const fld = (label, inner, tip) => `<div class="frw"><span class="flb">${label}${tip ? info : ''}</span>${inner}</div>`;
+  const cbx = (id, ph, unit) => `<div class="cbx" id="${id}B"><span class="iv ph" id="${id}">${ph}</span>${unit ? `<span class="un">${unit}</span>` : ''}</div>`;
+  const preview = (id, stacked) => `<div class="cp"><h4>Treść wiadomości<span class="ht">podgląd z przykładowymi danymi</span></h4>
+    <div class="cpc">${stacked ? `<div class="hd">${sv(I.msgSq, 15)}<b>SMS</b></div>` : `<div class="hd">${sv(I.msgSq, 15)}<b>SMS</b></div>`}
+    <div class="cppb"><span class="sc">Twoje studio</span><div class="bb" id="${id}B"></div><span class="tm">teraz</span></div>
+    <div class="cpm" id="${id}M"></div></div></div>`;
+
+  scene.innerHTML = `
+  <div class="pg" id="cl"><div class="clin">
+    <div class="clhd" id="clHd"><div><h1>Kampanie</h1><div class="clst" id="clSt"></div></div>
+      <div class="clac"><span class="clgh">${sv(I.set2, 16)}Ustawienia wysyłki</span><span class="clpr" id="clNew">${sv(I.plus, 16, 2.5)}Nowa kampania</span></div></div>
+    <div class="clfr" id="clFr"><span class="clchip on">Wszystkie</span><span class="clchip">Aktywne</span><span class="clchip">Zaplanowane</span><span class="clchip">Zakończone</span><span class="clchip">Szkice</span><span class="clsep"></span><span class="clchip">Z błędami</span>
+      <span class="clsrch">${sv(I.search, 14)}Szukaj po nazwie kampanii…</span></div>
+    <div class="clcard" id="clTbl"><div class="clhr"><span>Kampania</span><span>Kanał</span><span>Odbiorcy</span><span>Koszt (kredyty)</span><span>Status</span><span>Termin</span></div>
+      <div class="clnw" id="clNw"><div id="clNwIn"></div></div>${CAMPS.map(c => campRow(c)).join('')}</div>
+  </div><div class="clov" id="clOv"></div></div>
+
+  <div class="pg" id="wz"><div class="wzv" id="wzV"><div class="wzc" id="wzC">
+    <div class="wzhd" id="wzHd"><div class="wzt"><div class="wznm" id="wzNm"></div><div class="wzfx" id="wzFx"></div></div><span class="wzgh">Anuluj</span></div>
+    <div class="wzrl" id="wzRl"></div>
+
+    <div class="wzs" id="ws1">
+      <p class="wzin" id="w1In">Wybierz rodzaj kampanii, żeby zacząć.</p>
+      <div class="wzkg"><div class="wzkc" id="kOne">${sv(I.send, 20)}<h3>Jednorazowa wysyłka</h3><p>Wyślij raz, teraz lub w wybranym terminie, do wybranej grupy klientów. Dobra na promocje, życzenia i ogłoszenia.</p></div>
+        <div class="wzkc" id="kAuto">${sv(I.repeat, 20)}<h3>Kampania automatyczna</h3><p>Działa stale: wysyła wiadomość do każdego klienta, gdy spełni warunek, np. 180 dni od wykonanej usługi.</p></div></div>
+    </div>
+
+    <div class="wzs" id="ws2">
+      <div class="wzal"><div class="wzam">
+        <section class="wzp" id="pKog"><h4>Kogo szukamy</h4><div>
+          ${sec('sVis', 'Wizyty', 'bez ograniczeń', `<div class="abbw" id="abBw"><div class="abb" id="abB"><div class="fgd">
+            ${fld('Liczba wizyt', `<div class="cbx"><span class="iv ph">od</span><span class="dsh"></span><span class="iv ph">do</span><span class="un">wizyt</span></div>`)}
+            ${fld('Ostatnia wizyta dawniej niż', cbx('fOld', 'np. 180', 'dni temu'), 1)}
+            ${fld('Ostatnia wizyta w ciągu', cbx('fNew', 'np. 30', 'dni'), 1)}</div></div></div>`)}
+          ${sec('sRev', 'Wydatki klienta', 'bez ograniczeń')}${sec('sSvc', 'Usługi', 'wszystkie')}${sec('sVeh', 'Pojazdy', 'wszystkie')}${sec('sTyp', 'Typ klienta', 'wszyscy')}
+        </div></section>
+        <section class="wzp" id="pOdb"><h4 class="ath">Odbiorcy<span class="sp"></span><span class="cnt" id="odCnt"></span></h4>
+          <div class="atb"><span class="atsb">${sv(I.search, 14)}Szukaj po nazwisku lub numerze…</span><span class="attg"><span class="ck"></span>Pokaż klientów bez nazwiska</span></div>
+          <table class="att" id="att"><thead><tr><th class="pk"><span class="ck on" id="ckAll">${sv(I.check, 11, 3.5)}</span></th><th>Klient</th><th>Telefon</th><th class="wh">Ostatnia wizyta</th></tr></thead><tbody id="atB"></tbody></table>
+          <div class="atf"><span id="atFt"></span><span class="atpg"><span class="b">${sv(I.chevL, 14)}</span><span id="atPg"></span><span class="b">${sv(I.chevR, 14)}</span></span></div>
+        </section>
+      </div>
+      <section class="wzp" id="pEst"><div class="aen" id="eN"></div><div class="ael">Tylu klientów dostanie wiadomość${info}</div><ul class="aeb" id="eB"></ul></section></div>
+      <div class="wznv" id="nav2"><span class="wzib">${sv(I.arrL, 15)}Wstecz</span><span class="wzpb" id="b2">Dalej${sv(I.arrR, 15)}</span></div>
+    </div>
+
+    <div class="wzs" id="ws3">
+      <div class="wztc"><section class="wzp" id="pTre"><h4>Treść wiadomości</h4><div class="me">
+          <div class="mech"><span class="clchip on">SMS</span><span class="clchip">E-mail</span><span class="clchip">SMS i e-mail</span></div>
+          <div class="mets" id="mTok"><span class="lb">Dane klienta: kliknij, żeby wstawić</span><div class="metr">${['{{imie}}', '{{nazwisko}}', '{{marka}}', '{{model}}', '{{ostatnia_usluga}}', '{{data_ostatniej_wizyty}}', '{{dni_od_wizyty}}'].map((t, i) => `<span class="tok" id="tk${i}">${t}</span>`).join('')}</div></div>
+          <div class="mecc" id="mCard"><div class="hd">${sv(I.msgSq, 16)}<b>Wiadomość SMS</b></div>
+            <div class="mefl"><span class="lb">Treść</span><div class="meta" id="mTa"></div><div class="mecr" id="mCr"><span class="f" id="mCrL"></span><span id="mCrR"></span></div></div></div>
+          <div class="metr2" id="mTst"><span class="in ph" id="mTin">+48 XXX XXX XXX</span><span class="tb" id="mTb">${sv(I.send, 14)}Wyślij test do siebie</span><span class="ts" id="mTs">Wysłano wiadomość testową.</span></div>
+        </div></section>
+        <section class="wzp" id="pPrev">${preview('pv3', 1)}</section></div>
+      <div class="wznv" id="nav3"><span class="wzib">${sv(I.arrL, 15)}Wstecz</span><span class="wzpb" id="b3">Dalej${sv(I.arrR, 15)}</span></div>
+    </div>
+
+    <div class="wzs" id="ws4">
+      <section class="wzp" id="pSum"><h4>Podsumowanie</h4>
+        <dl class="rc"><dt>Kampania</dt><dd id="rcNm"></dd><dt>Kanał</dt><dd>SMS</dd><dt>Odbiorcy</dt><dd id="rcOd">38 (stan na dziś)</dd><dt>Odznaczeni ręcznie</dt><dd>1</dd><dt>Szacowany koszt</dt><dd id="rcK"></dd></dl>
+        <div class="chr"><span class="chp">Ostatnia wizyta: ponad 180 dni temu</span><span class="chp">Odznaczono ręcznie: 1</span></div></section>
+      <section class="wzp q" id="pPv4">${preview('pv4', 0)}</section>
+      <section class="wzp" id="pKdy"><h4>Kiedy wysłać</h4>
+        <div class="sel" id="sel"><div class="bx" id="selB"><span>Wyślij teraz</span>${sv(I.chevD, 16)}</div><div class="sdd" id="sdd"><div class="on" id="oNow">Wyślij teraz</div><div id="oAt">Zaplanuj termin</div></div></div>
+        <p class="scn" id="scn">Listę odbiorców przeliczymy ponownie tuż przed wysyłką, obejmie klientów spełniających warunki w dniu wysyłki. Twoje ręczne odznaczenia zostaną zachowane.</p></section>
+      <div class="wznv" id="nav4"><span class="wzib">${sv(I.arrL, 15)}Wstecz</span><span class="wznr"><span class="wzql">Zapisz jako szkic</span><span class="wzpb" id="b4">${sv(I.send, 15)}Wyślij teraz</span></span></div>
+    </div>
+  </div></div></div>
+
+  <div class="lay dm" id="dm">
+    <div class="dmh" id="dmH"><div><h2>Jesienne mycie z woskiem</h2><div class="dmid">${kindMark('ONE')}SMS</div></div>
+      <div class="dmst"><div class="dmsc"><span class="dmpl" id="dmPl"><i></i><span></span></span><span class="dmdu">${sv(I.copy, 13)}Duplikuj</span></div><span class="dmx">${sv(I.x, 18)}</span></div></div>
+    <div class="dmb">
+      <div class="dmnt" id="dmNt">${sv(I.okC, 16)}<span>Wysłano <b>38</b> wiadomości, zakończono 20.10.2026, 10:16.</span></div>
+      <section class="dmo" id="dmOut"><div class="dmoh"><b id="dmN"></b><span id="dmA"></span></div><div class="dmbar"><i></i></div><div class="dmlg"><span><i></i><b id="dmL"></b>dostarczone</span></div></section>
+      <div class="dmg"><div class="dmcol">
+          <section class="dmrp" id="dmPrev"><h4 class="dmsh"><span class="dmsi br">${sv(I.msgSq, 14)}</span>Treść wiadomości<span class="ht">podgląd z przykładowymi danymi</span></h4>
+            <div class="cppb"><span class="sc">Twoje studio</span><div class="bb">${esc(fillIn(SMS_FULL, SAMPLE))}</div><span class="tm">teraz</span></div></section>
+          <section class="dmfs" id="dmRec"><h4 class="dmsh"><span class="dmsi">${sv(I.users, 14)}</span>Odbiorcy<span class="sp"></span><span class="mt">38</span></h4>
+            <div class="dmsr"><span class="in">Szukaj po nazwisku lub numerze…</span></div>
+            <table class="dmt"><thead><tr><th></th><th>Klient</th><th>Status</th><th>Wysłano</th></tr></thead><tbody id="dmTb"></tbody></table></section></div>
+        <div class="dmcol" id="dmRail">
+          <section class="dmfs"><div class="dmtg"><span class="dmsi">${sv(I.users, 14)}</span>Kryteria odbiorców<span class="c">2</span>${sv(I.chevD, 15).replace('<svg', '<svg class="cv"')}</div></section>
+          <section class="dmfs"><h4 class="dmsh"><span class="dmsi">${sv(I.calClock, 14)}</span>Przebieg</h4><div class="dmtl" id="dmTl"></div></section></div></div>
+    </div>
+    <div class="dmf" id="dmF"></div>
+  </div>
+
+  <div class="lay phtag" id="phT"><i></i>Telefon klienta: Piotr Wiśniewski</div>
+  <div class="lay phn" id="ph"><div class="phs">
+    <div class="phsb"><span>10:15</span><span class="isl"></span><span style="display:flex;gap:5px;align-items:center"><i style="width:17px;height:11px;border-radius:2px;background:currentColor;display:block"></i><i style="width:24px;height:12px;border-radius:3px;border:1.5px solid currentColor;display:block"></i></span></div>
+    <div class="phh"><span class="av">GL</span><b>Gloss Lab</b></div>
+    <div class="phbd"><span class="dd">SMS, dziś 10:15</span><div class="bin" id="phB">${esc(fillIn(SMS_FULL, PIOTR))}</div></div>
+  </div></div>`;
+
+  // ---------- chapters and beats ----------
+  const CH = ['Nowa kampania', 'Nazwa i rodzaj', 'Odbiorcy', 'Treść SMS-a', 'Wysyłka', 'Efekt'];
+  const beats = [];
+  const words = s => (s || '').split(/\s+/).filter(Boolean).length;
+  window.beat = (ch, o, f) => beats.push({ ch, h: o.h, b: o.b, lead: o.lead ?? .6, act: o.act ?? 1, hold: o.hold ?? .6, f: f || (() => {}) });
+
+  window.H = {
+    P, lerp, out3, io3, back, type, clamp, SMS,
+    mv: (S, to, k, o = {}) => { S.cur = { to, k, dx: o.dx || 0, dy: o.dy || 0, from: o.from || null, fdx: o.fdx || 0, fdy: o.fdy || 0, drag: o.drag || 0, vis: S.cur.vis }; },
+    tap: (S, a, at, id) => { const k = P(S._s, S._lead + at * S._act, S._lead + at * S._act + .6); if (k > 0 && k < 1) S.tap = k; if (id && a > at && a < at + .14) S.press = id; },
+    cam: (S, to, k) => { S.cam = { to, k }; },
+    hl: (S, el, k = 1, pad = 6) => { S.hl = { el, k, pad }; },
+    foc: (S, sec) => { S.foc = sec; },
+    scr: (S, to, k = 1, dy = 0) => { S.scr = { to, k, dy }; },
+  };
+
+  const fresh = () => ({
+    cl: 0, clOut: 0, row: 0, rowK: 0,
+    wz: 0, step: 1, stepK: 1, scr: { to: null, k: 1, dy: 0 },
+    name: '', nameF: 0, kHov: null,
+    visO: 0, old: '', oldF: 0, est: 0, estDim: 0, off: 0,
+    sms: '', smsF: 0, tst: '', tstF: 0, tstOk: 0,
+    selO: 0, selH: null,
+    dm: 0, dmSt: 0, dmN: 0, ov: 0, ph: 0, phB: 0,
+    foc: null, focPrev: null, hov: null,
+    hl: null, hlLast: null,
+    cam: { to: 'cl', k: 1 }, cur: { to: null, k: 1, vis: 0, dx: 0, dy: 0 },
+    tap: 0, press: null, _s: 0,
+  });
+
+  let DUR = 0, chStart = [];
+  const layout = () => {
+    let t = 0, lastText = null;
+    beats.forEach((b, i) => {
+      const txt = b.h + '|' + b.b;
+      b.newText = txt !== lastText; lastText = txt;
+      b.textIdx = b.newText ? i : beats[i - 1].textIdx;
+      if (b.newText) b.lead = Math.max(b.lead, .7);
+      const read = b.newText ? 1.5 + words(b.h) * .26 + words(b.b) * .24 : 0;
+      const slack = read - (b.lead + b.act + b.hold);
+      if (slack > 0) b.act = Math.min(b.act * 1.7, b.act + slack * .5);
+      b.d = Math.max(b.lead + b.act + b.hold, read);
+      b.t0 = t; t += b.d;
+      if (chStart[b.ch] === undefined) chStart[b.ch] = b.t0;
+    });
+    DUR = t;
+  };
+
+  const beatAt = t => { let i = 0; while (i < beats.length - 1 && beats[i + 1].t0 <= t) i++; return i; };
+  const runBeat = (S, i, s) => {
+    const b = beats[i];
+    S.hlLast = S.hl; S.hl = null; S.focPrev = S.foc; S.tap = 0; S.press = null; S.hov = null; S._s = s; S._i = i; S._lead = b.lead; S._act = b.act; S._T = b.t0 + s;
+    b.f(S, P(s, b.lead, b.lead + b.act), s);
+  };
+  const stateAtBeat = (i, s) => { const S = fresh(); for (let j = 0; j < i; j++) runBeat(S, j, beats[j].d); runBeat(S, i, s); return S; };
+
+  // ---------- geometry ----------
+  const sRect = el => { const r = el.getBoundingClientRect(), s0 = stage.getBoundingClientRect(), k = s0.width / W; return { x: (r.left - s0.left) / k, y: (r.top - s0.top) / k, w: r.width / k, h: r.height / k }; };
+  const offR = el => { let x = 0, y = 0, n = el; while (n && n !== scene) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+
+  // ---------- flow-in ----------
+  const enter = (el, k, dy = 22, sc = .975, blur = 7) => {
+    k = clamp(k, 0, 1);
+    el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden';
+    if (k >= 1) { el.style.transform = ''; el.style.filter = ''; return; }
+    el.style.transform = `translateY(${(1 - out3(k)) * dy}px) scale(${lerp(sc, 1, out3(k))})`;
+    el.style.filter = `blur(${(1 - k) * blur}px)`;
+  };
+  const pop = (el, k) => { k = clamp(k, 0, 1); el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden'; el.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * -8}px) scale(${lerp(.97, 1, out3(k))})`; el.style.filter = k >= 1 ? '' : `blur(${(1 - k) * 5}px)`; };
+  const at = (el, x, y) => { el.style.left = Math.round(x) + 'px'; el.style.top = Math.round(y) + 'px'; };
+  const show = (el, on, disp = '') => { el.style.display = on ? disp : 'none'; };
+
+  // ---------- caption text (style B: words flow in from below with blur) ----------
+  const ctx = $('ctx'), cnum = $('cnum');
+  const textEls = {}, chEls = {};
+  const mkWords = s => s.split(' ').map(w => `<span class="w">${w} </span>`).join('');
+  const textEl = i => {
+    if (textEls[i]) return textEls[i];
+    const b = beats[i], d = document.createElement('div'); d.className = 'tl';
+    d.innerHTML = `<h2 class="ch">${mkWords(b.h)}</h2>` + (b.b ? `<div class="cbd">${mkWords(b.b)}</div>` : '');
+    d.style.display = 'none'; ctx.appendChild(d);
+    textEls[i] = { el: d, hw: Array.from(d.querySelectorAll('.ch .w')), bw: Array.from(d.querySelectorAll('.cbd .w')) };
+    return textEls[i];
+  };
+  const chEl = c => {
+    if (chEls[c]) return chEls[c];
+    const d = document.createElement('div'); d.innerHTML = `<b>${String(c + 1).padStart(2, '0')}</b><i></i><span>${CH[c]}</span>`;
+    d.style.display = 'none'; cnum.appendChild(d); return (chEls[c] = d);
+  };
+  const wIn = (w, k, dy = 32, bl = 9) => { w.style.opacity = k; w.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * dy}px)`; w.style.filter = k >= 1 ? '' : `blur(${(1 - k) * bl}px)`; };
+  const wOut = (w, k) => { w.style.opacity = 1 - k; w.style.transform = `translateY(${-io3(k) * 26}px)`; w.style.filter = `blur(${k * 7}px)`; };
+  let shownT = [], shownC = [];
+  const paintText = (i, t) => {
+    const cur = beats[i].textIdx, tS = beats[cur].t0, tau = t - tS;
+    const prevIdx = cur > 0 ? beats[cur - 1].textIdx : -1;
+    const want = [cur]; if (prevIdx >= 0 && tau < .75) want.push(prevIdx);
+    shownT.forEach(j => { if (!want.includes(j)) textEls[j].el.style.display = 'none'; });
+    shownT = want;
+    const T = textEl(cur); T.el.style.display = 'block';
+    const nh = T.hw.length;
+    T.hw.forEach((w, j) => wIn(w, P(tau, .3 + j * .05, .3 + j * .05 + .65)));
+    const b0 = .3 + nh * .05 + .25;
+    T.bw.forEach((w, j) => wIn(w, P(tau, b0 + j * .018, b0 + j * .018 + .6), 18, 6));
+    if (want[1] !== undefined) { const O = textEl(prevIdx); O.el.style.display = 'block'; [...O.hw, ...O.bw].forEach((w, j) => wOut(w, P(tau, j * .01, j * .01 + .42))); }
+    const c = beats[i].ch, cS = chStart[c], ct = t - cS, wantC = [c]; if (c > 0 && ct < .6) wantC.push(c - 1);
+    shownC.forEach(j => { if (!wantC.includes(j)) chEls[j].style.display = 'none'; });
+    shownC = wantC;
+    const C = chEl(c); C.style.display = 'flex'; wIn(C, c === 0 && t < .3 ? 0 : P(ct, .15, .75), 20, 6);
+    if (wantC[1] !== undefined) { const O = chEl(c - 1); O.style.display = 'flex'; wOut(O, P(ct, 0, .4)); }
+    $('pl').innerHTML = `Rozdział <b>${c + 1}</b> z ${CH.length}`;
+    const bars = $('pb').children;
+    for (let j = 0; j < CH.length; j++) { const a = chStart[j], b = j + 1 < CH.length ? chStart[j + 1] : DUR; bars[j].firstChild.style.width = (P(t, a, b) * 100) + '%'; }
+  };
+  $('pb').innerHTML = CH.map(() => '<i><b></b></i>').join('');
+
+  // ---------- paint ----------
+  const cl = $('cl'), wz = $('wz'), wzC = $('wzC'), wzV = $('wzV'), dm = $('dm'), ph = $('ph'), phT = $('phT');
+  const pageCam = el => ({ fx: el.offsetLeft + el.offsetWidth / 2, fy: el.offsetTop + el.offsetHeight / 2, s: Math.min(.96, 1070 / el.offsetWidth, 1000 / el.offsetHeight) });
+  const boxCam = (rs, cap = 1) => { const x0 = Math.min(...rs.map(r => r.x)), y0 = Math.min(...rs.map(r => r.y)), x1 = Math.max(...rs.map(r => r.x + r.w)), y1 = Math.max(...rs.map(r => r.y + r.h)); return { fx: (x0 + x1) / 2, fy: (y0 + y1) / 2, s: Math.min(cap, 1070 / (x1 - x0), 1000 / (y1 - y0)) }; };
+  const camTarget = to => {
+    if (to === 'cl') return pageCam(cl);
+    if (to === 'wz') return pageCam(wz);
+    if (to === 'dm') return boxCam([offR(dm)], 1);
+    if (to === 'ph') return boxCam([offR(ph), offR(phT)], 1.22);
+    if (to === 'fin') return boxCam([offR(dm), offR(ph), offR(phT)], 1);
+    const r = offR($(to.el));
+    return { fx: r.x + r.w / 2 + (to.dx || 0), fy: r.y + r.h / 2 + (to.dy || 0), s: to.s };
+  };
+  const FCL = ['clHd', 'clFr', 'clTbl'];
+  const FWZ = ['wzHd', 'wzRl', 'w1In', 'kOne', 'kAuto', 'pKog', 'pOdb', 'pEst', 'nav2', 'pTre', 'pPrev', 'nav3', 'pSum', 'pPv4', 'pKdy', 'nav4'];
+  const FDM = ['dmH', 'dmNt', 'dmOut', 'dmPrev', 'dmRec', 'dmRail', 'dmF'];
+  const dimFx = (ids, from, to, k, on, amt = .6, bl = 1.8) => ids.forEach(id => {
+    const r = $(id); if (!on) { r.style.opacity = ''; r.style.filter = ''; return; }
+    const d = lerp(from && !from.includes(id) ? 1 : 0, to && !to.includes(id) ? 1 : 0, k);
+    r.style.opacity = d > .001 ? 1 - d * amt : ''; r.style.filter = d > .001 ? `blur(${d * bl}px)` : '';
+  });
+  const page = (el, k, rec) => {
+    k = clamp(k, 0, 1); el.style.visibility = k > .001 ? 'visible' : 'hidden';
+    el.style.opacity = k * (1 - rec * .3);
+    const b = (1 - k) * 8 + rec * 3; el.style.filter = b > .01 ? `blur(${b}px)` : '';
+    el.style.transform = k < 1 ? `translateY(${(1 - out3(k)) * 30}px) scale(${lerp(.96, 1, out3(k))})` : '';
+  };
+  const setTxt = (el, v, ph, caret) => { el.textContent = v || ph; el.classList.toggle('ph', !v); if (caret) el.insertAdjacentHTML('beforeend', '<span class="caret"></span>'); };
+  const STEPS = ['Rodzaj', 'Odbiorcy', 'Treść', 'Podsumowanie'];
+  const keys = {};
+  const once = (k, v, fn) => { if (keys[k] !== v) { keys[k] = v; fn(); } };
+  let lastCur = { x: 1500, y: 1180 }, hovEl = [], pressEl = null;
+
+  function paint(S, prev) {
+    const s = S._s, T = S._T || 0;
+    const E = EST[S.est];
+    // --- list page, with the campaign window over it at the end
+    page(cl, S.cl * (1 - S.clOut), 0);
+    const sent = S.dmSt ? 38 : Math.round(S.dmN);
+    $('clSt').innerHTML = `<span>Działa: <b>1</b></span><span>Zaplanowane: <b>0</b></span><span>Wysłane w ostatnich 30 dniach: <b>${17 + (S.row ? sent : 0)}</b></span><span>Kredyty SMS: <b>${S.row ? 1240 - sent * 2 : 1240}</b></span>`;
+    once('row', S.row + ':' + (S.row === 1 ? sent : ''), () => {
+      $('clNwIn').innerHTML = S.row ? campRow(['Jesienne mycie z woskiem', 'ONE', 'SMS', S.row === 1 ? `${sent} / 38` : '38', S.row === 1 ? (sent ? String(sent * 2) : '-') : '76',
+        S.row === 1 ? 'W trakcie wysyłki' : 'Wysłana', S.row === 1 ? '#0284c7' : '#15803d', S.row === 1 ? 'Wysyła się teraz' : 'Zakończona', '', S.row === 1 ? 'teraz' : '10:16']) : '';
+    });
+    { const w = $('clNw'), k = io3(clamp(S.rowK, 0, 1)); w.style.height = S.row ? (k >= 1 ? '' : ($('clNwIn').offsetHeight * k) + 'px') : '0px'; }
+    $('clOv').style.opacity = clamp(S.ov, 0, 1);
+
+    // --- wizard page
+    page(wz, S.wz, 0);
+    setTxt($('wzNm'), S.name, 'Nazwa kampanii…', S.nameF); $('wzNm').classList.toggle('focus', !!S.nameF);
+    const facts = [`<span>Krok <b>${S.step}</b> z <b>4</b></span>`];
+    if (S.step > 1) facts.push('<span>Jednorazowa</span>');
+    if (S.step > 2) facts.push('<span>SMS</span>');
+    if (S.step > 1) facts.push(`<span>Odbiorcy: <b>${E[4]}</b></span>`);
+    once('fx', facts.join(''), () => { $('wzFx').innerHTML = facts.join(''); });
+    once('rail', S.step, () => {
+      $('wzRl').innerHTML = STEPS.map((l, j) => { const st = j + 1 < S.step ? 'done' : j + 1 === S.step ? 'cur' : ''; return `${j ? '<span class="wzln"></span>' : ''}<span class="wzri ${st}"><span class="wzmk">${st === 'done' ? sv(I.check, 10, 3) : ''}</span>${l}</span>`; }).join('');
+    });
+    [1, 2, 3, 4].forEach(n => show($('ws' + n), S.step === n, 'flex'));
+    enter($('ws' + S.step), S.stepK, 16, .99, 6);
+    ['kOne', 'kAuto'].forEach(id => $(id).classList.toggle('hov', S.kHov === id));
+    // step 2: filters, list and the estimate
+    { const w = $('abBw'), k = io3(clamp(S.visO, 0, 1)); w.style.height = k >= 1 ? '' : ($('abB').offsetHeight * k) + 'px'; w.style.opacity = k; }
+    $('sVisH').classList.toggle('hov', S.hov === 'sVisH');
+    const act = S.est > 0;
+    show($('sVisD'), act); $('sVisS').textContent = act ? 'ostatnia ponad 180 dni temu' : 'bez ograniczeń'; $('sVisS').classList.toggle('on', act);
+    setTxt($('fOld'), S.old, 'np. 180', S.oldF); $('fOldB').classList.toggle('focus', !!S.oldF);
+    const rows = S.est ? RF : RA;
+    once('rows', S.est ? 'f' : 'a', () => { $('atB').innerHTML = rows.map((r, i) => rowHTML(r, i, 'ar')).join(''); });
+    if (S.est) { const r = $('ar' + OFF_ROW), c = $('arc' + OFF_ROW); r.classList.toggle('off', S.off > .5); c.classList.toggle('on', S.off <= .5); c.innerHTML = S.off > .5 ? '' : sv(I.check, 11, 3.5); }
+    const dim = 1 - .55 * Math.sin(Math.PI * clamp(S.estDim, 0, 1));
+    $('odCnt').innerHTML = S.estDim > .2 && S.estDim < .8 ? 'przeliczam…' : `<b>${E[4]}</b> z ${E[0]} dostanie wiadomość`;
+    $('atFt').textContent = S.off > .5 ? '' : 'Wszyscy zaznaczeni.';
+    if (S.off > .5) $('atFt').innerHTML = 'Odznaczonych ręcznie: 1. <span class="wzql">Zaznacz wszystkich</span>';
+    $('atPg').textContent = `1–25 z ${E[0]}`;
+    $('eN').textContent = E[4]; $('eN').style.opacity = dim; $('att').style.opacity = dim;
+    once('eb', S.est, () => {
+      $('eB').innerHTML = `<li><span>Pasuje do filtrów${info}</span><b>${E[0]}</b></li><li><span>Brak zgody marketingowej${info}</span><b>−${E[1]}</b></li><li><span>Brak numeru / adresu${info}</span><b>−${E[2]}</b></li>`
+        + (E[3] ? `<li id="eOff"><span>Odznaczeni ręcznie${info}</span><b>−${E[3]}</b></li>` : '');
+    });
+    // step 3: the SMS editor and its preview
+    const tpl = S.sms;
+    $('mTa').innerHTML = tpl ? esc(tpl).replace(/\{\{[a-z_]+\}\}/g, m => `<span class="tk">${m}</span>`) + (S.smsF ? '<span class="caret"></span>' : '') : (S.smsF ? '<span class="caret"></span>' : 'Cześć {{imie}}! …');
+    $('mTa').classList.toggle('ph', !tpl && !S.smsF); $('mTa').classList.toggle('focus', !!S.smsF);
+    const m = smsMeta(tpl);
+    $('mCr').classList.toggle('warn', m.seg > 1);
+    $('mCrL').innerHTML = `<span>${m.n} ${pl(m.n, 'znak', 'znaki', 'znaków')}</span>${!m.gsm ? '<span>Polskie znaki skracają SMS</span>' : ''}`;
+    $('mCrR').textContent = `${m.seg} ${pl(m.seg, 'SMS', 'SMS-y', 'SMS-ów')} na odbiorcę, ${m.seg} ${pl(m.seg, 'kredyt', 'kredyty', 'kredytów')}`;
+    ['tk0', 'tk2'].forEach(id => $(id).classList.toggle('hov', S.hov === id));
+    setTxt($('mTin'), S.tst, '+48 XXX XXX XXX', S.tstF); $('mTin').classList.toggle('focus', !!S.tstF);
+    $('mTb').classList.toggle('en', !!S.tst); $('mTb').classList.toggle('hov', S.hov === 'mTb');
+    { const e = $('mTs'), k = clamp(S.tstOk, 0, 1); e.style.opacity = k; e.style.transform = k >= 1 ? '' : `translateX(${(1 - out3(k)) * -8}px)`; }
+    for (const id of ['pv3', 'pv4']) {
+      const b = $(id + 'B'); b.textContent = tpl ? fillIn(tpl, SAMPLE) : 'Brak treści SMS.'; b.classList.toggle('ph', !tpl);
+      $(id + 'M').innerHTML = tpl ? `<span><b>${m.n}</b> ${pl(m.n, 'znak', 'znaki', 'znaków')}</span><span><b>${m.seg}</b> ${pl(m.seg, 'SMS', 'SMS-y', 'SMS-ów')} na odbiorcę</span>` : '';
+      show($(id + 'M'), !!tpl, 'flex');
+    }
+    // step 4: summary and the moment of sending
+    $('rcNm').textContent = S.name; $('rcK').textContent = `${38 * m.seg} ${pl(38 * m.seg, 'kredyt SMS', 'kredyty SMS', 'kredytów SMS')}`;
+    $('selB').classList.toggle('focus', S.selO > 0); pop($('sdd'), S.selO);
+    ['oNow', 'oAt'].forEach(id => $(id).classList.toggle('hov', S.selH === id));
+    ['b2', 'b3', 'b4', 'clNew'].forEach(id => $(id).classList.toggle('hov', S.hov === id));
+
+    // --- scroll inside the wizard (after the content above is laid out)
+    const scrollOf = sc => {
+      if (!sc.to) return 0; let y = 0, n = $(sc.to); while (n && n !== wzC) { y += n.offsetTop; n = n.offsetParent; }
+      return clamp(y - 24 + (sc.dy || 0), 0, Math.max(0, wzC.offsetHeight - wzV.offsetHeight));
+    };
+    let scroll = scrollOf(S.scr);
+    if (prev && S.scr.k < 1) scroll = lerp(prev.scroll, scroll, io3(S.scr.k));
+    wzC.style.top = -Math.round(scroll) + 'px';
+    // the estimate panel is sticky (top: 24px) in the app, so it rides along with the list
+    { const e = $('pEst'), box = e.parentNode; let y = 0, n = e; while (n && n !== wzC) { y += n.offsetTop; n = n.offsetParent; }
+      const room = box.offsetTop + box.offsetHeight - e.offsetTop - e.offsetHeight; e.style.transform = `translateY(${Math.round(clamp(scroll + 24 - y, 0, Math.max(0, room)))}px)`; }
+
+    // --- campaign window: sending, then sent
+    const C0 = offR(cl);
+    once('dmst', S.dmSt + ':' + (S.dmSt ? 38 : Math.round(S.dmN)), () => {
+      const n = S.dmSt ? 38 : Math.round(S.dmN), col = S.dmSt ? '#15803d' : '#0284c7';
+      const pl0 = $('dmPl'); pl0.style.background = `color-mix(in srgb, ${col} 10%, transparent)`; pl0.style.border = `1px solid color-mix(in srgb, ${col} 38%, transparent)`; pl0.style.color = `color-mix(in srgb, ${col} 75%, #0f172a)`;
+      pl0.firstChild.style.background = col; pl0.lastChild.textContent = S.dmSt ? 'Wysłana' : 'W trakcie wysyłki';
+      $('dmN').textContent = n; $('dmL').textContent = n;
+      $('dmOut').querySelector('.dmbar i').style.width = (n / 38 * 100) + '%'; show($('dmOut').querySelector('.dmbar i'), n > 0); $('dmOut').querySelector('.dmlg').style.visibility = n > 0 ? '' : 'hidden';
+      $('dmA').innerHTML = (S.dmSt ? 'wiadomości dotarło do wszystkich' : 'z 38 — wysyłka trwa') + (n ? ` <span class="cr">(${n * 2} ${pl(n * 2, 'kredyt', 'kredyty', 'kredytów')})</span>` : '');
+      show($('dmNt'), S.dmSt, 'flex');
+      const recs = RF.filter((r, i) => !r[3] && i !== OFF_ROW).slice(0, 5);
+      $('dmTb').innerHTML = recs.map((r, i) => { const done = S.dmSt || i < n / 7.6; return `<tr><td class="ch">${sv(I.msgSq, 14)}</td><td class="nm">${r[0]}</td><td>${done ? 'Wysłano' : 'Oczekuje'}</td><td class="wh">${done ? '20.10.2026, 10:15' : '-'}</td></tr>`; }).join('');
+      $('dmTl').innerHTML = `<div style="--c:#94a3b8"><b>Utworzono</b>20.10.2026, 10:14</div><div style="--c:#0284c7"><b>Ruszyła wysyłka</b>20.10.2026, 10:15</div>` + (S.dmSt ? '<div style="--c:#15803d"><b>Zakończono</b>20.10.2026, 10:16</div>' : '');
+      $('dmF').innerHTML = S.dmSt ? `<span class="pb">${sv(I.copy, 14)}Wyślij ponownie</span><span class="ib">Zamknij</span>` : `<span class="dg" id="dmFstop">${sv(I.square, 14)}Zatrzymaj wysyłkę</span><span class="ib">Zamknij</span>`;
+    });
+    at(dm, C0.x + (C0.w - dm.offsetWidth) / 2, C0.y + Math.max(24, (C0.h - dm.offsetHeight) / 2));
+    enter(dm, S.dm, 26, .96, 8);
+    // --- the client's phone beside the window
+    at(ph, C0.x + C0.w - 20, C0.y + C0.h - ph.offsetHeight - 40);
+    at(phT, C0.x + C0.w - 20 + (ph.offsetWidth - phT.offsetWidth) / 2, C0.y + C0.h - ph.offsetHeight - 40 - phT.offsetHeight - 16);
+    enter(ph, S.ph, 40, .94, 8); enter(phT, P(S.ph, .3, 1), 12, .97, 5);
+    { const b = $('phB'), k = clamp(S.phB, 0, 1); b.style.opacity = k; b.style.transformOrigin = 'left bottom'; b.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * 14}px) scale(${lerp(.86, 1, back(k))})`; }
+
+    // --- hover and press
+    hovEl.forEach(e => e.classList.remove('hov')); hovEl = [];
+    if (S.hov && !['tk0', 'tk2', 'b2', 'b3', 'b4', 'clNew', 'sVisH', 'mTb'].includes(S.hov)) { const e = $(S.hov); if (e) { e.classList.add('hov'); hovEl.push(e); } }
+    if (pressEl && pressEl.id !== S.press) pressEl.style.transform = '';
+    pressEl = S.press ? $(S.press) : null; if (pressEl) pressEl.style.transform = 'scale(.93)';
+
+    // --- focus: the part with the action stays sharp, the rest softens
+    const fk = io3(P(s, 0, .7));
+    dimFx(FCL, S.focPrev, S.foc, fk, S.cl >= 1 && !S.clOut && S.dm <= 0);
+    dimFx(FWZ, S.focPrev, S.foc, fk, S.wz >= 1 && S.stepK >= 1);
+    dimFx(FDM, S.focPrev, S.foc, fk, S.dm >= 1);
+
+    // --- camera
+    const tg2 = camTarget(S.cam.to);
+    let cam = tg2;
+    if (prev && S.cam.k < 1) { const k = io3(S.cam.k); cam = { fx: lerp(prev.cam.fx, tg2.fx, k), fy: lerp(prev.cam.fy, tg2.fy, k), s: Math.exp(lerp(Math.log(prev.cam.s), Math.log(tg2.s), k)) }; }
+    const ds2 = cam.s, still = !(prev && S.cam.k < 1);
+    let tx = CX - cam.fx * ds2 + 9 * Math.sin(T * .29), ty = CY - cam.fy * ds2 + 6 * Math.sin(T * .21 + 1);
+    if (still) { tx = Math.round(tx); ty = Math.round(ty); }
+    scene.style.transform = `translate(${tx}px, ${ty}px) scale(${ds2})`;
+    // --- highlight ring (glides from the previous one)
+    const hlEl = $('hl');
+    const rr = (h) => { const r = sRect($(h.el)), p = (h.pad ?? 6) * 1.3; return { x: r.x - p, y: r.y - p, w: r.w + 2 * p, h: r.h + 2 * p }; };
+    let hr = null, ho = 0;
+    if (S.hlLast && !$(S.hlLast.el)) S.hlLast = null;
+    // a new ring glides out of the previous one; while it is still due (k = 0) the old one waits for it
+    if (S.hl) {
+      const b = rr(S.hl);
+      if (S.hlLast && S.hlLast.el !== S.hl.el && S.hlLast.k >= 1) { const a = rr(S.hlLast), k = io3(S.hl.k >= 1 ? P(s, 0, .6) : clamp(S.hl.k, 0, 1)); hr = { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), w: lerp(a.w, b.w, k), h: lerp(a.h, b.h, k) }; ho = 1; }
+      else { hr = b; ho = S.hlLast && S.hlLast.el === S.hl.el && S.hl.k >= 1 ? 1 : out3(S.hl.k); }
+    } else if (S.hlLast && S.hlLast.k > 0 && s < .35) { hr = rr(S.hlLast); ho = 1 - s / .35; }
+    if (hr && ho > .001) { hlEl.style.opacity = ho; hlEl.style.left = hr.x + 'px'; hlEl.style.top = hr.y + 'px'; hlEl.style.width = hr.w + 'px'; hlEl.style.height = hr.h + 'px'; hlEl.style.borderRadius = '14px'; } else hlEl.style.opacity = 0;
+
+    // --- cursor (arc between targets)
+    let cur = { x: 1500, y: 1180 };
+    const ctr = (id, dx, dy) => { const r = sRect($(id)); if (r.w < 1 && r.h < 1) return null; return { x: r.x + r.w / 2 + dx * ds2, y: r.y + r.h / 2 + dy * ds2 }; };
+    if (S.cur.to) cur = ctr(S.cur.to, S.cur.dx, S.cur.dy) || lastCur;
+    if (S.cur.k < 1 && (prev || S.cur.from)) {
+      const a = (S.cur.from && ctr(S.cur.from, S.cur.fdx, S.cur.fdy)) || (prev ? prev.cur : cur), k = io3(S.cur.k), dx = cur.x - a.x, dy = cur.y - a.y, d = Math.hypot(dx, dy) || 1, bend = S.cur.drag ? 0 : Math.sin(Math.PI * k) * Math.min(70, d * .14);
+      cur = { x: lerp(a.x, cur.x, k) - dy / d * bend, y: lerp(a.y, cur.y, k) + dx / d * bend };
+    }
+    lastCur = cur;
+    const cv2 = $('cursor'), press = S.tap > 0 ? Math.sin(Math.PI * clamp(S.tap * 2.2, 0, 1)) : 0;
+    cv2.style.opacity = S.cur.vis; cv2.style.transform = `translate(${cur.x - 7}px, ${cur.y - 5}px) scale(${1 - press * .16})`;
+    const ring = $('ring'); if (S.tap > 0 && S.tap < 1) { ring.style.opacity = (1 - S.tap) * S.cur.vis; ring.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${.35 + S.tap * .9})`; } else ring.style.opacity = 0;
+    return { cam, cur, scroll };
+  }
+  // ---------- timeline driver with memo of each beat's end ----------
+  const ends = [];
+  const endOf = i => {
+    if (i < 0) return null;
+    if (ends[i]) return ends[i];
+    const S = stateAtBeat(i, beats[i].d);
+    ends[i] = paint(S, i > 0 ? endOf(i - 1) : null);
+    return ends[i];
+  };
+  const draw = t => {
+    t = clamp(t, 0, DUR - .001);
+    const i = beatAt(t), b = beats[i];
+    const prev = endOf(i - 1);
+    const S = stateAtBeat(i, t - b.t0);
+    paint(S, prev);
+    paintText(i, t);
+    window.__t = t;
+  };
+
+  // ---------- player ----------
+  const player = $('player');
+  const fit = () => { stage.style.transform = `scale(${player.clientWidth / W})`; };
+  let t = 0, playing = false, rate = 1;
+  const bPlay = $('bPlay');
+  const syncBtn = () => { bPlay.textContent = playing ? 'Pauza' : (t >= DUR - .01 ? 'Od początku' : 'Odtwórz'); };
+  const chapAt = tt => { let c = 0; for (let j = 0; j < CH.length; j++) if (chStart[j] <= tt + .001) c = j; return c; };
+  const go = nt => { t = clamp(nt, 0, DUR - .001); draw(t); $('scrubI').style.width = (t / DUR * 100) + '%'; const c = chapAt(t); Array.from($('chaps').children).forEach((e, j) => e.classList.toggle('on', j === c)); };
+  bPlay.addEventListener('click', () => { if (t >= DUR - .01) go(0); playing = !playing; syncBtn(); });
+  const textStarts = () => beats.filter(b => b.newText).map(b => b.t0);
+  $('bNext').addEventListener('click', () => { const n = textStarts().find(x => x > t + .05); if (n !== undefined) go(n + .01); });
+  $('bPrev').addEventListener('click', () => { const ts = textStarts().filter(x => x < t - .4); go(ts.length ? ts[ts.length - 1] + .01 : 0); });
+  $('bRate').addEventListener('click', () => { rate = rate === 1 ? .75 : 1; $('bRate').textContent = `Tempo ${rate === 1 ? '1' : '0,75'}×`; });
+  $('scrub').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); go((e.clientX - r.left) / r.width * DUR); });
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (playing) {
+      let nt = t + dt * rate;
+      if ($('optStop').checked) { const n = textStarts().find(x => x > t + .001); if (n !== undefined && nt >= n) { nt = n - .001; playing = false; syncBtn(); } }
+      if (nt >= DUR) { nt = DUR - .001; playing = false; syncBtn(); }
+      go(nt);
+    }
+    requestAnimationFrame(frame);
+  };
+  window.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input')) return; if (e.key === ' ') { e.preventDefault(); bPlay.click(); } if (e.key === 'ArrowRight') $('bNext').click(); if (e.key === 'ArrowLeft') $('bPrev').click(); });
+
+  window.__start = () => {
+    layout();
+    $('chaps').innerHTML = CH.map((c, j) => `<button type="button">${j + 1}. ${c}</button>`).join('');
+    Array.from($('chaps').children).forEach((e, j) => e.addEventListener('click', () => go(chStart[j] + .01)));
+    fit(); try { new ResizeObserver(() => { fit(); ends.length = 0; go(t); }).observe(player); } catch (e) { window.addEventListener('resize', () => { fit(); ends.length = 0; go(t); }); }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    go(reduce ? chStart[1] + 2 : .01); syncBtn();
+    requestAnimationFrame(frame);
+    window.__seek = tt => { playing = false; syncBtn(); go(tt); };
+    window.__dur = DUR; window.__chStart = chStart; window.__beats = beats.map(b => [b.t0, b.d, b.ch, b.h, b.newText]);
+  };
+})();
+
+(() => {
+  const { P, io3, type, mv, tap, cam, hl, foc, scr, SMS } = window.H;
+  const B = window.beat;
+  const show = (S, s, a = 0, b = .45) => { S.cur.vis = P(s, a, b); };
+  const hide = (S, s, a = 0, b = .4) => { S.cur.vis = 1 - P(s, a, b); };
+  const NAME = 'Jesienne mycie z woskiem';
+
+  // ===== 1 Nowa kampania =====
+  B(0, { h: 'Jak stworzyć kampanię SMS?', b: '', lead: .2, act: 1.4, hold: .5 }, (S, a, s) => { S.cl = P(s, .3, 1.5); cam(S, 'cl', 1); });
+  B(0, { h: 'Kampania to SMS do wielu klientów naraz.', b: 'Na liście widać, co działa, a co już wyszło.', act: 1.6 }, (S, a) => { S.cl = 1; foc(S, ['clTbl']); hl(S, 'clTbl', P(a, .3, .6), 4); });
+  const T1 = 'Utwórz nową kampanię.';
+  B(0, { h: T1, b: '', act: 1.6 }, (S, a, s) => {
+    S.cl = 1; foc(S, ['clHd']); show(S, s); mv(S, 'clNew', P(a, 0, .62), { dx: -20, from: 'clNew', fdx: -260, fdy: 240 }); S.hov = a > .55 ? 'clNew' : null; tap(S, a, .8, 'clNew');
+  });
+  B(0, { h: T1, b: '', lead: 0, act: 1.2, hold: .2 }, (S, a, s) => {
+    S.cl = 1; S.clOut = P(s, 0, .45); S.wz = P(s, .25, .85); hide(S, s, 0, .3); cam(S, 'wz', P(s, 0, 1)); foc(S, null);
+  });
+
+  // ===== 2 Nazwa i rodzaj =====
+  B(1, { h: 'Nadaj kampanii nazwę.', b: 'Klient jej nie zobaczy.', act: 2.4 }, (S, a, s) => {
+    S.cl = 1; S.clOut = 1; S.wz = 1; foc(S, ['wzHd']); show(S, s);
+    mv(S, 'wzNm', P(a, 0, .4), { dx: -150 }); tap(S, a, .43); S.nameF = a > .45 ? 1 : 0; S.name = type(NAME, P(a, .5, .95));
+  });
+  B(1, { h: 'Jednorazowa wysyłka idzie raz.', b: 'Teraz albo w terminie, do klientów wybranych filtrami.', act: 1.8 }, (S, a) => {
+    S.nameF = 0; foc(S, ['kOne']); mv(S, 'kOne', P(a, 0, .5), { dx: 60, dy: 70 }); hl(S, 'kOne', P(a, .3, .6), 4);
+  });
+  B(1, { h: 'Automatyczna działa stale.', b: 'SMS dostaje każdy klient, gdy spełni warunek, np. 180 dni po usłudze.', act: 1.8 }, (S, a) => {
+    foc(S, ['kAuto']); mv(S, 'kAuto', P(a, 0, .5), { dx: 60, dy: 70 }); hl(S, 'kAuto', P(a, .3, .6), 4);
+  });
+  const T2 = 'Wybierz „Jednorazowa wysyłka”.', B2 = 'Ta instrukcja pokazuje kampanię jednorazową.';
+  B(1, { h: T2, b: B2, act: 2.0 }, (S, a) => {
+    foc(S, ['w1In', 'kOne', 'kAuto']); mv(S, 'kOne', P(a, .05, .5), { dx: -40, dy: 10, from: 'kAuto', fdx: 60, fdy: 70 }); S.kHov = a > .45 ? 'kOne' : null; hl(S, 'kOne', P(a, .45, .7), 4); tap(S, a, .85, 'kOne');
+  });
+  B(1, { h: T2, b: B2, lead: 0, act: .9, hold: .2 }, (S, a) => {
+    S.kHov = null; foc(S, null); S.step = 2; S.stepK = P(a, 0, 1); hide(S, a * 2.5);
+  });
+
+  // ===== 3 Odbiorcy =====
+  B(2, { h: 'Wybierz klientów filtrami.', b: '', act: 1.8 }, (S, a, s) => {
+    S.step = 2; foc(S, ['pKog']); show(S, s); mv(S, 'sVisH', P(a, .05, .45), { dx: -250 }); S.hov = a > .4 && a < .7 ? 'sVisH' : null; tap(S, a, .55); S.visO = P(a, .6, .95);
+  });
+  B(2, { h: 'Ustaw, jak dawno klient był w studiu.', b: '', act: 2.6 }, (S, a) => {
+    S.visO = 1; foc(S, ['pKog', 'pEst']); mv(S, 'fOldB', P(a, 0, .25), { dx: -40 }); tap(S, a, .3); S.oldF = a > .32 ? 1 : 0; S.old = type('180', P(a, .38, .55));
+    S.estDim = P(a, .62, .95); S.est = a > .78 ? 1 : 0; hl(S, 'sVisS', P(a, .82, 1), 4);
+  });
+  B(2, { h: 'Liczba pokazuje, ilu klientów dostanie SMS.', b: '', act: 1.6 }, (S, a) => {
+    S.oldF = 0; S.est = 1; foc(S, ['pEst']); mv(S, 'fOldB', P(a, 0, .4), { dx: 120, dy: 60 }); hl(S, 'eN', P(a, .1, .4), 8);
+  });
+  const T3 = 'Klient bez zgody marketingowej nie dostaje SMS-a.', B3 = 'Pomijani są też klienci bez numeru i wypisani przez STOP.';
+  B(2, { h: T3, b: B3, act: 1.4 }, (S, a) => { foc(S, ['pEst']); hl(S, 'eB', 1, 6); });
+  B(2, { h: T3, b: B3, lead: 0, act: 1.6 }, (S, a) => { foc(S, ['pOdb']); scr(S, 'nav2', P(a, 0, .6)); hl(S, 'ar3', 1, 2); });
+  const T4 = 'Odznacz klienta, którego chcesz pominąć.', B4 = 'Odznaczenie obowiązuje też w dniu wysyłki.';
+  B(2, { h: T4, b: B4, act: 2.2 }, (S, a, s) => {
+    foc(S, ['pOdb', 'pEst']); scr(S, 'nav2'); mv(S, 'arc4', P(a, .05, .45)); tap(S, a, .55); S.off = a > .57 ? 1 : 0;
+    S.estDim = a > .57 ? P(a, .57, .85) : 0; S.est = a > .7 ? 2 : 1; hl(S, 'ar4', P(a, .6, .8), 2);
+  });
+  B(2, { h: T4, b: B4, lead: 0, act: 1.4 }, (S, a) => { S.est = 2; S.off = 1; S.estDim = 1; foc(S, ['pOdb', 'pEst']); hl(S, 'eOff', 1, 4); mv(S, 'arc4', P(a, 0, .4), { dx: 90, dy: 30 }); });
+  B(2, { h: T4, b: B4, lead: 0, act: 2.1, hold: .2 }, (S, a) => {
+    foc(S, ['nav2']); mv(S, 'b2', P(a, 0, .56)); S.hov = a > .52 ? 'b2' : null; tap(S, a, .6, 'b2');
+    if (a > .66) { S.step = 3; S.stepK = P(a, .66, 1); scr(S, null, 1); foc(S, null); }
+  });
+
+  // ===== 4 Treść SMS-a =====
+  const sms = (n, k) => SMS.slice(0, n).join('') + (n < SMS.length ? type(SMS[n], k) : '');
+  B(3, { h: 'Napisz SMS do klientów.', b: '', act: 2.0 }, (S, a) => {
+    S.step = 3; foc(S, ['pTre']); mv(S, 'mTa', P(a, 0, .48), { dx: -120, dy: -20 }); tap(S, a, .52); S.smsF = a > .54 ? 1 : 0; S.sms = sms(0, P(a, .6, .86));
+  });
+  const T5 = 'Wstaw imię klienta i markę auta.', B5 = 'Każdy klient dostaje SMS ze swoimi danymi.';
+  B(3, { h: T5, b: B5, act: 3.0 }, (S, a) => {
+    S.smsF = 1; foc(S, ['pTre']);
+    if (a < .48) mv(S, 'tk0', P(a, 0, .2), { from: 'mTa', fdx: -120, fdy: -20 }); else mv(S, 'tk2', P(a, .48, .66), { from: 'tk0' });
+    S.hov = a > .16 && a < .3 ? 'tk0' : a > .62 && a < .76 ? 'tk2' : null; tap(S, a, .24, 'tk0'); tap(S, a, .7, 'tk2');
+    S.sms = a < .26 ? sms(1, 0) : a < .72 ? sms(2, P(a, .32, .42)) : sms(4, 0);
+    hl(S, 'mTa', P(a, .8, 1), 4);
+  });
+  B(3, { h: T5, b: B5, lead: 0, act: 3.2 }, (S, a) => {
+    S.smsF = 1; foc(S, ['pTre', 'pPrev']); mv(S, 'tk2', 1, { dx: 40, dy: -70 }); S.sms = sms(4, P(a, .05, .9)); hl(S, 'pv3B', P(a, .3, .55), 4);
+  });
+  B(3, { h: 'Sprawdź, jak SMS wygląda u klienta.', b: '', act: 1.6 }, (S, a) => { S.smsF = 0; S.sms = SMS.join(''); foc(S, ['pPrev']); hl(S, 'pv3B', 1, 4); });
+  const T6 = 'Polskie znaki skracają SMS do 70 znaków.', B6 = 'Ta treść to 2 SMS-y, czyli 2 kredyty na klienta.';
+  B(3, { h: T6, b: B6, act: 2.2 }, (S, a) => { foc(S, ['pTre']); hl(S, 'mCr', P(a, .1, .4), 5); });
+  const T10 = 'Wyślij test na swój numer.', B10 = 'Zobacz SMS na swoim telefonie przed wysyłką.';
+  B(3, { h: T10, b: B10, act: 3.0 }, (S, a) => {
+    foc(S, ['pTre']); mv(S, 'mTin', P(a, 0, .2), { dx: -60 }); tap(S, a, .24); S.tstF = a > .26 && a < .62 ? 1 : 0; S.tst = type('+48 600 700 800', P(a, .3, .55));
+    if (a > .58) mv(S, 'mTb', P(a, .58, .72), { from: 'mTin', fdx: -60 }); S.hov = a > .7 && a < .86 ? 'mTb' : null; tap(S, a, .76, 'mTb');
+    S.tstOk = P(a, .82, .95); hl(S, 'mTst', P(a, .85, 1), 4);
+  });
+  B(3, { h: T10, b: B10, lead: 0, act: 1.6, hold: .2 }, (S, a) => {
+    S.tst = '+48 600 700 800'; S.tstOk = 1; foc(S, ['nav3']); mv(S, 'b3', P(a, 0, .45)); S.hov = a > .4 ? 'b3' : null; tap(S, a, .55, 'b3');
+    if (a > .62) { S.step = 4; S.stepK = P(a, .62, 1); foc(S, null); }
+  });
+
+  // ===== 5 Wysyłka =====
+  B(4, { h: 'Sprawdź odbiorców i koszt przed wysyłką.', b: 'Gdy kredytów jest za mało, pojawia się tu ostrzeżenie.', act: 1.8 }, (S, a) => { S.step = 4; foc(S, ['pSum']); hl(S, 'rcK', P(a, .2, .5), 6); });
+  const T7 = 'Wyślij od razu albo zaplanuj termin.', B7 = 'Wysyłka zaplanowana na noc wyjdzie następnego dnia rano.';
+  B(4, { h: T7, b: B7, act: 2.8 }, (S, a) => {
+    foc(S, ['pKdy']); mv(S, 'selB', P(a, 0, .36), { dx: -120 }); tap(S, a, .39); S.selO = P(a, .42, .5) - P(a, .88, .98);
+    if (a > .5) mv(S, a < .72 ? 'oAt' : 'oNow', a < .72 ? P(a, .5, .62) : P(a, .72, .8), { from: a < .72 ? 'selB' : 'oAt', fdx: -120, dx: -120 });
+    S.selH = a > .58 && a < .74 ? 'oAt' : a > .78 && a < .9 ? 'oNow' : null; tap(S, a, .84);
+  });
+  const T8 = 'Wyślij kampanię do 38 klientów.';
+  B(4, { h: 'W dniu wysyłki lista liczy się na nowo.', b: 'Twoje odznaczenia zostają.', act: 1.6 }, (S, a) => { foc(S, ['pKdy']); hl(S, 'scn', P(a, .1, .4), 6); });
+  B(4, { h: T8, b: '', act: 2.1 }, (S, a) => {
+    foc(S, ['nav4']); mv(S, 'b4', P(a, .05, .5)); S.hov = a > .45 ? 'b4' : null; tap(S, a, .7, 'b4');
+  });
+  B(4, { h: T8, b: '', lead: 0, act: 1.4, hold: .3 }, (S, a, s) => {
+    foc(S, null); hide(S, s, 0, .3); S.wz = 1 - P(s, 0, .4); S.clOut = 1 - P(s, .35, .8); S.row = 1; S.rowK = 1;
+    S.ov = P(s, .75, 1.1); S.dm = P(s, .85, 1.45); cam(S, 'dm', P(s, .3, 1.5));
+  });
+
+  // ===== 6 Efekt =====
+  B(5, { h: 'Okno kampanii pokazuje postęp wysyłki.', b: '', act: 2.6 }, (S, a) => {
+    S.wz = 0; S.clOut = 0; S.row = 1; S.ov = 1; S.dm = 1; S.dmN = 38 * P(a, .1, .95); foc(S, ['dmH', 'dmOut']); hl(S, 'dmOut', P(a, .05, .3), 4);
+  });
+  B(5, { h: 'Wysyłkę da się zatrzymać.', b: 'SMS-ów, które już wyszły, nie da się cofnąć.', act: 1.6 }, (S, a) => {
+    S.dmN = 38; foc(S, ['dmOut', 'dmF']); hl(S, 'dmFstop', P(a, .1, .4), 4);
+  });
+  B(5, { h: 'Przy każdym kliencie widać status SMS-a.', b: '', act: 1.8 }, (S, a) => {
+    S.dmN = 38; S.dmSt = 1; S.row = 2; foc(S, ['dmNt', 'dmOut', 'dmRec']); hl(S, 'dmRec', P(a, .1, .4), 4);
+  });
+  const T9 = 'Klienci dostają SMS od Twojego studia.', B9 = 'Każdy SMS ma imię klienta i markę auta.';
+  B(5, { h: T9, b: B9, act: 2.6 }, (S, a, s) => {
+    foc(S, []); S.dmN = 38; S.dmSt = 1; S.row = 2; S.ph = P(s, .3, 1.3); S.phB = P(a, .55, .85); cam(S, 'ph', P(s, 0, 2.6));
+  });
+  B(5, { h: T9, b: B9, lead: 0, act: 1.6, hold: 5.2 }, (S, a, s) => {
+    S.ph = 1; S.phB = 1; foc(S, null); cam(S, 'fin', P(s, 0, 2.6)); hl(S, 'dmPl', P(s, 2.4, 2.8), 4);
+  });
+})();
+window.__start();
+</script>
+
+</body>
+</html>

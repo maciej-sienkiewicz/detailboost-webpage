@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../osadzenie.css">
+<script>if (window.self !== window.top) { document.documentElement.classList.add('osadzona'); document.documentElement.dataset.theme = 'dark'; }</script>
+</head>
+<body>
+<title>Jak założyć konto pracownikowi</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-ext-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Page: help-centre look. Stage: style B, caption column on the left, the settings screen alone on the right. */
+:root {
+  --bg: #eef2f7; --surface: #ffffff; --ink: #0f172a; --ink-2: #475569; --muted: #64748b; --line: #e2e8f0;
+  --brand: #0ea5e9; --brand-ink: #0369a1; --brand-soft: #e0f2fe;
+  --font: 'InterDB', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  padding: 36px max(16px, env(safe-area-inset-right, 0px)) 72px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-ink); }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 800; margin: 6px 0 0; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--ink-2); margin: 0; max-width: 760px; }
+
+.player { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #eef2f7; box-shadow: 0 20px 50px rgba(15,23,42,.16); }
+.stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; font-family: var(--font); color: #0f172a; background: #eef2f7; }
+.bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bar button { font: 600 14px var(--font); height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.bar button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; min-width: 120px; justify-content: center; }
+.bar button:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.bar label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+.bar .sp { flex: 1; }
+.scrub { position: relative; height: 8px; border-radius: 4px; background: var(--line); cursor: pointer; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #0ea5e9; }
+.scrub b { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); opacity: .45; }
+.chaps { display: flex; flex-wrap: wrap; gap: 8px; }
+.chaps button { font: 500 13.5px var(--font); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.chaps button.on { border-color: #0ea5e9; color: var(--brand-ink); background: var(--brand-soft); font-weight: 700; }
+
+/* ===== stage ===== */
+.bgx { position: absolute; inset: 0; background:
+  radial-gradient(900px 700px at 78% 45%, rgba(14,165,233,.10), transparent 70%),
+  radial-gradient(700px 600px at 8% 95%, rgba(37,99,235,.07), transparent 70%), #eef2f7; }
+.brand { position: absolute; left: 120px; top: 84px; display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; z-index: 40; }
+.brand i { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #2563eb); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 17px; font-weight: 800; }
+.brand span { font-size: 19px; font-weight: 500; color: #64748b; margin-left: 6px; letter-spacing: -0.01em; }
+.cap { position: absolute; left: 120px; top: 262px; width: 600px; z-index: 40; }
+.cnum { height: 34px; position: relative; margin-bottom: 26px; }
+.cnum > div { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; color: #0369a1; white-space: nowrap; }
+.cnum > div b { font-variant-numeric: tabular-nums; }
+.cnum > div i { display: block; width: 46px; height: 2px; background: linear-gradient(90deg, #38bdf8, rgba(56,189,248,0)); }
+.cnum > div span { color: #0f172a; font-weight: 600; }
+.ctx { position: relative; }
+.ctx .tl { position: absolute; left: 0; top: 0; width: 600px; }
+.ch { font-size: 56px; font-weight: 750; letter-spacing: -0.038em; line-height: 1.08; margin: 0; }
+.cbd { font-size: 28px; line-height: 1.45; color: #475569; margin-top: 28px; letter-spacing: -0.01em; }
+.ch .w, .cbd .w { display: inline-block; white-space: pre; will-change: transform, filter, opacity; }
+.prog { position: absolute; left: 120px; bottom: 96px; z-index: 40; }
+.prog .pl { font-size: 18px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
+.prog .pl b { color: #0f172a; font-weight: 700; }
+.prog .pb { display: flex; gap: 7px; }
+.prog .pb i { display: block; width: 34px; height: 6px; border-radius: 3px; background: #d5dde8; overflow: hidden; }
+.prog .pb i b { display: block; height: 100%; width: 0; background: #0ea5e9; }
+
+.view { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 20; -webkit-mask-image: linear-gradient(90deg, transparent 735px, #000 800px); mask-image: linear-gradient(90deg, transparent 735px, #000 800px); }
+.scene { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 90; filter: drop-shadow(0 4px 8px rgba(15,23,42,.32)); opacity: 0; pointer-events: none; }
+.ring { position: absolute; left: 0; top: 0; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 3px solid #0ea5e9; opacity: 0; z-index: 89; pointer-events: none; }
+.kcap { position: absolute; z-index: 91; padding: 10px 18px; border-radius: 12px; background: #0f172a; color: #fff; font-size: 22px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,.3); opacity: 0; border-bottom: 4px solid #334155; }
+.hl { position: absolute; z-index: 60; border-radius: 12px; border: 2.5px solid #0ea5e9; box-shadow: 0 0 0 5px rgba(14,165,233,.16), 0 0 26px rgba(14,165,233,.35); opacity: 0; pointer-events: none; }
+
+/* ===== wspólne: przyciski (Button), plakietki (StatusPill) ===== */
+.scene svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px; border: 1px solid transparent; border-radius: 999px; font-size: 13.5px; font-weight: 600; line-height: 1; white-space: nowrap; flex-shrink: 0; }
+.btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+.btn.lg { height: 40px; padding: 0 18px; font-size: 14px; }
+.btn.lg svg { width: 16px; height: 16px; }
+.btn.sm { height: 30px; padding: 0 11px; font-size: 12.5px; }
+.btn.pr { background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; box-shadow: 0 4px 12px rgba(3,105,161,.25); }
+.btn.ol { border-color: #e2e8f0; background: #fff; color: #334155; }
+.btn.ti { border-color: #7dd3fc; background: #f0f9ff; color: #075985; }
+.btn.prs { transform: scale(.96); }
+.pill { display: inline-flex; align-items: center; padding: 2px 9px; border: 1px solid #e2e8f0; border-radius: 999px; background: #f8fafc; color: #475569; font-size: 12px; font-weight: 600; line-height: 1.4; white-space: nowrap; }
+.pill.ok { border-color: #86efac; background: #f0fdf4; color: #15803d; }
+.pill.wa { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
+.mut { font-size: 13px; color: #64748b; }
+
+/* ===== aplikacja: panel boczny + moduł „Pracownicy” ===== */
+.ap { position: absolute; left: 0; top: 0; width: 1240px; height: 860px; border-radius: 20px; overflow: hidden; background: #eef2f7; border: 1px solid #d6dee9; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 30px 70px -20px rgba(15,23,42,.28); opacity: 0; }
+.asb { position: absolute; left: 0; top: 0; bottom: 0; width: 248px; background: #0f172a; display: flex; flex-direction: column; padding: 0 12px; overflow: hidden; }
+.asbB { display: flex; align-items: center; gap: 12px; padding: 20px 4px 18px; border-bottom: 1px solid rgba(255,255,255,.07); margin: 0 -12px 0; padding-left: 16px; }
+.asbL { width: 36px; height: 36px; border-radius: 10px; background: #1e293b; color: #e2e8f0; display: grid; place-items: center; font-size: 15px; font-weight: 700; }
+.asbN { color: #f1f5f9; font-size: 15px; font-weight: 600; }
+.asbS { padding: 14px 0 2px; }
+.asbS:first-of-type { padding-top: 6px; }
+.asbT { padding: 0 12px 5px; color: #64748b; font-size: 11.5px; font-weight: 600; }
+.asbI { display: flex; align-items: center; gap: 11px; padding: 9px 12px; margin-bottom: 1px; border-radius: 10px; color: #cbd5e1; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.asbI svg { width: 17px; height: 17px; stroke-width: 1.75; flex-shrink: 0; }
+.asbI.hov { background: rgba(255,255,255,.04); color: #f1f5f9; }
+.asbI.on { background: rgba(14,165,233,.11); color: #38bdf8; font-weight: 600; }
+.asbP { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 12px 14px; background: #0f172a; border-top: 1px solid rgba(255,255,255,.07); }
+.amn { position: absolute; left: 248px; top: 0; right: 0; bottom: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 18px; }
+.aph { margin: 0; padding: 4px 0 2px; font-size: 28px; font-weight: 700; color: #0f172a; letter-spacing: -0.4px; line-height: 1.15; }
+.atb { display: flex; align-items: flex-end; gap: 12px; }
+.tbs { flex: 1; display: flex; gap: 6px; border-bottom: 1px solid #e2e8f0; }
+.tb { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; margin-bottom: -1px; font-size: 15px; font-weight: 500; color: #475569; border-bottom: 2px solid transparent; white-space: nowrap; }
+.tb.on { color: #0ea5e9; font-weight: 700; border-bottom-color: #0ea5e9; }
+.tb em { font-style: normal; min-width: 20px; padding: 1px 7px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-align: center; background: rgba(14,165,233,.12); color: #0ea5e9; }
+.atb .btn { margin-bottom: 6px; }
+.alc { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+.alh, .alr { display: grid; grid-template-columns: minmax(0, 1fr) 170px 200px 36px; gap: 16px; padding: 14px 24px; align-items: center; }
+.alh { padding: 14px 24px 10px; border-bottom: 1px solid #f1f5f9; }
+.alh span { font-size: 12.5px; font-weight: 600; color: #64748b; }
+.alr { border-bottom: 1px solid #f1f5f9; }
+.alr:last-child { border-bottom: none; }
+.alr.hov { background: #f8fafc; }
+.aln { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.aln b { font-size: 15px; font-weight: 700; color: #0f172a; }
+.alm { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: 13px; line-height: 1.45; color: #64748b; }
+.alk { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.alx { display: flex; justify-content: flex-end; }
+.ib { width: 30px; height: 30px; border-radius: 999px; display: grid; place-items: center; color: #475569; }
+.ib svg { width: 14px; height: 14px; }
+.ib.on { background: #f1f5f9; color: #0f172a; }
+#rw4 { display: none; }
+.amu { position: absolute; z-index: 25; min-width: 210px; padding: 4px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 8px 32px rgba(15,23,42,.16); opacity: 0; visibility: hidden; }
+.ami { display: flex; align-items: center; gap: 10px; min-height: 38px; padding: 0 10px; border-radius: 8px; font-size: 13.5px; font-weight: 500; color: #0f172a; white-space: nowrap; }
+.ami svg { width: 15px; height: 15px; color: #64748b; }
+.ami.hov { background: #f1f5f9; }
+
+/* nakładka i okno (ModalShell + EmployeeFormModal) */
+.scrim { position: absolute; inset: 0; z-index: 30; background: rgba(15,23,42,.48); opacity: 0; visibility: hidden; }
+.md { position: absolute; left: 340px; top: 120px; width: 560px; z-index: 31; background: #fff; border-radius: 24px; box-shadow: 0 0 0 1px rgba(0,0,0,.04), 0 4px 8px -2px rgba(0,0,0,.06), 0 16px 40px -8px rgba(0,0,0,.16); display: flex; flex-direction: column; overflow: hidden; opacity: 0; visibility: hidden; }
+.mdh { padding: 28px 28px 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid #f1f5f9; }
+.mdt { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; }
+.mdt h2 { margin: 0; font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; line-height: 1.2; }
+.mdt p { margin: 0; font-size: 14px; color: #64748b; line-height: 1.5; }
+.mdx { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 50%; color: #64748b; }
+.mdx svg { width: 16px; height: 16px; }
+.mdc { padding: 24px 28px; display: flex; flex-direction: column; gap: 20px; }
+.fg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.ff { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ff label, .rlf > label { display: block; font-size: 12px; font-weight: 600; color: #334155; }
+.ff label span { color: #ef4444; margin-left: 2px; }
+.fi { height: 38px; padding: 0 12px; display: flex; align-items: center; font-size: 13px; color: #0f172a; border: 1.5px solid #e2e8f0; border-radius: 9px; background: #fff; white-space: nowrap; overflow: hidden; }
+.fi.ph { color: #94a3b8; }
+.fi.focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.14); }
+.caret { display: inline-block; width: 2px; height: 17px; margin-left: 1px; background: #0ea5e9; vertical-align: middle; }
+.acb { padding: 16px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; }
+.acr { display: flex; align-items: flex-start; gap: 10px; }
+.cbx { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; border-radius: 5px; border: 1.5px solid #cbd5e1; background: #fff; display: grid; place-items: center; color: #fff; }
+.cbx svg { width: 11px; height: 11px; stroke-width: 3; opacity: 0; }
+.cbx.on { border-color: #0ea5e9; background: #0ea5e9; }
+.cbx.on svg { opacity: 1; }
+.act { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.act b { font-size: 13.5px; font-weight: 600; color: #0f172a; }
+.act span { font-size: 12px; color: #64748b; line-height: 1.5; }
+.rlf { display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+.rlf > label { margin-top: 14px; }
+.rpt { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 38px; padding: 0 12px; font-size: 13px; color: #94a3b8; border: 1.5px solid #e2e8f0; border-radius: 9px; background: #fff; }
+.rpt svg { width: 12px; height: 12px; stroke-width: 2.5; color: #94a3b8; }
+.rpt.sel { color: #0f172a; }
+.rpt.open { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.14); }
+.rpt.open svg { transform: rotate(180deg); }
+.rph { font-size: 12px; color: #64748b; line-height: 1.5; }
+.rph.pv { font-size: 12.5px; color: #475569; }
+.mdf { padding: 16px 28px; border-top: 1px solid #f1f5f9; background: #fafbfd; display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.rpm { position: absolute; z-index: 40; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 12px 32px rgba(15,23,42,.14), 0 2px 8px rgba(15,23,42,.08); overflow: hidden; opacity: 0; visibility: hidden; }
+.rpg { display: flex; flex-direction: column; }
+.rpg + .rpg { border-top: 1px solid #f1f5f9; }
+.rpl { padding: 10px 14px 4px; font-size: 13px; font-weight: 600; color: #334155; }
+.rpr { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 14px; }
+.rpr.hov { background: #f8fafc; }
+.rpr.cr.hov { background: rgba(14,165,233,.06); }
+.rpr.sel { background: rgba(14,165,233,.08); }
+.rpa { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rpa b { font-size: 13px; font-weight: 600; color: #0f172a; }
+.rpa small { font-size: 12px; color: #64748b; line-height: 1.45; }
+.rpr em { flex-shrink: 0; font-style: normal; font-size: 12px; font-weight: 600; color: #64748b; white-space: nowrap; }
+.rpf { border-top: 1px solid #f1f5f9; background: #fafbfc; padding: 8px 14px; font-size: 12px; font-weight: 600; color: #0284c7; }
+.tst { position: absolute; right: 24px; bottom: 24px; display: flex; align-items: center; gap: 16px; padding: 16px 24px; background: #16a34a; color: #fff; border-radius: 12px; min-width: 320px; box-shadow: 0 20px 25px -5px rgba(0,0,0,.1), 0 8px 10px -6px rgba(0,0,0,.1); z-index: 45; opacity: 0; visibility: hidden; }
+.tst > svg { width: 24px; height: 24px; flex-shrink: 0; }
+.tst b { display: block; font-size: 16px; font-weight: 600; line-height: 1.4; }
+.tst span { display: block; font-size: 14px; opacity: .9; line-height: 1.4; }
+
+/* ===== poczta pracownika ===== */
+.ml { position: absolute; left: 1330px; top: 60px; width: 760px; background: #fff; border-radius: 18px; border: 1px solid #d6dee9; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 30px 70px -20px rgba(15,23,42,.28); overflow: hidden; opacity: 0; visibility: hidden; }
+.mlb, .aub { display: flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+.mlb i, .aub i { width: 11px; height: 11px; border-radius: 50%; background: #cbd5e1; }
+.mlb span { margin-left: 10px; font-size: 13px; font-weight: 600; color: #475569; }
+.mlc { padding: 26px 32px 30px; }
+.mlc h3 { margin: 0 0 18px; font-size: 21px; font-weight: 700; color: #0f172a; letter-spacing: -0.01em; }
+.mlm { display: flex; align-items: center; gap: 12px; padding-bottom: 18px; border-bottom: 1px solid #f1f5f9; }
+.mla { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #0ea5e9, #2563eb); color: #fff; font-size: 13px; font-weight: 800; display: grid; place-items: center; }
+.mlm div { flex: 1; display: flex; flex-direction: column; }
+.mlm b { font-size: 14px; color: #0f172a; }
+.mlm small { font-size: 12.5px; color: #64748b; }
+.mlm em { font-style: normal; font-size: 12.5px; color: #64748b; }
+.mlt { padding-top: 16px; font-size: 14.5px; line-height: 1.6; color: #1e293b; }
+.mlt p { margin: 0 0 12px; }
+.mlk { color: #0369a1; text-decoration: underline; text-underline-offset: 3px; }
+.mlk.hov { color: #075985; }
+
+/* ===== brama „Aktywuj konto” ===== */
+.au { position: absolute; left: 1330px; top: 820px; width: 1120px; height: 700px; background: #eef2f7; border-radius: 18px; border: 1px solid #d6dee9; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 30px 70px -20px rgba(15,23,42,.28); overflow: hidden; opacity: 0; visibility: hidden; }
+.auu { margin-left: 12px; flex: 1; height: 26px; display: flex; align-items: center; padding: 0 12px; border-radius: 8px; background: #fff; font-size: 12.5px; color: #475569; }
+.aug { position: absolute; left: 0; right: 0; top: 41px; bottom: 0; display: grid; grid-template-columns: 42% 1fr; }
+.auL { position: relative; overflow: hidden; background: #08080a; color: #f4f4f2; padding: 40px 48px; display: flex; flex-direction: column; justify-content: center; gap: 28px; }
+.auL::before { content: ''; position: absolute; inset: -20%; background: radial-gradient(ellipse 55% 40% at 40% 10%, rgba(220,174,92,.16), transparent 70%), radial-gradient(ellipse 40% 45% at 0% 70%, rgba(200,210,230,.06), transparent 70%); }
+.auF { position: absolute; inset: 0; background-image: radial-gradient(rgba(244,244,242,.16) 1px, transparent 1.4px); background-size: 18px 18px; -webkit-mask-image: radial-gradient(ellipse 85% 70% at 40% 45%, #000 30%, transparent 85%); mask-image: radial-gradient(ellipse 85% 70% at 40% 45%, #000 30%, transparent 85%); }
+.auM { position: absolute; left: 48px; top: 40px; z-index: 1; display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; }
+.auM span { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #0ea5e9, #2563eb); display: grid; place-items: center; font-size: 12px; font-weight: 800; color: #fff; }
+.auL h2 { position: relative; z-index: 1; margin: 0; font-size: 44px; line-height: 1.08; font-weight: 700; letter-spacing: -0.03em; }
+.auL h2 b { color: #dcae5c; }
+.auR { display: flex; align-items: center; justify-content: center; padding: 40px 48px; }
+.auC { width: 380px; }
+.auC h1 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 650; letter-spacing: -0.02em; color: #0f172a; }
+.aus { margin: 6px 0 28px; font-size: 15px; line-height: 1.5; color: #64748b; }
+.auOk { display: none; align-items: center; gap: 10px; padding: 16px; margin-bottom: 18px; background: #f0fdf4; border: 1px solid #16a34a; border-radius: 8px; font-size: 14px; color: #15803d; }
+.auOk svg { width: 20px; height: 20px; color: #16a34a; flex-shrink: 0; }
+.auFm { display: flex; flex-direction: column; gap: 18px; }
+.auGp { display: flex; flex-direction: column; gap: 8px; }
+.auGp label { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .45px; line-height: 1; }
+.auI { position: relative; height: 44px; padding: 0 44px 0 14px; display: flex; align-items: center; border: 1px solid #cfd6df; border-radius: 8px; background: #fff; font-size: 15px; color: #0f172a; letter-spacing: .12em; }
+.auI svg { position: absolute; right: 12px; top: 12px; width: 20px; height: 20px; color: #94a3b8; }
+.auI.focus { border-color: #0f172a; box-shadow: 0 0 0 3px rgba(15,23,42,.08); }
+.auRq { margin-top: 0; }
+.auRq p { margin: 0 0 8px; font-size: 12px; color: #475569; }
+.auRq ul { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 0; list-style: none; }
+.auRq li { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #94a3b8; }
+.auRq li i { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid #e2e8f0; display: grid; place-items: center; color: #16a34a; }
+.auRq li i svg { width: 10px; height: 10px; stroke-width: 3.5; opacity: 0; }
+.auRq li.met { color: #16a34a; }
+.auRq li.met i { border-color: #16a34a; background: #f0fdf4; }
+.auRq li.met i svg { opacity: 1; }
+.auBtn { display: flex; align-items: center; justify-content: center; height: 44px; border-radius: 8px; background: #0f172a; color: #fff; font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.auBtn.prs { transform: scale(.97); }
+.auAs { display: none; margin-top: 28px; padding-top: 24px; border-top: 1px solid #dde3ea; font-size: 14px; }
+.auAs span { color: #0f172a; font-weight: 600; text-decoration: underline; text-decoration-color: rgba(15,23,42,.25); text-underline-offset: 3px; }
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DetailBoost, instrukcje</div>
+    <h1>Jak założyć konto pracownikowi?</h1>
+  </header>
+  <p class="lede">Moduł „Pracownicy”: dane pracownika, konto z rolą, zaproszenie e-mailem i aktywacja konta przez pracownika. Kliknij rozdział niżej, żeby przejść od razu do niego.</p>
+
+  <div class="player" id="player" aria-label="Animacja: jak założyć konto pracownikowi">
+    <div class="stage" id="stage">
+      <div class="bgx"></div>
+      <div class="brand"><i>DB</i>DetailBoost<span>Instrukcja</span></div>
+      <div class="cap">
+        <div class="cnum" id="cnum"></div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+      <div class="prog"><div class="pl" id="pl"></div><div class="pb" id="pb"></div></div>
+
+      <div class="view" id="view"><div class="scene" id="scene">
+
+        <!-- Aplikacja (Layout + Sidebar + EmployeesView, desktop) -->
+        <div class="ap" id="ap">
+          <aside class="asb" id="asb">
+            <div class="asbB"><span class="asbL">GL</span><span class="asbN">Gloss Lab</span></div>
+            <div class="asbS">
+              <div class="asbI"><svg viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Tablica</div>
+            </div>
+            <div class="asbS"><div class="asbT">Praca</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>Wizyty</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>Kalendarz</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>Zlecenia zbiorcze</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/></svg>Galeria</div>
+            </div>
+            <div class="asbS"><div class="asbT">Klienci i zapytania</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Zapytania</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Klienci</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/></svg>Zaplanowane treści</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>Pojazdy</div>
+            </div>
+            <div class="asbS"><div class="asbT">Firma</div>
+              <div class="asbI" id="nvP"><svg viewBox="0 0 24 24"><path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/></svg>Pracownicy</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>Finanse</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>Statystyki</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 8.7 5 8.7-5"/></svg>Produkty</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>Aktywność</div>
+            </div>
+            <div class="asbS"><div class="asbT">Marketing</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Kampanie</div>
+            </div>
+            <div class="asbP">
+              <div class="asbI"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>Ustawienia</div>
+              <div class="asbI"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>Zgłoś problem</div>
+            </div>
+          </aside>
+
+          <main class="amn" id="amn">
+            <h1 class="aph" id="aph">Pracownicy</h1>
+            <div class="atb" id="atb">
+              <nav class="tbs"><span class="tb on">Zespół<em id="tCnt">3</em></span><span class="tb">Wnioski urlopowe</span><span class="tb">Czas pracy</span><span class="tb">Listy obecności</span></nav>
+              <span class="btn pr lg" id="addBtn"><svg viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg>Dodaj pracownika</span>
+            </div>
+            <div class="alc" id="alc">
+              <div class="alh"><span>Osoba</span><span>Rola</span><span>Konto</span><span></span></div>
+              <div class="alr" id="rw1"><div class="aln"><b>Marek Nowak</b><div class="alm"><span>marek.nowak@glosslab.pl</span><span>+48 604 118 273</span><span>Liczony czas pracy</span></div></div>
+                <div><span class="pill ne">Detailer</span></div><div class="alk"><span class="pill ok">Aktywne</span><span class="mut">Ostatnio dziś, 8:12</span></div><div class="alx"><span class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></span></div></div>
+              <div class="alr" id="rw2"><div class="aln"><b>Ewa Pawlak</b><div class="alm"><span>ewa.pawlak@glosslab.pl</span><span>+48 698 220 145</span><span>Liczony czas pracy</span></div></div>
+                <div><span class="pill ne">Recepcja</span></div><div class="alk"><span class="pill ok">Aktywne</span><span class="mut">Ostatnio wczoraj, 17:40</span></div><div class="alx"><span class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></span></div></div>
+              <div class="alr" id="rw3"><div class="aln"><b>Paweł Szymański</b><div class="alm"><span>+48 501 733 902</span></div></div>
+                <div><span class="mut">bez roli</span></div><div class="alk"><span class="btn ti sm">Zaproś do aplikacji</span></div><div class="alx"><span class="ib"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></span></div></div>
+              <div class="alr" id="rw4"><div class="aln"><b>Bartosz Kaczmarek</b><div class="alm"><span>bartosz.kaczmarek@glosslab.pl</span><span>+48 512 384 906</span><span>Liczony czas pracy</span></div></div>
+                <div><span class="pill ne">Detailer</span></div><div class="alk" id="rw4K"><span class="pill wa" id="rw4P">Konto nieaktywowane</span></div><div class="alx"><span class="ib" id="rw4M"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></span></div></div>
+            </div>
+          </main>
+
+          <!-- menu ⋮ (ActionMenu) -->
+          <div class="amu" id="amu">
+            <div class="ami"><svg viewBox="0 0 24 24"><path d="M21.17 6.81a1 1 0 0 0-3.99-3.99L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/><path d="m15 5 4 4"/></svg>Edytuj dane</div>
+            <div class="ami" id="amR"><svg viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>Wyślij zaproszenie ponownie</div>
+          </div>
+
+          <div class="scrim" id="scrim"></div>
+
+          <!-- okno „Nowy pracownik” (EmployeeFormModal, mode add) -->
+          <div class="md" id="md">
+            <div class="mdh"><div class="mdt"><h2>Nowy pracownik</h2><p>Konto nie jest wymagane, zaprosić możesz też później.</p></div><span class="mdx"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span></div>
+            <div class="mdc" id="mdc">
+              <div class="fg" id="fgN">
+                <div class="ff"><label>Imię<span>*</span></label><div class="fi" id="fFn"></div></div>
+                <div class="ff"><label>Nazwisko<span>*</span></label><div class="fi" id="fLn"></div></div>
+              </div>
+              <div class="fg" id="fgC">
+                <div class="ff"><label>Telefon</label><div class="fi" id="fPh"></div></div>
+                <div class="ff"><label>E-mail</label><div class="fi" id="fEm"></div></div>
+              </div>
+              <div class="acb" id="acb">
+                <div class="acr" id="acr"><span class="cbx" id="cbx"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span><span class="act"><b>Załóż konto w aplikacji</b><span>Na ten e-mail wyślemy link do ustawienia hasła, ważny 48 godzin.</span></span></div>
+                <div class="rlf" id="rlf"><label>Rola i uprawnienia</label>
+                  <div class="rpt" id="rpt"><span id="rptV">Wybierz rolę…</span><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></div>
+                  <span class="rph" id="rph">Bez roli pracownik może się zalogować, ale nie zobaczy żadnego modułu.</span>
+                </div>
+              </div>
+            </div>
+            <div class="mdf"><span class="btn ol md2">Anuluj</span><span class="btn pr md2" id="mdSave">Dodaj pracownika</span></div>
+          </div>
+
+          <!-- lista ról (RolePicker, portal pod polem) -->
+          <div class="rpm" id="rpm">
+            <div class="rpg" id="rpgE">
+              <div class="rpr" id="rpD"><span class="rpa"><b>Detailer</b><small>Wykonuje wizyty, bez cen, finansów i ustawień</small></span><em>5 uprawnień</em></div>
+              <div class="rpr" id="rpR"><span class="rpa"><b>Recepcja</b><small>Umawia wizyty, obsługuje klientów i wysyła wiadomości</small></span><em>7 uprawnień</em></div>
+            </div>
+            <div class="rpg" id="rpgT"><div class="rpl">Utwórz nową rolę</div>
+              <div class="rpr cr"><span class="rpa"><b>Detailer</b><small>Wykonuje wizyty, bez cen, finansów i ustawień</small></span><em>już istnieje</em></div>
+              <div class="rpr cr"><span class="rpa"><b>Recepcja</b><small>Umawia wizyty, obsługuje klientów i wysyła wiadomości</small></span><em>już istnieje</em></div>
+              <div class="rpr cr"><span class="rpa"><b>＋ Menedżer</b><small>Prowadzi studio: zespół, urlopy, raporty i marketing</small></span><em>utwórz</em></div>
+              <div class="rpr cr"><span class="rpa"><b>＋ Tylko podgląd</b><small>Widzi wizyty i klientów, niczego nie zmienia</small></span><em>utwórz</em></div>
+            </div>
+            <div class="rpf"><span>Zbuduj rolę od zera: pełny edytor uprawnień</span></div>
+          </div>
+
+          <div class="tst" id="tst"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg><div><b>Pracownik dodany</b><span>Zaproszenie do założenia konta zostało wysłane.</span></div></div>
+        </div>
+
+        <!-- skrzynka pracownika: e-mail z zaproszeniem (EmployeeInvitationEmail) -->
+        <div class="ml" id="ml">
+          <div class="mlb"><i></i><i></i><i></i><span>Poczta</span></div>
+          <div class="mlc">
+            <h3>Zaproszenie do DetailBoost – ustaw hasło</h3>
+            <div class="mlm"><span class="mla">DB</span><div><b>DetailBoost</b><small>do: bartosz.kaczmarek@glosslab.pl</small></div><em>9:02</em></div>
+            <div class="mlt">
+              <p>Cześć Bartosz,</p>
+              <p>Adam Krawczyk zaprasza Cię do DetailBoost.</p>
+              <p>Aby aktywować konto i ustawić hasło, kliknij link:<br><span class="mlk" id="mlk">https://detailboost.pl/confirm-password?token=7f3c9a1e…</span></p>
+              <p>Link jest aktywny przez 48 godzin. Po tym czasie wygaśnie i będziesz musiał(-a) poprosić administratora o ponowne wysłanie zaproszenia.</p>
+              <p>Jeśli nie spodziewałeś(-aś) się tego zaproszenia, możesz zignorować tę wiadomość.</p>
+              <p>Pozdrawiamy,<br>Zespół DetailBoost</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ekran „Aktywuj konto” (ResetPasswordView mode="setup", AuthLayout) -->
+        <div class="au" id="au">
+          <div class="aub"><i></i><i></i><i></i><span class="auu">detailboost.pl/confirm-password?token=7f3c9a1e…</span></div>
+          <div class="aug">
+            <div class="auL"><div class="auM"><span>DB</span>DetailBoost</div><h2>Witaj w zespole<b>.</b></h2><div class="auF"></div></div>
+            <div class="auR"><div class="auC" id="auC">
+              <h1>Aktywuj konto</h1><p class="aus">Ustaw hasło, aby aktywować swoje konto w DetailBoost</p>
+              <div class="auOk" id="auOk"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>Konto aktywne. Możesz się teraz zalogować.</div>
+              <div class="auFm" id="auFm">
+                <div class="auGp"><label>Hasło</label><div class="auI" id="auP1"><span id="auP1v"></span><svg viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></svg></div>
+                  <div class="auRq" id="auRq"><p>Hasło musi zawierać:</p><ul><li id="rq1"><i><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></i>co najmniej 8 znaków</li><li id="rq2"><i><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></i>wielką literę</li><li id="rq3"><i><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></i>małą literę</li><li id="rq4"><i><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></i>cyfrę</li></ul></div></div>
+                <div class="auGp"><label>Powtórz hasło</label><div class="auI" id="auP2"><span id="auP2v"></span><svg viewBox="0 0 24 24"><path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/></svg></div></div>
+                <span class="auBtn" id="auBtn">Aktywuj konto</span>
+              </div>
+              <div class="auAs" id="auAs"><span>Przejdź do logowania</span></div>
+            </div></div>
+          </div>
+        </div>
+      </div></div>
+
+      <div class="hl" id="hl"></div>
+      <div class="ring" id="ring"></div>
+      <div class="kcap" id="kcap">Enter ↵</div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.2 6.9z" fill="#0f172a" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="scrub" id="scrub"><i id="scrubI"></i></div>
+  <div class="bar">
+    <button type="button" id="bPrev">‹ Poprzedni krok</button>
+    <button type="button" class="pri" id="bPlay">Odtwórz</button>
+    <button type="button" id="bNext">Następny krok ›</button>
+    <span class="sp"></span>
+    <label><input type="checkbox" id="optStop"> Zatrzymuj po każdym kroku</label>
+    <button type="button" id="bRate">Tempo 1×</button>
+  </div>
+  <div class="chaps" id="chaps"></div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const out3 = k => 1 - Math.pow(1 - k, 3);
+  const io3 = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const back = k => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.5; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+  const type = (s, k) => s.slice(0, Math.round(s.length * clamp(k, 0, 1)));
+  const W = 1920, H = 1080, CX = 1290, CY = 540;
+
+  const stage = $('stage'), scene = $('scene'), ap = $('ap');
+
+  // ---------- dane przykładowe ----------
+  // Wymogi hasła jak w modules/auth/utils/passwordRules.ts.
+  const RULES = [['rq1', p => p.length >= 8], ['rq2', p => /[A-Z]/.test(p)], ['rq3', p => /[a-z]/.test(p)], ['rq4', p => /[0-9]/.test(p)]];
+  window.DATA = { fn: 'Bartosz', ln: 'Kaczmarek', ph: '+48 512 384 906', em: 'bartosz.kaczmarek@glosslab.pl', pw: 'Polerka2026' };
+
+  // ---------- chapters and beats ----------
+  const CH = ['Otwieranie', 'Dane pracownika', 'Konto i rola', 'Zaproszenie', 'Aktywacja konta', 'Gotowe'];
+  const beats = [];
+  const words = s => (s || '').split(/\s+/).filter(Boolean).length;
+  window.beat = (ch, o, f) => beats.push({ ch, h: o.h, b: o.b, lead: o.lead ?? .6, act: o.act ?? 1, hold: o.hold ?? .6, f: f || (() => {}) });
+
+  window.H = {
+    P, lerp, out3, io3, back, type, clamp,
+    mv: (S, to, k, o = {}) => { S.cur = { to, k, dx: o.dx || 0, dy: o.dy || 0, from: o.from || null, fdx: o.fdx || 0, fdy: o.fdy || 0, vis: S.cur.vis }; },
+    tap: (S, a, at, id) => { const k = P(S._s, S._lead + at * S._act, S._lead + at * S._act + .6); if (k > 0 && k < 1) S.tap = k; if (id && a > at && a < at + .14) S.press = id; },
+    cam: (S, to, k) => { S.cam = { to, k }; },
+    hl: (S, el, k = 1, pad = 6) => { S.hl = { el, k, pad }; },
+    foc: (S, sec) => { S.foc = sec; },
+  };
+
+  const fresh = () => ({
+    ap: 0, navHov: 0, navAct: 0, mainK: 0,
+    mdK: 0, fn: '', ln: '', ph: '', em: '', fF: null, typing: false,
+    acc: 0, accK: 0, rpK: 0, rpHov: null, role: '', saving: 0,
+    r4K: 0, r4Act: 0, cnt: 3, tst: 0, amK: 0, amHov: 0, rowHov: null,
+    mlK: 0, mlkHov: 0, auK: 0, p1: '', p2: '', auF: null, auDone: 0,
+    hl: null, hlLast: null, foc: null, focPrev: null,
+    cam: { to: 'ap', k: 1 }, cur: { to: null, k: 1, vis: 0, dx: 0, dy: 0 },
+    tap: 0, key: 0, press: null, _s: 0,
+  });
+
+  let DUR = 0, chStart = [];
+  const layout = () => {
+    let t = 0, lastText = null;
+    beats.forEach((b, i) => {
+      const txt = b.h + '|' + b.b;
+      b.newText = txt !== lastText; lastText = txt;
+      b.textIdx = b.newText ? i : beats[i - 1].textIdx;
+      if (b.newText) b.lead = Math.max(b.lead, .7);
+      const read = b.newText ? 1.5 + words(b.h) * .26 + words(b.b) * .24 : 0;
+      const slack = read - (b.lead + b.act + b.hold);
+      if (slack > 0) b.act = Math.min(b.act * 1.7, b.act + slack * .5);
+      b.d = Math.max(b.lead + b.act + b.hold, read);
+      b.t0 = t; t += b.d;
+      if (chStart[b.ch] === undefined) chStart[b.ch] = b.t0;
+    });
+    DUR = t;
+  };
+
+  const beatAt = t => { let i = 0; while (i < beats.length - 1 && beats[i + 1].t0 <= t) i++; return i; };
+  const runBeat = (S, i, s) => {
+    const b = beats[i];
+    S.hlLast = S.hl; S.hl = null; S.focPrev = S.foc; S.tap = 0; S.key = 0; S.press = null; S._s = s; S._i = i; S._lead = b.lead; S._act = b.act; S._T = b.t0 + s;
+    b.f(S, P(s, b.lead, b.lead + b.act), s);
+  };
+  const stateAtBeat = (i, s) => { const S = fresh(); for (let j = 0; j < i; j++) runBeat(S, j, beats[j].d); runBeat(S, i, s); return S; };
+
+  // ---------- geometry ----------
+  const sRect = el => { const r = el.getBoundingClientRect(), s0 = stage.getBoundingClientRect(), k = s0.width / W; return { x: (r.left - s0.left) / k, y: (r.top - s0.top) / k, w: r.width / k, h: r.height / k }; };
+  // layout position in scene coordinates (offsets ignore flow-in transforms)
+  const geo = el => { let x = 0, y = 0, n = el; while (n && n !== scene) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+
+  // ---------- flow-in ----------
+  const enter = (el, k, dy = 22, sc = .975, blur = 7) => {
+    k = clamp(k, 0, 1);
+    el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden';
+    if (k >= 1) { el.style.transform = ''; el.style.filter = ''; return; }
+    el.style.transform = `translateY(${(1 - out3(k)) * dy}px) scale(${lerp(sc, 1, out3(k))})`;
+    el.style.filter = `blur(${(1 - k) * blur}px)`;
+  };
+  const stag = (els, k, st = .12, dy = 14) => { const n = els.length, span = 1 + st * (n - 1); els.forEach((el, i) => enter(el, clamp(k * span - i * st, 0, 1), dy, .99, 5)); };
+  const clear = els => els.forEach(p => { if (p.style.transform || p.style.filter || p.style.opacity !== '') { p.style.transform = ''; p.style.filter = ''; p.style.opacity = ''; p.style.visibility = ''; } });
+  const pop = (el, k) => { k = clamp(k, 0, 1); el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden'; el.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * -8}px) scale(${lerp(.97, 1, out3(k))})`; el.style.filter = k >= 1 ? '' : `blur(${(1 - k) * 5}px)`; };
+
+  // ---------- caption text (style B: words flow in from below with blur) ----------
+  const ctx = $('ctx'), cnum = $('cnum');
+  const textEls = {}, chEls = {};
+  const mkWords = s => s.split(' ').reduce((a, w) => { const p = a[a.length - 1]; if (p !== undefined && /^\p{L}$/u.test(p)) a[a.length - 1] = p + ' ' + w; else a.push(w); return a; }, []).map(w => `<span class="w">${w} </span>`).join('');
+  const textEl = i => {
+    if (textEls[i]) return textEls[i];
+    const b = beats[i], d = document.createElement('div'); d.className = 'tl';
+    d.innerHTML = `<h2 class="ch">${mkWords(b.h)}</h2>` + (b.b ? `<div class="cbd">${mkWords(b.b)}</div>` : '');
+    d.style.display = 'none'; ctx.appendChild(d);
+    textEls[i] = { el: d, hw: Array.from(d.querySelectorAll('.ch .w')), bw: Array.from(d.querySelectorAll('.cbd .w')) };
+    return textEls[i];
+  };
+  const chEl = c => {
+    if (chEls[c]) return chEls[c];
+    const d = document.createElement('div'); d.innerHTML = `<b>${String(c + 1).padStart(2, '0')}</b><i></i><span>${CH[c]}</span>`;
+    d.style.display = 'none'; cnum.appendChild(d); return (chEls[c] = d);
+  };
+  const wIn = (w, k, dy = 32, bl = 9) => { w.style.opacity = k; w.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * dy}px)`; w.style.filter = k >= 1 ? '' : `blur(${(1 - k) * bl}px)`; };
+  const wOut = (w, k) => { w.style.opacity = 1 - k; w.style.transform = `translateY(${-io3(k) * 26}px)`; w.style.filter = `blur(${k * 7}px)`; };
+  let shownT = [], shownC = [];
+  const paintText = (i, t) => {
+    const cur = beats[i].textIdx, tS = beats[cur].t0, tau = t - tS;
+    const prevIdx = cur > 0 ? beats[cur - 1].textIdx : -1;
+    const want = [cur]; if (prevIdx >= 0 && tau < .75) want.push(prevIdx);
+    shownT.forEach(j => { if (!want.includes(j)) textEls[j].el.style.display = 'none'; });
+    shownT = want;
+    const T = textEl(cur); T.el.style.display = 'block';
+    const nh = T.hw.length;
+    T.hw.forEach((w, j) => wIn(w, P(tau, .3 + j * .05, .3 + j * .05 + .65)));
+    const b0 = .3 + nh * .05 + .25;
+    T.bw.forEach((w, j) => wIn(w, P(tau, b0 + j * .018, b0 + j * .018 + .6), 18, 6));
+    if (want[1] !== undefined) { const O = textEl(prevIdx); O.el.style.display = 'block'; [...O.hw, ...O.bw].forEach((w, j) => wOut(w, P(tau, j * .01, j * .01 + .42))); }
+    const c = beats[i].ch, cS = chStart[c], ct = t - cS, wantC = [c]; if (c > 0 && ct < .6) wantC.push(c - 1);
+    shownC.forEach(j => { if (!wantC.includes(j)) chEls[j].style.display = 'none'; });
+    shownC = wantC;
+    const C = chEl(c); C.style.display = 'flex'; wIn(C, c === 0 && t < .3 ? 0 : P(ct, .15, .75), 20, 6);
+    if (wantC[1] !== undefined) { const O = chEl(c - 1); O.style.display = 'flex'; wOut(O, P(ct, 0, .4)); }
+    $('pl').innerHTML = `Rozdział <b>${c + 1}</b> z ${CH.length}`;
+    const bars = $('pb').children;
+    for (let j = 0; j < CH.length; j++) { const a = chStart[j], b = j + 1 < CH.length ? chStart[j + 1] : DUR; bars[j].firstChild.style.width = (P(t, a, b) * 100) + '%'; }
+  };
+  $('pb').innerHTML = CH.map(() => '<i><b></b></i>').join('');
+
+  // ---------- camera targets ----------
+  const fitS = (w, h, mx = 1.5) => Math.min(mx, 1060 / w, 1000 / h);
+  const camTarget = to => {
+    if (to === 'ap') return { fx: 590, fy: 430, s: fitS(1240, 860) };
+    // zoomed on the modal, the dark sidebar under the scrim stays behind the caption mask
+    const noSide = (fx, s) => Math.max(fx, 248 + 570 / s);
+    if (to === 'md') { const m = geo($('md')); return { fx: noSide(m.x + m.w / 2, 1.3), fy: m.y + m.h / 2, s: 1.3 }; }
+    if (to === 'mdR') { // okno razem z otwartą listą ról
+      const m = geo($('md')), r = geo($('rpm')), y0 = Math.min(m.y, r.y), y1 = Math.max(m.y + m.h, r.y + r.h);
+      const s = Math.min(1.3, 1000 / (y1 - y0)); return { fx: noSide(m.x + m.w / 2, s), fy: (y0 + y1) / 2, s };
+    }
+    if (to === 'list') { const l = geo($('alc')), a = geo($('aph')); return { fx: l.x + l.w / 2, fy: (a.y + l.y + l.h) / 2, s: Math.min(1.12, 1060 / l.w) }; }
+    if (to === 'ml') { const m = geo($('ml')); return { fx: m.x + m.w / 2, fy: m.y + m.h / 2, s: fitS(m.w, m.h, 1.3) }; }
+    // left edge of the page right at the caption mask, so the dark gate panel stays whole
+    if (to === 'auF') { const a = geo($('au')), s = .98; return { fx: a.x + (CX - 800) / s, fy: a.y + a.h / 2, s }; }
+    return { fx: 620, fy: 430, s: 1 };
+  };
+
+  const navParts = Array.from($('asb').children);
+  const mainParts = Array.from($('amn').children);
+  const FOCUS = ['asb', 'aph', 'atb', 'alc', 'fgN', 'fgC', 'acb'];
+  const MD_PARTS = ['fgN', 'fgC', 'acb'];
+
+  const field = (id, val, ph, focus, T, typing) => {
+    const el = $(id); el.classList.toggle('focus', !!focus);
+    const shown = val || (focus ? '' : ph);
+    el.classList.toggle('ph', !val && !focus && !!ph);
+    el.innerHTML = '';
+    el.appendChild(document.createTextNode(shown));
+    if (focus) el.insertAdjacentHTML('beforeend', `<span class="caret" style="opacity:${Math.floor(T * 2.2) % 2 && !typing ? 0 : 1}"></span>`);
+  };
+
+  let lastCur = { x: 1500, y: 1180 };
+  function paint(S, prev) {
+    const s = S._s, T = S._T || 0;
+    // --- app frame, sidebar, main content
+    enter(ap, S.ap, 30, .96, 8);
+    if (S.ap < 1) stag(navParts, S.ap * 1.1, .06, 14); else clear(navParts);
+    $('nvP').classList.toggle('on', !!S.navAct); $('nvP').classList.toggle('hov', !!S.navHov && !S.navAct);
+    if (S.mainK < 1) stag(mainParts, S.mainK, .14, 18); else clear(mainParts);
+    $('addBtn').classList.toggle('prs', S.press === 'addBtn');
+    $('tCnt').textContent = S.cnt;
+
+    // --- new row in the list
+    { const r = $('rw4'); r.style.display = S.r4K > 0 ? 'grid' : 'none'; if (S.r4K > 0) enter(r, S.r4K, 22, .975, 7);
+      const p = $('rw4P'); p.className = 'pill ' + (S.r4Act ? 'ok' : 'wa'); p.textContent = S.r4Act ? 'Aktywne' : 'Konto nieaktywowane';
+      r.classList.toggle('hov', S.rowHov === 'rw4'); $('rw4M').classList.toggle('on', S.amK > .5); }
+    enter($('tst'), S.tst, 18, .97, 6);
+
+    // --- action menu ⋮ under the row button, right-aligned
+    pop($('amu'), S.amK);
+    if (S.amK > 0) { const b = geo($('rw4M')), m = $('amu'); m.style.left = (b.x + b.w - m.offsetWidth) + 'px'; m.style.top = (b.y + b.h + 4) + 'px'; }
+    $('amR').classList.toggle('hov', !!S.amHov);
+
+    // --- modal „Nowy pracownik”
+    { const sc = $('scrim'), k = clamp(S.mdK, 0, 1); sc.style.opacity = k; sc.style.visibility = k > .001 ? 'visible' : 'hidden'; }
+    const md = $('md');
+    enter(md, S.mdK, 16, .96, 8);
+    if (S.mdK < 1 && S.mdK > 0 && !S.saving) stag(MD_PARTS.map($), S.mdK, .07, 18); else if (S.mdK >= 1) clear(MD_PARTS.map($));
+    field('fFn', S.fn, '', S.fF === 'fFn', T, S.typing);
+    field('fLn', S.ln, '', S.fF === 'fLn', T, S.typing);
+    field('fPh', S.ph, '+48 600 000 000', S.fF === 'fPh', T, S.typing);
+    field('fEm', S.em, 'pracownik@firma.pl', S.fF === 'fEm', T, S.typing);
+    $('cbx').classList.toggle('on', !!S.acc);
+    $('cbx').style.transform = S.acc && S.accK < .4 ? `scale(${lerp(.8, 1, back(P(S.accK, 0, .4)))})` : '';
+    { const r = $('rlf'), full = r.scrollHeight, k = out3(clamp(S.accK, 0, 1)); r.style.maxHeight = (S.acc ? k * full : 0) + 'px'; r.style.opacity = S.acc ? k : 0; }
+    { const t = $('rpt'); t.classList.toggle('open', S.rpK > .5); t.classList.toggle('sel', !!S.role); $('rptV').textContent = S.role ? 'Detailer' : 'Wybierz rolę…';
+      const h = $('rph'); h.classList.toggle('pv', !!S.role); h.textContent = S.role ? 'Dostęp do modułów: Wizyty i kalendarz, Zadania.' : 'Bez roli pracownik może się zalogować, ale nie zobaczy żadnego modułu.'; }
+    $('mdSave').textContent = S.saving ? 'Zapisywanie…' : 'Dodaj pracownika';
+    $('mdSave').classList.toggle('prs', S.press === 'mdSave');
+    md.style.top = Math.round((860 - md.offsetHeight) / 2) + 'px';
+
+    // --- role list: under the field when it fits in the window, otherwise above it
+    pop($('rpm'), S.rpK);
+    { const t = geo($('rpt')), m = $('rpm'); m.style.width = t.w + 'px'; m.style.left = t.x + 'px';
+      const below = t.y + t.h + 4; m.style.top = (below + m.offsetHeight <= 848 ? below : t.y - 4 - m.offsetHeight) + 'px'; }
+    $('rpD').classList.toggle('sel', S.role === 'D'); $('rpD').classList.toggle('hov', S.rpHov === 'rpD' && S.role !== 'D');
+    Array.from(document.querySelectorAll('#rpgT .rpr')).forEach((r, j) => r.classList.toggle('hov', S.rpHov === 't' + j));
+
+    // --- mail and the activation page
+    enter($('ml'), S.mlK, 24, .97, 8);
+    $('mlk').classList.toggle('hov', !!S.mlkHov);
+    enter($('au'), S.auK, 24, .97, 8);
+    const pw = window.DATA.pw;
+    $('auP1v').textContent = '•'.repeat(S.p1.length); $('auP2v').textContent = '•'.repeat(S.p2.length);
+    $('auP1').classList.toggle('focus', S.auF === 'p1'); $('auP2').classList.toggle('focus', S.auF === 'p2');
+    RULES.forEach(([id, f]) => $(id).classList.toggle('met', f(S.p1)));
+    $('auRq').style.display = S.auF === 'p1' || S.p1.length > 0 ? '' : 'none';
+    $('auFm').style.display = S.auDone ? 'none' : ''; $('auOk').style.display = S.auDone ? 'flex' : 'none'; $('auAs').style.display = S.auDone ? 'block' : 'none';
+    if (S.auDone && S.auDone < 1) { enter($('auOk'), S.auDone, 12, .98, 5); enter($('auAs'), S.auDone, 12, .98, 5); } else { clear([$('auOk'), $('auAs')]); }
+    $('auBtn').classList.toggle('prs', S.press === 'auBtn');
+    void pw;
+
+    // --- focus: the active section stays sharp, the rest softens
+    const fk = io3(P(s, 0, .7));
+    const dimOf = (f, id) => (f && !(Array.isArray(f) ? f.includes(id) : f === id) ? 1 : 0);
+    FOCUS.forEach(id => {
+      const el = $(id);
+      const inMd = MD_PARTS.includes(id);
+      if (inMd ? S.mdK < 1 : (mainParts.includes(el) ? S.mainK < 1 : S.ap < 1)) return;
+      // a focus set for the modal does not dim the app behind it, and the other way round
+      const rel = f => (f && (Array.isArray(f) ? f : [f]).some(x => MD_PARTS.includes(x)) === inMd ? f : null);
+      const d = lerp(dimOf(rel(S.focPrev), id), dimOf(rel(S.foc), id), fk);
+      el.style.opacity = d > .001 ? 1 - d * .6 : ''; el.style.filter = d > .001 ? `blur(${d * 1.8}px)` : '';
+    });
+
+    // --- camera
+    const tg2 = camTarget(S.cam.to);
+    let cam = tg2;
+    if (prev && S.cam.k < 1) { const k = io3(S.cam.k); cam = { fx: lerp(prev.cam.fx, tg2.fx, k), fy: lerp(prev.cam.fy, tg2.fy, k), s: Math.exp(lerp(Math.log(prev.cam.s), Math.log(tg2.s), k)) }; }
+    // gentle drift: translation only (a breathing scale makes small boxes shimmer); whole pixels while the camera rests
+    const ds = cam.s, still = !(prev && S.cam.k < 1);
+    let tx = CX - cam.fx * ds + 9 * Math.sin(T * .29), ty = CY - cam.fy * ds + 6 * Math.sin(T * .21 + 1);
+    if (still) { tx = Math.round(tx); ty = Math.round(ty); }
+    scene.style.transform = `translate(${tx}px, ${ty}px) scale(${ds})`;
+
+    // --- highlight ring (glides from the previous one)
+    const hlEl = $('hl');
+    const rr = h => { const r = sRect($(h.el)), p = (h.pad ?? 6) * 1.3; return { x: r.x - p, y: r.y - p, w: r.w + 2 * p, h: r.h + 2 * p }; };
+    let hr = null, ho = 0;
+    if (S.hl) {
+      const b = rr(S.hl);
+      if (S.hlLast && S.hlLast.el !== S.hl.el) { const a = rr(S.hlLast), k = io3(P(s, 0, .6)); hr = { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), w: lerp(a.w, b.w, k), h: lerp(a.h, b.h, k) }; ho = 1; }
+      else { hr = b; ho = S.hlLast && S.hlLast.el === S.hl.el && S.hl.k >= 1 ? 1 : out3(S.hl.k); }
+    } else if (S.hlLast && s < .35) { hr = rr(S.hlLast); ho = 1 - s / .35; }
+    if (hr && ho > .001) { hlEl.style.opacity = ho; hlEl.style.left = hr.x + 'px'; hlEl.style.top = hr.y + 'px'; hlEl.style.width = hr.w + 'px'; hlEl.style.height = hr.h + 'px'; hlEl.style.borderRadius = '14px'; } else hlEl.style.opacity = 0;
+
+    // --- cursor (arc between targets)
+    let cur = { x: 1500, y: 1180 };
+    const ctr = (id, dx, dy) => { const r = sRect($(id)); if (r.w < 1 && r.h < 1) return null; return { x: r.x + r.w / 2 + dx * ds, y: r.y + r.h / 2 + dy * ds }; };
+    if (S.cur.to) cur = ctr(S.cur.to, S.cur.dx, S.cur.dy) || lastCur;
+    if (S.cur.k < 1 && (prev || S.cur.from)) {
+      const a = (S.cur.from && ctr(S.cur.from, S.cur.fdx, S.cur.fdy)) || (prev ? prev.cur : cur), k = io3(S.cur.k), dx = cur.x - a.x, dy = cur.y - a.y, d = Math.hypot(dx, dy) || 1, bend = Math.sin(Math.PI * k) * Math.min(70, d * .14);
+      cur = { x: lerp(a.x, cur.x, k) - dy / d * bend, y: lerp(a.y, cur.y, k) + dx / d * bend };
+    }
+    lastCur = cur;
+    const cv2 = $('cursor'), press = S.tap > 0 ? Math.sin(Math.PI * clamp(S.tap * 2.2, 0, 1)) : 0;
+    cv2.style.opacity = S.cur.vis; cv2.style.transform = `translate(${cur.x - 7}px, ${cur.y - 5}px) scale(${1 - press * .16})`;
+    const ring = $('ring'); if (S.tap > 0 && S.tap < 1) { ring.style.opacity = (1 - S.tap) * S.cur.vis; ring.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${.35 + S.tap * .9})`; } else ring.style.opacity = 0;
+    const kc = $('kcap'); kc.style.opacity = S.key; kc.style.left = (cur.x + 40) + 'px'; kc.style.top = (cur.y + 18) + 'px';
+    return { cam, cur };
+  }
+
+  // ---------- timeline driver with memo of each beat's end ----------
+  const ends = [];
+  const endOf = i => {
+    if (i < 0) return null;
+    if (ends[i]) return ends[i];
+    const S = stateAtBeat(i, beats[i].d);
+    ends[i] = paint(S, i > 0 ? endOf(i - 1) : null);
+    return ends[i];
+  };
+  const draw = t => {
+    t = clamp(t, 0, DUR - .001);
+    const i = beatAt(t), b = beats[i];
+    const prev = endOf(i - 1);
+    const S = stateAtBeat(i, t - b.t0);
+    paint(S, prev);
+    paintText(i, t);
+    window.__t = t;
+  };
+
+  // ---------- player ----------
+  const player = $('player');
+  const fit = () => { stage.style.transform = `scale(${player.clientWidth / W})`; };
+  let t = 0, playing = false, rate = 1;
+  const bPlay = $('bPlay');
+  const syncBtn = () => { bPlay.textContent = playing ? 'Pauza' : (t >= DUR - .01 ? 'Od początku' : 'Odtwórz'); };
+  const chapAt = tt => { let c = 0; for (let j = 0; j < CH.length; j++) if (chStart[j] <= tt + .001) c = j; return c; };
+  const go = nt => { t = clamp(nt, 0, DUR - .001); draw(t); $('scrubI').style.width = (t / DUR * 100) + '%'; const c = chapAt(t); Array.from($('chaps').children).forEach((e, j) => e.classList.toggle('on', j === c)); };
+  bPlay.addEventListener('click', () => { if (t >= DUR - .01) go(0); playing = !playing; syncBtn(); });
+  const textStarts = () => beats.filter(b => b.newText).map(b => b.t0);
+  $('bNext').addEventListener('click', () => { const n = textStarts().find(x => x > t + .05); if (n !== undefined) go(n + .01); });
+  $('bPrev').addEventListener('click', () => { const ts = textStarts().filter(x => x < t - .4); go(ts.length ? ts[ts.length - 1] + .01 : 0); });
+  $('bRate').addEventListener('click', () => { rate = rate === 1 ? .75 : 1; $('bRate').textContent = `Tempo ${rate === 1 ? '1' : '0,75'}×`; });
+  $('scrub').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); go((e.clientX - r.left) / r.width * DUR); });
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (playing) {
+      let nt = t + dt * rate;
+      if ($('optStop').checked) { const n = textStarts().find(x => x > t + .001); if (n !== undefined && nt >= n) { nt = n - .001; playing = false; syncBtn(); } }
+      if (nt >= DUR) { nt = DUR - .001; playing = false; syncBtn(); }
+      go(nt);
+    }
+    requestAnimationFrame(frame);
+  };
+  window.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input')) return; if (e.key === ' ') { e.preventDefault(); bPlay.click(); } if (e.key === 'ArrowRight') $('bNext').click(); if (e.key === 'ArrowLeft') $('bPrev').click(); });
+
+  window.__start = () => {
+    layout();
+    $('chaps').innerHTML = CH.map((c, j) => `<button type="button">${j + 1}. ${c}</button>`).join('');
+    Array.from($('chaps').children).forEach((e, j) => e.addEventListener('click', () => go(chStart[j] + .01)));
+    fit(); try { new ResizeObserver(() => { fit(); ends.length = 0; go(t); }).observe(player); } catch (e) { window.addEventListener('resize', () => { fit(); ends.length = 0; go(t); }); }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    go(reduce ? chStart[1] + 2 : .01); syncBtn();
+    requestAnimationFrame(frame);
+    window.__seek = tt => { playing = false; syncBtn(); go(tt); };
+    window.__dur = DUR; window.__chStart = chStart; window.__beats = beats.map(b => [b.t0, b.d, b.ch, b.h, b.newText]);
+  };
+})();
+
+(() => {
+  const { P, out3, type, mv, tap, cam, hl, foc } = window.H;
+  const B = window.beat;
+  const D = window.DATA;
+  const show = (S, s, a = 0, b = .45) => { S.cur.vis = P(s, a, b); };
+  const hide = (S, s) => { S.cur.vis = 1 - P(s, 0, .35); };
+
+  // 1 Otwieranie
+  B(0, { h: 'Jak założyć konto pracownikowi?', b: '', lead: .2, act: 1.4, hold: .5 }, (S, a, s) => { S.ap = P(s, .3, 1.5); cam(S, 'ap', 1); });
+  B(0, { h: 'Otwórz „Pracownicy” w sekcji „Firma”.', b: '', lead: .6, act: 2.4, hold: .4 }, (S, a, s) => {
+    S.ap = 1; show(S, s); mv(S, 'nvP', P(a, 0, .42), { dx: -30 }); S.navHov = a > .36 ? 1 : 0; tap(S, a, .44);
+    if (a > .47) S.navAct = 1; S.mainK = P(a, .5, 1);
+  });
+  B(0, { h: 'Lista pokazuje, kto ma już konto w programie.', b: 'Osoba bez konta nie loguje się do programu.', lead: .7, act: 1.8, hold: .8 }, (S, a, s) => {
+    S.mainK = 1; hide(S, s); cam(S, 'list', P(a, 0, .7)); foc(S, 'alc'); hl(S, 'rw3', P(a, .55, .9), 2);
+  });
+
+  // 2 Dane pracownika
+  B(1, { h: 'Dodaj nowego pracownika.', b: 'Konto możesz założyć też później.', lead: .7, act: 3.0, hold: .4 }, (S, a, s) => {
+    show(S, s); cam(S, 'ap', P(a, 0, .45)); mv(S, 'addBtn', P(a, 0, .5)); tap(S, a, .54, 'addBtn');
+    S.mdK = P(a, .58, .88);
+  });
+  B(1, { h: 'Dodaj nowego pracownika.', b: 'Konto możesz założyć też później.', lead: 0, act: 1.2, hold: .2 }, (S, a) => {
+    S.mdK = 1; cam(S, 'md', P(a, 0, 1)); mv(S, 'fFn', P(a, .2, 1));
+  });
+  B(1, { h: 'Wpisz dane pracownika.', b: '', lead: .7, act: 3.4, hold: .2 }, (S, a) => {
+    foc(S, 'fgN'); mv(S, 'fFn', 1); tap(S, a, .02); S.fF = 'fFn';
+    S.fn = type(D.fn, P(a, .06, .36)); S.typing = a > .06 && a < .36;
+    if (a > .42) { mv(S, 'fLn', P(a, .42, .56), { from: 'fFn' }); }
+    tap(S, a, .58); if (a > .6) S.fF = 'fLn';
+    S.ln = type(D.ln, P(a, .64, .98)); if (a > .64) S.typing = a < .98;
+  });
+  B(1, { h: 'Wpisz dane pracownika.', b: '', lead: 0, act: 2.8, hold: .3 }, (S, a) => {
+    foc(S, ['fgN', 'fgC']); S.typing = false; mv(S, 'fPh', P(a, 0, .2)); tap(S, a, .22); if (a > .24) S.fF = 'fPh';
+    S.ph = type(D.ph, P(a, .3, .95)); S.typing = a > .3 && a < .95;
+  });
+  B(1, { h: 'Podaj e-mail, na który trafi zaproszenie.', b: 'Ten adres jest loginem pracownika.', lead: .7, act: 3.2, hold: .5 }, (S, a) => {
+    foc(S, 'fgC'); S.typing = false; mv(S, 'fEm', P(a, 0, .18)); tap(S, a, .2); if (a > .22) S.fF = 'fEm';
+    S.em = type(D.em, P(a, .28, .92)); S.typing = a > .28 && a < .92;
+  });
+
+  // 3 Konto i rola
+  B(2, { h: 'Załóż konto, żeby pracownik mógł się logować.', b: 'Link do ustawienia hasła jest ważny 48 godzin.', lead: .7, act: 2.2, hold: .6 }, (S, a) => {
+    S.typing = false; S.fF = null; foc(S, 'acb'); mv(S, 'cbx', P(a, 0, .38)); tap(S, a, .42);
+    if (a > .45) { S.acc = 1; S.accK = P(a, .45, .9); }
+  });
+  B(2, { h: 'Rola decyduje, co pracownik widzi w programie.', b: '', lead: .7, act: 2.2, hold: .3 }, (S, a) => {
+    foc(S, 'acb'); S.accK = 1; mv(S, 'rpt', P(a, 0, .36)); tap(S, a, .4); S.rpK = P(a, .44, .6); cam(S, 'mdR', P(a, .4, 1));
+  });
+  B(2, { h: 'Rola decyduje, co pracownik widzi w programie.', b: '', lead: 0, act: 1.4, hold: .6 }, (S, a) => {
+    S.rpK = 1; hl(S, 'rpgE', P(a, 0, .4), 2); mv(S, 'rpD', P(a, .2, .8), { dx: 60 }); if (a > .75) S.rpHov = 'rpD';
+  });
+  B(2, { h: 'Brakującą rolę utwórz z gotowego wzoru.', b: 'Pełny edytor uprawnień jest pod listą.', lead: .7, act: 1.8, hold: .8 }, (S, a) => {
+    S.rpHov = null; hl(S, 'rpgT', 1, 2); mv(S, 'rpgT', P(a, 0, .6), { dx: 120, dy: 50 }); if (a > .55) S.rpHov = 't2';
+  });
+  B(2, { h: 'Wybierz rolę pracownika.', b: 'Bez roli pracownik zaloguje się, ale nie zobaczy żadnego modułu.', lead: .7, act: 2.2, hold: .1 }, (S, a) => {
+    S.rpHov = a < .5 ? null : 'rpD'; mv(S, 'rpD', P(a, 0, .42), { dx: 60 }); tap(S, a, .5);
+    if (a > .53) S.role = 'D'; if (a > .55) S.rpK = 1 - out3(P(a, .55, .7));
+  });
+  B(2, { h: 'Wybierz rolę pracownika.', b: 'Bez roli pracownik zaloguje się, ale nie zobaczy żadnego modułu.', lead: 0, act: 1.4, hold: .8 }, (S, a) => {
+    S.rpK = 0; S.rpHov = null; cam(S, 'md', P(a, 0, 1)); mv(S, 'rph', P(a, 0, .8), { dx: 150, dy: 30 }); hl(S, 'rph', P(a, .35, .8), 5);
+  });
+
+  // 4 Zaproszenie
+  B(3, { h: 'Dodaj pracownika i wyślij zaproszenie.', b: '', lead: .7, act: 2.8, hold: .2 }, (S, a) => {
+    S.rpK = 0; S.rpHov = null; foc(S, null); mv(S, 'mdSave', P(a, 0, .34)); tap(S, a, .38, 'mdSave');
+    S.saving = a > .42 && a < .6 ? 1 : 0; S.mdK = 1 - out3(P(a, .58, .8)); if (a > .58) cam(S, 'ap', P(a, .58, 1));
+    if (a > .7) { S.cnt = 4; } S.r4K = P(a, .74, 1); S.tst = P(a, .72, .92);
+  });
+  B(3, { h: 'Pracownik dostaje e-mail z zaproszeniem.', b: 'Do ustawienia hasła konto jest „nieaktywowane”.', lead: .7, act: 2.0, hold: .8 }, (S, a, s) => {
+    S.mdK = 0; S.saving = 0; hide(S, s); S.tst = 1 - out3(P(a, .5, .8)); cam(S, 'list', P(a, 0, .7)); foc(S, 'alc'); hl(S, 'rw4P', P(a, .5, .9), 5);
+  });
+  B(3, { h: 'Wyślij zaproszenie ponownie, gdy link wygaśnie.', b: 'Nowy link też działa 48 godzin.', lead: .7, act: 2.4, hold: 1 }, (S, a, s) => {
+    S.tst = 0; show(S, s); mv(S, 'rw4M', P(a, 0, .34)); S.rowHov = a > .2 ? 'rw4' : null; tap(S, a, .36); S.amK = P(a, .4, .52);
+    if (a > .56) mv(S, 'amR', P(a, .56, .8), { from: 'rw4M', dx: 40 }); S.amHov = a > .78 ? 1 : 0;
+  });
+
+  // 5 Aktywacja konta (po stronie pracownika)
+  B(4, { h: 'Pracownik otwiera link z e-maila.', b: '', lead: .7, act: 4.2, hold: .3 }, (S, a, s) => {
+    S.amK = 1 - out3(P(s, 0, .4)); S.amHov = 0; S.rowHov = null; S.cur.vis = a < .4 ? 1 - P(s, 0, .3) : P(a, .55, .7); foc(S, null);
+    cam(S, 'ml', P(a, 0, .66)); S.mlK = P(a, .08, .5);
+    if (a > .5) mv(S, 'mlk', P(a, .55, .82), { from: 'mlk', fdx: 160, fdy: 110, dx: -60 }); S.mlkHov = a > .78 ? 1 : 0; tap(S, a, .86);
+  });
+  B(4, { h: 'Pracownik ustawia własne hasło.', b: 'Co najmniej 8 znaków, wielka i mała litera oraz cyfra.', lead: .7, act: 4.6, hold: .3 }, (S, a) => {
+    S.mlkHov = 0; cam(S, 'auF', P(a, 0, .55)); S.auK = P(a, .04, .45); S.cur.vis = a < .1 ? 1 - P(a, 0, .1) : P(a, .5, .6);
+    if (a > .5) mv(S, 'auP1', P(a, .5, .62), { from: 'auP1', fdx: 140, fdy: 90 }); tap(S, a, .64); if (a > .66) S.auF = 'p1';
+    S.p1 = type(D.pw, P(a, .68, .98));
+  });
+  B(4, { h: 'Pracownik ustawia własne hasło.', b: 'Co najmniej 8 znaków, wielka i mała litera oraz cyfra.', lead: 0, act: 2.4, hold: .4 }, (S, a) => {
+    S.p1 = D.pw; S.auF = 'p1'; mv(S, 'auP2', P(a, 0, .22)); tap(S, a, .24); if (a > .26) S.auF = 'p2';
+    S.p2 = type(D.pw, P(a, .3, .95));
+  });
+  B(4, { h: 'Potem pracownik loguje się e-mailem i hasłem.', b: '', lead: .7, act: 2.2, hold: 1 }, (S, a) => {
+    S.p1 = S.p2 = D.pw; S.auF = null; mv(S, 'auBtn', P(a, 0, .36)); tap(S, a, .4, 'auBtn'); S.auDone = P(a, .48, .7); hl(S, 'auOk', P(a, .66, .95), 5);
+  });
+
+  // 6 Gotowe
+  B(5, { h: 'Rolę zmienisz później w oknie pracownika.', b: 'Nowe uprawnienia działają od razu.', lead: .7, act: 2.6, hold: 0 }, (S, a, s) => {
+    S.auDone = 1; hide(S, s); cam(S, 'list', P(a, 0, 1)); S.r4Act = 1; foc(S, 'alc');
+  });
+  B(5, { h: 'Rolę zmienisz później w oknie pracownika.', b: 'Nowe uprawnienia działają od razu.', lead: 0, act: 1.2, hold: .6 }, (S, a) => { hl(S, 'rw4', P(a, 0, .6), 3); });
+  B(5, { h: 'Konto pracownika jest aktywne.', b: '', lead: .7, act: 1.6, hold: 4.4 }, (S, a) => { hl(S, 'rw4P', P(a, 0, .5), 5); });
+})();
+window.__start();
+</script>
+
+</body>
+</html>
