@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../osadzenie.css">
+<script>if (window.self !== window.top) { document.documentElement.classList.add('osadzona'); document.documentElement.dataset.theme = 'dark'; }</script>
+</head>
+<body>
+<title>Jak skonfigurować pocztę</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-ext-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Page: help-centre look. Stage: style B, caption column on the left, the inbox and the mailbox page on the right. */
+:root {
+  --bg: #eef2f7; --surface: #ffffff; --ink: #0f172a; --ink-2: #475569; --muted: #64748b; --line: #e2e8f0;
+  --brand: #0ea5e9; --brand-ink: #0369a1; --brand-soft: #e0f2fe;
+  --font: 'InterDB', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  padding: 36px max(16px, env(safe-area-inset-right, 0px)) 72px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-ink); }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 800; margin: 6px 0 0; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--ink-2); margin: 0; max-width: 760px; }
+
+.player { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #eef2f7; box-shadow: 0 20px 50px rgba(15,23,42,.16); }
+.stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; font-family: var(--font); color: #0f172a; background: #eef2f7; }
+.bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bar button { font: 600 14px var(--font); height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.bar button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; min-width: 120px; justify-content: center; }
+.bar button:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.bar label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+.bar .sp { flex: 1; }
+.scrub { position: relative; height: 8px; border-radius: 4px; background: var(--line); cursor: pointer; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #0ea5e9; }
+.scrub b { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); opacity: .45; }
+.chaps { display: flex; flex-wrap: wrap; gap: 8px; }
+.chaps button { font: 500 13.5px var(--font); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.chaps button.on { border-color: #0ea5e9; color: var(--brand-ink); background: var(--brand-soft); font-weight: 700; }
+
+/* ===== stage ===== */
+.bgx { position: absolute; inset: 0; background:
+  radial-gradient(900px 700px at 78% 45%, rgba(14,165,233,.10), transparent 70%),
+  radial-gradient(700px 600px at 8% 95%, rgba(37,99,235,.07), transparent 70%), #eef2f7; }
+.brand { position: absolute; left: 120px; top: 84px; display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; z-index: 40; }
+.brand i { width: 42px; height: 42px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #2563eb); display: grid; place-items: center; color: #fff; font-style: normal; font-size: 17px; font-weight: 800; }
+.brand span { font-size: 19px; font-weight: 500; color: #64748b; margin-left: 6px; letter-spacing: -0.01em; }
+.cap { position: absolute; left: 120px; top: 262px; width: 600px; z-index: 40; }
+.cnum { height: 34px; position: relative; margin-bottom: 26px; }
+.cnum > div { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; color: #0369a1; white-space: nowrap; }
+.cnum > div b { font-variant-numeric: tabular-nums; }
+.cnum > div i { display: block; width: 46px; height: 2px; background: linear-gradient(90deg, #38bdf8, rgba(56,189,248,0)); }
+.cnum > div span { color: #0f172a; font-weight: 600; }
+.ctx { position: relative; }
+.ctx .tl { position: absolute; left: 0; top: 0; width: 600px; }
+.ch { font-size: 56px; font-weight: 750; letter-spacing: -0.038em; line-height: 1.08; margin: 0; }
+.cbd { font-size: 28px; line-height: 1.45; color: #475569; margin-top: 28px; letter-spacing: -0.01em; }
+.ch .w, .cbd .w { display: inline-block; white-space: pre; will-change: transform, filter, opacity; }
+.prog { position: absolute; left: 120px; bottom: 96px; z-index: 40; }
+.prog .pl { font-size: 18px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
+.prog .pl b { color: #0f172a; font-weight: 700; }
+.prog .pb { display: flex; gap: 7px; }
+.prog .pb i { display: block; width: 34px; height: 6px; border-radius: 3px; background: #d5dde8; overflow: hidden; }
+.prog .pb i b { display: block; height: 100%; width: 0; background: #0ea5e9; }
+
+.view { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 20; -webkit-mask-image: linear-gradient(90deg, transparent 735px, #000 800px); mask-image: linear-gradient(90deg, transparent 735px, #000 800px); }
+.scene { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 90; filter: drop-shadow(0 4px 8px rgba(15,23,42,.32)); opacity: 0; pointer-events: none; }
+.ring { position: absolute; left: 0; top: 0; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 3px solid #0ea5e9; opacity: 0; z-index: 89; pointer-events: none; }
+.kcap { position: absolute; z-index: 91; padding: 10px 18px; border-radius: 12px; background: #0f172a; color: #fff; font-size: 22px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,.3); opacity: 0; border-bottom: 4px solid #334155; }
+.hl { position: absolute; z-index: 60; border-radius: 12px; border: 2.5px solid #0ea5e9; box-shadow: 0 0 0 5px rgba(14,165,233,.16), 0 0 26px rgba(14,165,233,.35); opacity: 0; pointer-events: none; }
+
+
+.touch { position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(15,23,42,.18); border: 2px solid rgba(255,255,255,.85); box-shadow: 0 4px 12px rgba(15,23,42,.25); opacity: 0; z-index: 88; pointer-events: none; }
+
+/* toast (common/components/Toast), top right of the page */
+.tst { position: absolute; z-index: 70; display: flex; align-items: center; gap: 16px; padding: 16px 24px; min-width: 320px; max-width: 500px; border-radius: 12px; background: #16a34a; color: #fff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.1), 0 10px 10px -5px rgba(0,0,0,.04); opacity: 0; visibility: hidden; }
+.tst .ti { width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center; }
+.tst b { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; }
+.tst small { display: block; font-size: 14px; line-height: 1.4; opacity: .95; white-space: nowrap; }
+.tst .tx { margin-left: 8px; opacity: .85; display: grid; place-items: center; }
+.tst { max-width: none; }
+
+/* ===== window: "Zapytania" (comms/inbox) and "Skrzynki pocztowe" (MailboxConnectView) ===== */
+.scr { position: absolute; }
+.pgw { width: 1240px; height: 820px; border-radius: 22px; background: #eef2f7; border: 1px solid #dbe3ec; box-shadow: 0 30px 70px -20px rgba(15,23,42,.35); overflow: hidden; font-size: 14px; line-height: normal; color: #0f172a; }
+.vw { position: absolute; inset: 0; }
+.caret { display: inline-block; width: 2px; height: 1.1em; background: #0ea5e9; margin-left: 1px; vertical-align: -0.15em; }
+
+/* inbox page: padding 24 on #eef2f7, one white card, list column 380 px + detail */
+.ibw { padding: 24px; }
+.ibx { position: relative; height: 100%; display: flex; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+.lcol { flex: 0 0 380px; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; }
+.lhd { display: flex; align-items: center; gap: 8px; padding: 18px 16px 10px 20px; }
+.lhd h1 { flex: 1; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.ib { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; color: #475569; }
+.ib.hov { background: #f1f5f9; color: #0f172a; }
+.tabs { display: flex; gap: 2px; margin: 0 16px 6px; padding: 3px; border-radius: 999px; background: #f1f5f9; }
+.tab { flex: 1; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; font-size: 13px; font-weight: 500; color: #475569; white-space: nowrap; }
+.tab.on { background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.1); color: #0f172a; font-weight: 600; }
+.tab.hov:not(.on) { color: #0f172a; }
+.lbody { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
+.empty { margin: 24px 20px; font-size: 14px; line-height: 1.5; color: #64748b; }
+.phd { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center; color: #64748b; font-size: 14px; line-height: 1.5; }
+.phd svg { color: #cbd5e1; }
+.pbtn { border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; padding: 10px 18px; font-size: 14px; font-weight: 500; color: #334155; }
+.pbtn.hov { background: #f8fafc; }
+.dcol { flex: 1; min-width: 0; display: flex; }
+.sync { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 40px 28px; text-align: center; color: #64748b; }
+.sync svg { color: #0ea5e9; }
+.sync h3 { margin: 0; font-size: 16px; font-weight: 600; color: #0f172a; }
+.sync p { margin: 0; font-size: 13px; line-height: 1.5; max-width: 300px; }
+.sync .trk { width: 100%; max-width: 280px; height: 6px; border-radius: 999px; background: #e2e8f0; overflow: hidden; margin-top: 6px; }
+.sync .trk i { display: block; height: 100%; border-radius: inherit; background: #0ea5e9; }
+.sync .lbl { font-size: 12px; font-variant-numeric: tabular-nums; }
+.mlist { padding: 0 6px 12px; }
+.mday { margin: 14px 14px 4px; font-size: 12px; font-weight: 600; color: #64748b; }
+.mrow { position: relative; display: flex; flex-direction: column; gap: 1px; padding: 10px 14px 10px 26px; border-radius: 10px; }
+.mrow .top { display: flex; align-items: center; gap: 8px; min-height: 20px; }
+.mrow .from { flex: 1; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 500; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mrow .when { flex: none; font-size: 12px; color: #64748b; font-variant-numeric: tabular-nums; }
+.mrow .subj { font-size: 13px; line-height: 18px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mrow.un::before { content: ''; position: absolute; left: 11px; top: 17px; width: 7px; height: 7px; border-radius: 999px; background: #0ea5e9; }
+.mrow.un .from { font-weight: 700; color: #0f172a; }
+.mrow.un .subj { color: #0f172a; }
+.afoot { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; }
+.afoot .dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; }
+/* gear menu (ui/ActionMenu) */
+.amenu { position: absolute; left: 128px; top: 86px; z-index: 30; width: 260px; padding: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(15,23,42,.22); opacity: 0; visibility: hidden; transform-origin: right top; }
+.mi { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; font-size: 14px; color: #0f172a; white-space: nowrap; }
+.mi svg { color: #64748b; flex: none; }
+.mi.hov { background: #f1f5f9; }
+.mdiv { height: 1px; margin: 6px 4px; background: #e2e8f0; }
+
+/* mailbox page: 760 px column, PageHeader, two cards */
+.mbw { overflow: hidden; }
+.mscr { width: 760px; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 20px; box-sizing: content-box; }
+.phdr { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 4px 0 2px; }
+.phdr h1 { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+.phdr p { margin: 6px 0 0; font-size: 14px; color: #64748b; font-weight: 500; }
+.gbtn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; font-size: 14px; font-weight: 600; color: #0f172a; white-space: nowrap; }
+.gbtn.hov { border-color: #cbd5e1; background: #f8fafc; }
+.mcard { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04); padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.mcard h3 { margin: 0; font-size: 14px; font-weight: 600; }
+.help { margin: 0; font-size: 13px; color: #6b7280; line-height: 1.5; }
+.fld { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #374151; }
+.inp { display: flex; align-items: center; height: 39px; padding: 0 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; color: #0f172a; white-space: pre; background: #fff; letter-spacing: 0; }
+.inp.ph { color: #9ca3af; }
+.inp.focus { border-color: #9ca3af; }
+#iPw:not(.ph) { letter-spacing: .12em; }
+.pwg { display: flex; flex-direction: column; gap: 12px; }
+.adv { align-self: flex-start; font-size: 12px; color: #6b7280; text-decoration: underline; }
+.adv.hov { color: #374151; }
+.man { display: flex; flex-direction: column; gap: 12px; }
+.two { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+.err { font-size: 13px; line-height: 1.5; color: #b91c1c; background: #fef2f2; border-radius: 8px; padding: 10px 12px; }
+.oauth { font-size: 13px; line-height: 1.5; color: #075985; background: #f0f9ff; border-radius: 8px; padding: 10px 12px; }
+.pbt { align-self: flex-start; display: inline-flex; align-items: center; padding: 7px 14px; border-radius: 999px; background: #0ea5e9; color: #fff; font-size: 13px; font-weight: 500; box-shadow: 0 2px 8px rgba(14,165,233,.28); white-space: nowrap; }
+.pbt.dis { opacity: .5; }
+.pbt.hov { background: #0284c7; }
+.arow { display: flex; align-items: center; gap: 10px; padding: 10px 0; font-size: 14px; color: #111827; }
+.arow .aic { color: #22c55e; display: grid; place-items: center; }
+.arow .aic.bad { color: #ef4444; }
+.arow .meta { flex: 1; }
+.arow .sub { font-size: 12px; color: #6b7280; }
+.arow .aerr { font-size: 12px; color: #b91c1c; }
+.arow .tb { display: inline-flex; align-items: center; padding: 7px 14px; border: 1px solid #e2e8f0; border-radius: 999px; color: #475569; }
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DetailBoost, instrukcje</div>
+    <h1>Jak skonfigurować pocztę?</h1>
+  </header>
+  <p class="lede">Animacja pokazuje, jak podłączyć skrzynkę e-mail studia do „Zapytań”, co zrobić, gdy połączenie się nie udaje, i jak wrócić do pracy po zmianie hasła. Wybierz rozdział pod animacją, żeby przejść od razu do niego.</p>
+
+  <div class="player" id="player" aria-label="Animacja: jak skonfigurować pocztę">
+    <div class="stage" id="stage">
+      <div class="bgx"></div>
+      <div class="brand"><i>DB</i>DetailBoost<span>Instrukcja</span></div>
+      <div class="cap">
+        <div class="cnum" id="cnum"></div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+      <div class="prog"><div class="pl" id="pl"></div><div class="pb" id="pb"></div></div>
+
+      <div class="view" id="view"><div class="scene" id="scene"></div></div>
+
+      <div class="hl" id="hl"></div>
+      <div class="ring" id="ring"></div>
+      <div class="touch" id="touch"></div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.2 6.9z" fill="#0f172a" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="scrub" id="scrub"><i id="scrubI"></i></div>
+  <div class="bar">
+    <button type="button" id="bPrev">‹ Poprzedni krok</button>
+    <button type="button" class="pri" id="bPlay">Odtwórz</button>
+    <button type="button" id="bNext">Następny krok ›</button>
+    <span class="sp"></span>
+    <label><input type="checkbox" id="optStop"> Zatrzymuj po każdym kroku</label>
+    <button type="button" id="bRate">Tempo 1×</button>
+  </div>
+  <div class="chaps" id="chaps"></div>
+</div>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const out3 = k => 1 - Math.pow(1 - k, 3);
+  const io3 = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const back = k => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.5; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+  const type = (s, k) => s.slice(0, Math.round(s.length * clamp(k, 0, 1)));
+  const W = 1920, H = 1080, CX = 1340, CY = 540;
+
+  const stage = $('stage'), scene = $('scene');
+
+  // ---------- icons (lucide, as in the app) ----------
+  const sv = (p, s = 16, sw = 2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const I = {
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    mailOpen: '<path d="M21.2 8.4c.5.38.8.97.8 1.6v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V10a2 2 0 0 1 .8-1.6l8-6a2 2 0 0 1 2.4 0l8 6Z"/><path d="m22 10-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 10"/>',
+    penSq: '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.38 2.62a1 1 0 0 1 3 3l-9.01 9.02a2 2 0 0 1-.85.5l-2.87.84a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.85z"/>',
+    shieldAlert: '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4M12 16h.01"/>',
+    refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+    penLine: '<path d="M12 20h9"/><path d="M16.38 3.62a1 1 0 0 1 3 3L7.37 18.64a2 2 0 0 1-.86.5l-2.87.84a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.85z"/>',
+    sparkles: '<path d="M9.94 14.06A2 2 0 0 0 8.5 12.6L2.4 11a.5.5 0 0 1 0-.96L8.5 8.5a2 2 0 0 0 1.44-1.44L11.5.96a.5.5 0 0 1 .96 0L14.06 7a2 2 0 0 0 1.44 1.44l6.1 1.58a.5.5 0 0 1 0 .96L15.5 12.6a2 2 0 0 0-1.44 1.44L12.5 20.1a.5.5 0 0 1-.96 0z"/>',
+    bar: '<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>',
+    arrowL: '<path d="m12 19-7-7 7-7M19 12H5"/>',
+    okCircle: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+    trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  };
+
+  // ---------- data ----------
+  const MAILS = [
+    ['Dzisiaj', [['Katarzyna Lis', '10:42', 'Powłoka ceramiczna na BMW X3, wolny termin?', 1], ['Tomasz Zieliński', '09:15', 'Wycena korekty lakieru, Audi A4', 1]]],
+    ['Wczoraj', [['Marta Kowalczyk', '16:08', 'Re: Odbiór auta w piątek', 0], ['Piotr Wiśniewski', '11:30', 'Folia PPF na przód, Tesla Model 3', 0], ['Anna Dąbrowska', '08:52', 'Re: Pranie tapicerki, zdjęcia', 0]]],
+    ['18 października', [['Hurtownia kosmetyków', '14:20', 'Potwierdzenie zamówienia nr 4471', 0], ['Michał Nowicki', '10:05', 'Czy robicie renowację reflektorów?', 0]]],
+  ];
+  const mailRows = MAILS.map(([d, rows]) => `<h2 class="mday">${d}</h2>` + rows.map(([f, w, s, u]) => `<div class="mrow${u ? ' un' : ''}"><div class="top"><span class="from">${f}</span><span class="when">${w}</span></div><div class="subj">${s}</div></div>`).join('')).join('');
+  const menuIt = (ic, l, id) => `<div class="mi"${id ? ` id="${id}"` : ''}>${sv(I[ic], 16)}<span>${l}</span></div>`;
+
+  scene.innerHTML = `
+  <div class="scr pgw" id="pg">
+    <div class="vw ibw" id="vIn">
+      <div class="ibx">
+        <section class="lcol" id="lcol">
+          <div class="lhd" id="lhd"><h1>Zapytania</h1><span class="ib">${sv(I.search, 16)}</span><span class="ib" id="ibG">${sv(I.settings, 16)}</span></div>
+          <div class="tabs" id="tabs"><span class="tab on" id="tSp">Sprawy</span><span class="tab" id="tPo">Poczta</span><span class="tab" id="tWy">Wysłane</span></div>
+          <div class="lbody">
+            <p class="empty" id="lSp">Nikt nie czeka na odpowiedź. Nowe zapytania pojawią się tutaj same.</p>
+            <div class="phd" id="lNo">${sv(I.mail, 36)}<span>Podłącz skrzynkę pocztową - wiadomości pojawią się tutaj i odpowiesz bez wychodzenia z CRM.</span><span class="pbtn" id="bConnect">Podłącz skrzynkę</span></div>
+            <div class="sync" id="lSy">${sv(I.refresh, 28)}<h3>Pobieramy Twoją pocztę</h3><p>Układamy Twoje maile w rozmowy. To potrwa kilka minut, możesz w tym czasie zająć się czymś innym.</p><div class="trk"><i id="syF"></i></div><span class="lbl" id="syL"></span></div>
+            <div class="mlist" id="lMl">${mailRows}</div>
+          </div>
+          <div class="afoot" id="aft"><span class="dot"></span><span>biuro@glosslab.pl</span></div>
+        </section>
+        <div class="dcol" id="dcol">
+          <div class="phd" id="dSp">${sv(I.inbox, 36)}<span>Nikt nie czeka na odpowiedź.</span></div>
+          <div class="phd" id="dPo">${sv(I.mailOpen, 36)}<span>Wybierz wiadomość z listy.</span><span class="pbtn" id="dNew">Napisz nową wiadomość</span></div>
+        </div>
+      </div>
+      <div class="amenu" id="amenu">
+        ${menuIt('penSq', 'Nowa wiadomość')}${menuIt('shieldAlert', 'Odrzucone przez automat')}${menuIt('refresh', 'Odśwież skrzynkę')}
+        <div class="mdiv"></div>
+        ${menuIt('penLine', 'Stopka maila')}${menuIt('sparkles', 'Styl szkiców AI')}${menuIt('inbox', 'Skrzynki pocztowe', 'miBox')}${menuIt('bar', 'Pieniądze w zapytaniach')}
+      </div>
+    </div>
+
+    <div class="vw mbw" id="vMb"><div class="mscr" id="mscr">
+      <header class="phdr"><div><h1>Skrzynki pocztowe</h1><p>Podłącz pocztę firmową</p></div><span class="gbtn" id="bBack">${sv(I.arrowL, 16)}Wróć do skrzynki</span></header>
+      <section class="mcard" id="mc1">
+        <p class="help" id="mHelp">Podaj adres i hasło, resztę ustawimy sami.</p>
+        <label class="fld"><span>Adres e-mail</span><div class="inp" id="iEm"></div></label>
+        <div class="oauth" id="mOa">Skrzynkę Gmail podłączymy wkrótce. Na razie działa zwykła poczta firmowa z hostingu.</div>
+        <div class="pwg" id="mPw">
+          <label class="fld"><span>Hasło do skrzynki</span><div class="inp" id="iPw"></div></label>
+          <span class="adv" id="mAdv">Ustawienia ręczne (zaawansowane)</span>
+          <div class="man" id="mMan">
+            <div class="two"><label class="fld"><span>Serwer IMAP</span><div class="inp" id="iIh"></div></label><label class="fld"><span>Port</span><div class="inp ph" id="iIp">993</div></label></div>
+            <div class="two"><label class="fld"><span>Serwer SMTP</span><div class="inp" id="iSh"></div></label><label class="fld"><span>Port</span><div class="inp ph" id="iSp">587</div></label></div>
+          </div>
+          <div class="err" id="mErr"></div>
+          <span class="pbt dis" id="bGo">Połącz skrzynkę</span>
+        </div>
+      </section>
+      <section class="mcard" id="mc2">
+        <h3>Podłączone skrzynki</h3>
+        <p class="help" id="aNone">Nie podłączono jeszcze żadnej skrzynki.</p>
+        <div class="arow" id="aRow"><span class="aic" id="aIc">${sv(I.okCircle, 16)}</span><div class="meta">biuro@glosslab.pl<div class="sub" id="aSub">Za chwilę pobierzemy pocztę</div><div class="aerr" id="aErr">Hasło przestało działać - połącz skrzynkę ponownie</div></div><span class="tb">${sv(I.trash, 14)}</span></div>
+      </section>
+    </div></div>
+
+    <div class="tst" id="tst"><span class="ti">${sv(I.okCircle, 22)}</span><div><b>Skrzynka połączona</b><small>Pobieramy wiadomości z ostatnich 90 dni - możesz już pracować</small></div><span class="tx">${sv(I.x, 16)}</span></div>
+  </div>`;
+  const pg = $('pg');
+  pg.style.left = '0px'; pg.style.top = '0px';
+
+  // ---------- chapters and beats ----------
+  const CH = ['Gdzie', 'Adres i hasło', 'Gotowe'];
+  const beats = [];
+  const words = s => (s || '').split(/\s+/).filter(Boolean).length;
+  window.beat = (ch, o, f) => beats.push({ ch, h: o.h, b: o.b, lead: o.lead ?? .6, act: o.act ?? 1, hold: o.hold ?? .6, f: f || (() => {}) });
+
+  window.H = {
+    P, lerp, out3, io3, back, type, clamp,
+    mv: (S, to, k, o = {}) => { S.cur = { to, k, dx: o.dx || 0, dy: o.dy || 0, from: o.from || null, fdx: o.fdx || 0, fdy: o.fdy || 0, vis: S.cur.vis }; },
+    tap: (S, a, at, id) => { const k = P(S._s, S._lead + at * S._act, S._lead + at * S._act + .6); if (k > 0 && k < 1) S.tap = k; if (id && a > at && a < at + .14) S.press = id; },
+    cam: (S, to, k) => { S.cam = { to, k }; },
+    hl: (S, el, k = 1, pad = 6) => { S.hl = { el, k, pad }; },
+    foc: (S, sec) => { S.foc = sec; },
+  };
+
+  const fresh = () => ({
+    pg: 0, v: 'in', vK: 1, tab: 'sp', tabK: 1, mail: 'none', mailK: 1, syncP: 0, menu: 0, aft: 0,
+    em: '', emF: 0, pw: 0, pwF: 0, oa: 0, adv: 0, ih: '', ihF: 0, sh: '', shF: 0, err: '', errK: 0, going: 0,
+    acc: 0, accK: 1, bad: 0, synced: 0, tst: 0,
+    foc: null, focPrev: null, hov: null,
+    hl: null, hlLast: null,
+    cam: { to: 'pg', k: 1 },
+    cur: { to: null, k: 1, vis: 0, dx: 0, dy: 0 },
+    tap: 0, press: null, _s: 0,
+  });
+
+  let DUR = 0, chStart = [];
+  const layout = () => {
+    let t = 0, lastText = null;
+    beats.forEach((b, i) => {
+      const txt = b.h + '|' + b.b;
+      b.newText = txt !== lastText; lastText = txt;
+      b.textIdx = b.newText ? i : beats[i - 1].textIdx;
+      if (b.newText) b.lead = Math.max(b.lead, .7);
+      const read = b.newText ? 1.5 + words(b.h) * .26 + words(b.b) * .24 : 0;
+      const slack = read - (b.lead + b.act + b.hold);
+      if (slack > 0) b.act = Math.min(b.act * 1.7, b.act + slack * .5);
+      b.d = Math.max(b.lead + b.act + b.hold, read);
+      b.t0 = t; t += b.d;
+      if (chStart[b.ch] === undefined) chStart[b.ch] = b.t0;
+    });
+    DUR = t;
+  };
+
+  const beatAt = t => { let i = 0; while (i < beats.length - 1 && beats[i + 1].t0 <= t) i++; return i; };
+  const runBeat = (S, i, s) => {
+    const b = beats[i];
+    S.hlLast = S.hl; S.hl = null; S.focPrev = S.foc; S.tap = 0; S.press = null; S.hov = null; S._s = s; S._i = i; S._lead = b.lead; S._act = b.act; S._T = b.t0 + s;
+    b.f(S, P(s, b.lead, b.lead + b.act), s);
+  };
+  const stateAtBeat = (i, s) => { const S = fresh(); for (let j = 0; j < i; j++) runBeat(S, j, beats[j].d); runBeat(S, i, s); return S; };
+
+  // ---------- geometry ----------
+  const sRect = el => { const r = el.getBoundingClientRect(), s0 = stage.getBoundingClientRect(), k = s0.width / W; return { x: (r.left - s0.left) / k, y: (r.top - s0.top) / k, w: r.width / k, h: r.height / k }; };
+  const offR = el => { let x = 0, y = 0, n = el; while (n && n !== scene) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+
+  // ---------- flow-in ----------
+  const enter = (el, k, dy = 22, sc = .975, blur = 7) => {
+    k = clamp(k, 0, 1);
+    el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden';
+    if (k >= 1) { el.style.transform = ''; el.style.filter = ''; return; }
+    el.style.transform = `translateY(${(1 - out3(k)) * dy}px) scale(${lerp(sc, 1, out3(k))})`;
+    el.style.filter = `blur(${(1 - k) * blur}px)`;
+  };
+  const screen = (el, k) => {
+    k = clamp(k, 0, 1); el.style.visibility = k > .001 ? 'visible' : 'hidden'; el.style.opacity = k;
+    const bl = (1 - k) * 9; el.style.filter = bl > .01 ? `blur(${bl}px)` : '';
+    el.style.transform = k < 1 ? `translateY(${(1 - out3(k)) * 30}px) scale(${lerp(.96, 1, out3(k))})` : '';
+  };
+  // a part that folds open (or shut) so the card around it grows smoothly
+  const fold = (el, k, disp = 'flex') => {
+    k = clamp(k, 0, 1);
+    if (k <= .001) { el.style.display = 'none'; return; }
+    el.style.display = disp; el.style.height = ''; el.style.overflow = ''; el.style.opacity = ''; el.style.filter = ''; el.style.marginTop = '';
+    if (k >= 1) return;
+    const h = el.offsetHeight, e = io3(k);
+    el.style.overflow = 'hidden'; el.style.height = (h * e) + 'px'; el.style.marginTop = (-12 * (1 - e)) + 'px';
+    el.style.opacity = clamp((k - .3) / .7, 0, 1); el.style.filter = `blur(${(1 - k) * 4}px)`;
+  };
+  const xfade = (els, on, k) => { Object.entries(els).forEach(([key, el]) => { const o = key === on ? k : 0; if (o <= .001 && key !== on) { el.style.display = 'none'; return; } el.style.display = ''; el.style.opacity = o; el.style.filter = o < 1 ? `blur(${(1 - o) * 5}px)` : ''; }); };
+
+  // ---------- caption text (style B: words flow in from below with blur) ----------
+  const ctx = $('ctx'), cnum = $('cnum');
+  const textEls = {}, chEls = {};
+  const mkWords = s => s.split(' ').map(w => `<span class="w">${w} </span>`).join('');
+  const textEl = i => {
+    if (textEls[i]) return textEls[i];
+    const b = beats[i], d = document.createElement('div'); d.className = 'tl';
+    d.innerHTML = `<h2 class="ch">${mkWords(b.h)}</h2>` + (b.b ? `<div class="cbd">${mkWords(b.b)}</div>` : '');
+    d.style.display = 'none'; ctx.appendChild(d);
+    textEls[i] = { el: d, hw: Array.from(d.querySelectorAll('.ch .w')), bw: Array.from(d.querySelectorAll('.cbd .w')) };
+    return textEls[i];
+  };
+  const chEl = c => {
+    if (chEls[c]) return chEls[c];
+    const d = document.createElement('div'); d.innerHTML = `<b>${String(c + 1).padStart(2, '0')}</b><i></i><span>${CH[c]}</span>`;
+    d.style.display = 'none'; cnum.appendChild(d); return (chEls[c] = d);
+  };
+  const wIn = (w, k, dy = 32, bl = 9) => { w.style.opacity = k; w.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * dy}px)`; w.style.filter = k >= 1 ? '' : `blur(${(1 - k) * bl}px)`; };
+  const wOut = (w, k) => { w.style.opacity = 1 - k; w.style.transform = `translateY(${-io3(k) * 26}px)`; w.style.filter = `blur(${k * 7}px)`; };
+  let shownT = [], shownC = [];
+  const paintText = (i, t) => {
+    const cur = beats[i].textIdx, tS = beats[cur].t0, tau = t - tS;
+    const prevIdx = cur > 0 ? beats[cur - 1].textIdx : -1;
+    const want = [cur]; if (prevIdx >= 0 && tau < .75) want.push(prevIdx);
+    shownT.forEach(j => { if (!want.includes(j)) textEls[j].el.style.display = 'none'; });
+    shownT = want;
+    const T = textEl(cur); T.el.style.display = 'block';
+    const nh = T.hw.length;
+    T.hw.forEach((w, j) => wIn(w, P(tau, .3 + j * .05, .3 + j * .05 + .65)));
+    const b0 = .3 + nh * .05 + .25;
+    T.bw.forEach((w, j) => wIn(w, P(tau, b0 + j * .018, b0 + j * .018 + .6), 18, 6));
+    if (want[1] !== undefined) { const O = textEl(prevIdx); O.el.style.display = 'block'; [...O.hw, ...O.bw].forEach((w, j) => wOut(w, P(tau, j * .01, j * .01 + .42))); }
+    const c = beats[i].ch, cS = chStart[c], ct = t - cS, wantC = [c]; if (c > 0 && ct < .6) wantC.push(c - 1);
+    shownC.forEach(j => { if (!wantC.includes(j)) chEls[j].style.display = 'none'; });
+    shownC = wantC;
+    const C = chEl(c); C.style.display = 'flex'; wIn(C, c === 0 && t < .3 ? 0 : P(ct, .15, .75), 20, 6);
+    if (wantC[1] !== undefined) { const O = chEl(c - 1); O.style.display = 'flex'; wOut(O, P(ct, 0, .4)); }
+    $('pl').innerHTML = `Rozdział <b>${c + 1}</b> z ${CH.length}`;
+    const bars = $('pb').children;
+    for (let j = 0; j < CH.length; j++) { const a = chStart[j], b = j + 1 < CH.length ? chStart[j + 1] : DUR; bars[j].firstChild.style.width = (P(t, a, b) * 100) + '%'; }
+  };
+  $('pb').innerHTML = CH.map(() => '<i><b></b></i>').join('');
+
+  // ---------- paint ----------
+  const camR = {};
+  const camTarget = to => {
+    if (typeof to === 'string') {
+      const el = $(to); const s = Math.min(.95, 1040 / el.offsetWidth, 960 / el.offsetHeight);
+      return { fx: el.offsetLeft + el.offsetWidth / 2, fy: el.offsetTop + el.offsetHeight / 2, s };
+    }
+    const el = $(to.el); let r = offR(el);
+    if (el.offsetParent) camR[to.el] = r; else r = camR[to.el] || r;
+    return { fx: r.x + r.w / 2 + (to.dx || 0), fy: r.y + (to.top ? 0 : r.h / 2) + (to.dy || 0), s: to.s };
+  };
+  const FOC = ['lcol', 'dcol', 'mc1', 'mc2'];
+  const setInp = (el, val, ph, f, pw) => {
+    el.classList.toggle('ph', !val); el.classList.toggle('focus', !!f);
+    el.textContent = val ? (pw ? '•'.repeat(val) : val) : ph;
+    if (f) el.insertAdjacentHTML(val ? 'beforeend' : 'afterbegin', '<span class="caret"></span>');
+  };
+  const ERR = {
+    rej: 'Serwer poczty odrzucił adres lub hasło — sprawdź dane i spróbuj ponownie',
+    app: 'Ta skrzynka wymaga hasła aplikacji — wygeneruj je w panelu dostawcy poczty i wklej zamiast zwykłego hasła',
+    host: 'Nie udało się połączyć z serwerem imap.glosslab.pl — sprawdź adres lub uzupełnij dane ręcznie',
+  };
+  let lastCur = { x: 1500, y: 1180 }, hovEl = null, pressEl = null;
+
+  function paint(S, prev) {
+    const s = S._s;
+    screen(pg, S.pg);
+    // --- the two pages of the window: "Zapytania" and "Skrzynki pocztowe"
+    const kIn = S.v === 'in' ? S.vK : 1 - S.vK;
+    [['vIn', kIn], ['vMb', 1 - kIn]].forEach(([id, k]) => { const el = $(id); el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden'; el.style.filter = k > 0 && k < 1 ? `blur(${(1 - k) * 6}px)` : ''; });
+
+    // --- hover and press
+    if (hovEl && hovEl.id !== S.hov) hovEl.classList.remove('hov');
+    hovEl = S.hov ? $(S.hov) : null; if (hovEl) hovEl.classList.add('hov');
+    if (pressEl && pressEl.id !== S.press) pressEl.style.transform = '';
+    pressEl = S.press ? $(S.press) : null; if (pressEl) pressEl.style.transform = 'scale(.95)';
+
+    // --- inbox: tabs, list column and the right-hand placeholder
+    $('tSp').classList.toggle('on', S.tab === 'sp'); $('tPo').classList.toggle('on', S.tab === 'po');
+    const lk = S.tab === 'sp' ? 'sp' : S.mail;
+    xfade({ sp: $('lSp'), none: $('lNo'), sync: $('lSy'), list: $('lMl') }, lk, S.tab === 'sp' ? 1 : Math.min(S.tabK, S.mailK));
+    xfade({ sp: $('dSp'), po: $('dPo') }, S.tab, S.tab === 'po' ? S.tabK : 1);
+    $('dNew').style.display = S.mail === 'none' ? 'none' : '';
+    $('syF').style.width = Math.round(S.syncP * 100) + '%';
+    { const tot = 1380, n = Math.round(tot * S.syncP); $('syL').textContent = `${n} z ${tot} wiadomości (${Math.round(S.syncP * 100)}%)`; }
+    { const f = $('aft'); f.style.display = S.aft ? 'flex' : 'none'; }
+    enter($('amenu'), S.menu, -10, .97, 5);
+
+    // --- "Skrzynki pocztowe": the form
+    setInp($('iEm'), S.em, 'biuro@twojafirma.pl', S.emF);
+    setInp($('iPw'), S.pw, '', S.pwF, true);
+    setInp($('iIh'), S.ih, 'imap.glosslab.pl', S.ihF);
+    setInp($('iSh'), S.sh, 'smtp.glosslab.pl', S.shF);
+    fold($('mOa'), S.oa, 'block'); fold($('mPw'), 1 - S.oa, 'flex');
+    $('mAdv').textContent = S.adv > 0 ? 'Ukryj ustawienia ręczne' : 'Ustawienia ręczne (zaawansowane)';
+    fold($('mMan'), S.adv, 'flex');
+    if (S.err) $('mErr').textContent = ERR[S.err];
+    fold($('mErr'), S.err ? S.errK : 0, 'block');
+    const ready = S.em.includes('@') && S.pw > 0;
+    $('bGo').classList.toggle('dis', !ready || S.going); $('bGo').textContent = S.going ? 'Łączenie…' : 'Połącz skrzynkę';
+
+    // --- "Podłączone skrzynki"
+    fold($('aNone'), 1 - S.acc, 'block'); fold($('aRow'), S.acc, 'flex');
+    if (S.acc) enter($('aRow'), S.accK, 10, .98, 5);
+    $('aIc').classList.toggle('bad', !!S.bad); $('aErr').style.display = S.bad ? '' : 'none';
+    $('aSub').textContent = S.synced ? 'Ostatnio pobrano: 20.10.2026, 08:52' : 'Za chwilę pobierzemy pocztę';
+
+    // --- toast, top right of the window
+    // toast over the right edge of the mailbox column, so it stays in the shot
+    const ts = $('tst'), ms = $('mscr'); ts.style.left = (ms.offsetLeft + ms.offsetWidth + 32 - ts.offsetWidth) + 'px'; ts.style.top = '20px'; enter(ts, S.tst, -18, .96, 6);
+
+    // --- focus: the part the text is about stays sharp, the rest softens
+    const fk = io3(P(s, 0, .7));
+    const dimOf = (f, id) => f && !f.includes(id) ? 1 : 0;
+    FOC.forEach(id => { const d = lerp(dimOf(S.focPrev, id), dimOf(S.foc, id), fk), r = $(id); r.style.opacity = d > .001 ? 1 - d * .6 : ''; r.style.filter = d > .001 ? `blur(${d * 1.8}px)` : ''; });
+
+    // --- camera
+    const tg2 = camTarget(S.cam.to);
+    let cam = tg2;
+    if (prev && S.cam.k < 1) { const k = io3(S.cam.k); cam = { fx: lerp(prev.cam.fx, tg2.fx, k), fy: lerp(prev.cam.fy, tg2.fy, k), s: Math.exp(lerp(Math.log(prev.cam.s), Math.log(tg2.s), k)) }; }
+    // gentle drift: translation only (a breathing scale makes small boxes shimmer); whole pixels while the camera rests
+    const T = S._T || 0, ds2 = cam.s, still = !(prev && S.cam.k < 1);
+    let tx = CX - cam.fx * ds2 + 9 * Math.sin(T * .29), ty = CY - cam.fy * ds2 + 6 * Math.sin(T * .21 + 1);
+    if (still) { tx = Math.round(tx); ty = Math.round(ty); }
+    scene.style.transform = `translate(${tx}px, ${ty}px) scale(${ds2})`;
+
+    // --- highlight ring (glides from the previous one)
+    const hlEl = $('hl');
+    const rr = h => { const r = sRect($(h.el)), p = (h.pad ?? 6) * 1.3; return { x: r.x - p, y: r.y - p, w: r.w + 2 * p, h: r.h + 2 * p }; };
+    let hr = null, ho = 0;
+    if (S.hl) {
+      const b = rr(S.hl);
+      if (S.hlLast && S.hlLast.el !== S.hl.el) { const a = rr(S.hlLast), k = io3(P(s, 0, .6)); hr = { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), w: lerp(a.w, b.w, k), h: lerp(a.h, b.h, k) }; ho = S.hl.k >= 1 ? 1 : Math.max(out3(S.hl.k), 1 - k); }
+      else { hr = b; ho = S.hlLast && S.hlLast.el === S.hl.el && S.hl.k >= 1 ? 1 : out3(S.hl.k); }
+    } else if (S.hlLast && s < .35) { hr = rr(S.hlLast); ho = 1 - s / .35; }
+    if (hr && ho > .001 && hr.w > 4) { hlEl.style.opacity = ho; hlEl.style.left = hr.x + 'px'; hlEl.style.top = hr.y + 'px'; hlEl.style.width = hr.w + 'px'; hlEl.style.height = hr.h + 'px'; hlEl.style.borderRadius = '14px'; } else hlEl.style.opacity = 0;
+
+    // --- mouse cursor (glides in an arc)
+    const ctr = (id, dx, dy) => { const r = sRect($(id)); if (r.w < 1 && r.h < 1) return null; return { x: r.x + r.w / 2 + dx * ds2, y: r.y + r.h / 2 + dy * ds2 }; };
+    const glide = (P0, prevPt, last) => {
+      let p = P0.to ? (ctr(P0.to, P0.dx, P0.dy) || last) : { x: 1500, y: 1180 };
+      if (P0.k < 1 && (prevPt || P0.from)) {
+        const a = (P0.from && ctr(P0.from, P0.fdx, P0.fdy)) || prevPt || p, k = io3(P0.k), dx = p.x - a.x, dy = p.y - a.y, d = Math.hypot(dx, dy) || 1, bend = Math.sin(Math.PI * k) * Math.min(70, d * .14);
+        p = { x: lerp(a.x, p.x, k) - dy / d * bend, y: lerp(a.y, p.y, k) + dx / d * bend };
+      }
+      return p;
+    };
+    const cur = glide(S.cur, prev && prev.cur, lastCur); lastCur = cur;
+    const cv2 = $('cursor'), press = S.tap > 0 && S.cur.vis > 0 ? Math.sin(Math.PI * clamp(S.tap * 2.2, 0, 1)) : 0;
+    cv2.style.opacity = S.cur.vis; cv2.style.transform = `translate(${cur.x - 7}px, ${cur.y - 5}px) scale(${1 - press * .16})`;
+    const ring = $('ring');
+    if (S.tap > 0 && S.tap < 1) { ring.style.opacity = (1 - S.tap) * S.cur.vis; ring.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${.35 + S.tap * .9})`; } else ring.style.opacity = 0;
+    return { cam, cur };
+  }
+
+  // ---------- timeline driver with memo of each beat's end ----------
+  const ends = [];
+  const endOf = i => {
+    if (i < 0) return null;
+    if (ends[i]) return ends[i];
+    const S = stateAtBeat(i, beats[i].d);
+    ends[i] = paint(S, i > 0 ? endOf(i - 1) : null);
+    return ends[i];
+  };
+  const draw = t => {
+    t = clamp(t, 0, DUR - .001);
+    const i = beatAt(t), b = beats[i];
+    const prev = endOf(i - 1);
+    const S = stateAtBeat(i, t - b.t0);
+    paint(S, prev);
+    paintText(i, t);
+    window.__t = t;
+  };
+
+  // ---------- player ----------
+  const player = $('player');
+  const fit = () => { stage.style.transform = `scale(${player.clientWidth / W})`; };
+  let t = 0, playing = false, rate = 1;
+  const bPlay = $('bPlay');
+  const syncBtn = () => { bPlay.textContent = playing ? 'Pauza' : (t >= DUR - .01 ? 'Od początku' : 'Odtwórz'); };
+  const chapAt = tt => { let c = 0; for (let j = 0; j < CH.length; j++) if (chStart[j] <= tt + .001) c = j; return c; };
+  const go = nt => { t = clamp(nt, 0, DUR - .001); draw(t); $('scrubI').style.width = (t / DUR * 100) + '%'; const c = chapAt(t); Array.from($('chaps').children).forEach((e, j) => e.classList.toggle('on', j === c)); };
+  bPlay.addEventListener('click', () => { if (t >= DUR - .01) go(0); playing = !playing; syncBtn(); });
+  const textStarts = () => beats.filter(b => b.newText).map(b => b.t0);
+  $('bNext').addEventListener('click', () => { const n = textStarts().find(x => x > t + .05); if (n !== undefined) go(n + .01); });
+  $('bPrev').addEventListener('click', () => { const ts = textStarts().filter(x => x < t - .4); go(ts.length ? ts[ts.length - 1] + .01 : 0); });
+  $('bRate').addEventListener('click', () => { rate = rate === 1 ? .75 : 1; $('bRate').textContent = `Tempo ${rate === 1 ? '1' : '0,75'}×`; });
+  $('scrub').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); go((e.clientX - r.left) / r.width * DUR); });
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (playing) {
+      let nt = t + dt * rate;
+      if ($('optStop').checked) { const n = textStarts().find(x => x > t + .001); if (n !== undefined && nt >= n) { nt = n - .001; playing = false; syncBtn(); } }
+      if (nt >= DUR) { nt = DUR - .001; playing = false; syncBtn(); }
+      go(nt);
+    }
+    requestAnimationFrame(frame);
+  };
+  window.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input')) return; if (e.key === ' ') { e.preventDefault(); bPlay.click(); } if (e.key === 'ArrowRight') $('bNext').click(); if (e.key === 'ArrowLeft') $('bPrev').click(); });
+
+  window.__start = () => {
+    layout();
+    $('chaps').innerHTML = CH.map((c, j) => `<button type="button">${j + 1}. ${c}</button>`).join('');
+    Array.from($('chaps').children).forEach((e, j) => e.addEventListener('click', () => go(chStart[j] + .01)));
+    fit(); try { new ResizeObserver(() => { fit(); ends.length = 0; go(t); }).observe(player); } catch (e) { window.addEventListener('resize', () => { fit(); ends.length = 0; go(t); }); }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    go(reduce ? chStart[1] + 2 : .01); syncBtn();
+    requestAnimationFrame(frame);
+    window.__seek = tt => { playing = false; syncBtn(); go(tt); };
+    window.__dur = DUR; window.__chStart = chStart; window.__beats = beats.map(b => [b.t0, b.d, b.ch, b.h, b.newText]);
+  };
+})();
+
+(() => {
+  const { P, type, mv, tap, cam, hl } = window.H;
+  const B = window.beat;
+  const show = (S, s, a = 0, b = .45) => { S.cur.vis = P(s, a, b); };
+  const hide = (S, k) => { S.cur.vis = Math.min(S.cur.vis, 1 - k); };
+  // one camera target per beat; the form card grows downwards, so the camera holds on its top edge
+  const ZL = { el: 'lcol', s: 1.12 }, ZF = { el: 'mc1', top: true, dy: 210, s: 1.3 };
+  const ZM = { el: 'mscr', top: true, dy: 300, s: 1.08 };
+  const EM = 'biuro@glosslab.pl';
+
+  // ===== 1 Gdzie =====
+  B(0, { h: 'Jak skonfigurować pocztę?', b: '', lead: .2, act: 1.4, hold: .5 }, (S, a, s) => { S.pg = P(s, .3, 1.5); cam(S, 'pg', 1); });
+  B(0, { h: 'Otwórz „Pocztę” w „Zapytaniach”.', b: '', lead: .6, act: 1.8, hold: .3 }, (S, a, s) => {
+    S.pg = 1; cam(S, ZL, P(s, 0, 1.2)); show(S, s); mv(S, 'tPo', P(a, .1, .55), { from: 'lhd', fdx: 60 }); S.hov = a > .45 && a < .62 ? 'tPo' : null; tap(S, a, .6, 'tPo');
+    if (a > .62) { S.tab = 'po'; S.tabK = P(a, .62, .95); }
+  });
+  B(0, { h: 'Kliknij „Podłącz skrzynkę”.', b: '', lead: .6, act: 2.0, hold: .1 }, (S, a, s) => {
+    S.tabK = 1; cam(S, ZL, 1); mv(S, 'bConnect', P(a, .1, .5)); S.hov = a > .45 && a < .7 ? 'bConnect' : null; tap(S, a, .6, 'bConnect');
+    if (a > .7) { S.v = 'mb'; S.vK = P(a, .7, 1); }
+  });
+
+  // ===== 2 Adres i hasło =====
+  const T1 = { h: 'Wpisz adres e-mail i hasło do poczty.', b: 'Te same, którymi logujesz się do poczty w przeglądarce.' };
+  B(1, { ...T1, lead: .6, act: 2.2, hold: .1 }, (S, a, s) => {
+    S.vK = 1; cam(S, ZF, P(s, 0, 2)); mv(S, 'iEm', P(a, .05, .3), { dx: -120 }); tap(S, a, .33); S.emF = a > .35 ? 1 : 0; S.em = type(EM, P(a, .4, .95));
+  });
+  B(1, { ...T1, lead: 0, act: 1.8, hold: .3 }, (S, a, s) => {
+    S.em = EM; cam(S, ZF, 1); mv(S, 'iPw', P(a, 0, .3), { dx: -120, from: 'iEm', fdx: -120 }); tap(S, a, .33); if (a > .35) { S.emF = 0; S.pwF = 1; } S.pw = Math.round(12 * P(a, .4, .92));
+  });
+  B(1, { h: 'Twoje hasło jest bezpieczne.', b: 'Jest zaszyfrowane. Nikt w CRM go nie widzi, także Ty i Twój zespół.', lead: .6, act: 1.4, hold: .8 }, (S, a, s) => {
+    S.pw = 12; S.pwF = 0; cam(S, ZF, 1); hide(S, P(s, 0, .4)); hl(S, 'iPw', P(a, 0, .4), 5);
+  });
+  B(1, { h: 'Kliknij „Połącz skrzynkę”.', b: '', lead: .6, act: 1.6, hold: .2 }, (S, a, s) => {
+    cam(S, ZF, 1); show(S, s); mv(S, 'bGo', P(a, .05, .45), { from: 'iPw', fdx: -60 }); S.hov = a > .4 ? 'bGo' : null; tap(S, a, .52, 'bGo'); S.going = a > .55 ? 1 : 0;
+  });
+
+  // ===== 3 Gotowe =====
+  B(2, { h: 'Skrzynka jest połączona.', b: 'Do CRM trafiają maile z ostatnich 90 dni.', lead: .6, act: 1.8, hold: .5 }, (S, a, s) => {
+    S.em = ''; S.pw = 0; S.going = 0; cam(S, 'pg', P(s, 0, 1.2)); hide(S, P(s, 0, .4)); S.tst = P(s, .1, .6); S.acc = 1; S.accK = P(s, .3, 1); hl(S, 'aRow', P(a, .3, .6), 5);
+  });
+  B(2, { h: 'Maile od klientów są w „Zapytaniach”.', b: 'Odpowiadasz na nie bez wychodzenia z CRM.', lead: .6, act: 1.8, hold: .8 }, (S, a, s) => {
+    S.accK = 1; S.tst = 1 - P(s, 0, .5); S.v = 'in'; S.vK = P(s, .2, .9); S.synced = 1; S.mail = 'list'; S.mailK = 1; cam(S, ZL, P(s, 0, 1.4));
+  });
+  B(2, { h: 'Jeśli coś nie działa, napisz do nas.', b: 'Kliknij „Zgłoś problem” w menu. Pomożemy podłączyć skrzynkę.', lead: .6, act: 1.6, hold: 6 }, (S, a, s) => {
+    S.vK = 1; cam(S, 'pg', P(s, 0, 1.4));
+  });
+})();
+
+window.__start();</script>
+
+</body>
+</html>
