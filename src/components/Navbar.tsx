@@ -50,8 +50,8 @@ export function Navbar() {
                 aria-label="Główna"
                 className="mx-auto grid h-16 max-w-[100rem] grid-cols-[1fr_auto] items-center px-5 sm:px-8 lg:grid-cols-[1fr_auto_1fr] lg:px-12"
             >
-                <a href="#" className="justify-self-start text-[1.0625rem] font-[680] tracking-[-0.04em] text-paper">
-                    DetailBoost
+                <a href="#" className="justify-self-start">
+                    <img src="/brand/detailboost-horizontal-white.svg" alt="DetailBoost" width={685} height={81} className="h-[1.125rem] w-auto" />
                 </a>
 
                 <ul className="hidden items-center gap-9 lg:flex">
