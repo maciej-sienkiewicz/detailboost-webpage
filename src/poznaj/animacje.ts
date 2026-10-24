@@ -8,7 +8,16 @@ import wygenerowane from './animacje.gen.json';
  * `animacje.gen.json` dopisuje `scripts/animacje.mjs`: długość i rozdziały odczytane
  * z samej animacji. Pliki animacji leżą w `public/animacje/<slug>/`.
  */
-export type Kategoria = 'kalendarz' | 'przyjecie' | 'wizyta' | 'zapytania' | 'klienci' | 'rozliczenia' | 'zespol';
+export type Kategoria =
+    | 'konfiguracja'
+    | 'zapytania'
+    | 'rezerwacja'
+    | 'przyjecie'
+    | 'studio'
+    | 'wydanie'
+    | 'flota'
+    | 'marketing'
+    | 'firma';
 
 export type Animacja = {
     slug: string;
@@ -27,13 +36,15 @@ export type Animacja = {
 };
 
 export const KATEGORIE: ReadonlyArray<{ id: Kategoria; nazwa: string; opis: string }> = [
-    { id: 'kalendarz', nazwa: 'Kalendarz i rezerwacje', opis: 'Od pierwszego telefonu do terminu w kalendarzu.' },
-    { id: 'przyjecie', nazwa: 'Przyjęcie auta', opis: 'Wizyta, zdjęcia, uszkodzenia i protokół z podpisem.' },
-    { id: 'wizyta', nazwa: 'W trakcie wizyty', opis: 'Zmiany w wizycie, dodatkowe usługi i zgoda klienta.' },
-    { id: 'zapytania', nazwa: 'Zapytania i poczta', opis: 'Leady, skrzynka studia i odpowiedzi z AI.' },
-    { id: 'klienci', nazwa: 'Klienci i marketing', opis: 'SMS-y, kampanie, kontakty i konkurencja.' },
-    { id: 'rozliczenia', nazwa: 'Cennik i rozliczenia', opis: 'Pakiety, VAT, KSeF i zlecenia zbiorcze.' },
-    { id: 'zespol', nazwa: 'Zespół', opis: 'Konta pracowników i zadania na Tablicy.' },
+    { id: 'konfiguracja', nazwa: 'Pierwsze uruchomienie', opis: 'Dane firmy, cennik, zespół, poczta, SMS-y i KSeF.' },
+    { id: 'zapytania', nazwa: 'Klient pisze', opis: 'Zapytanie, wycena z AI i tablica zapytań.' },
+    { id: 'rezerwacja', nazwa: 'Rezerwacja', opis: 'Wolny termin w kalendarzu, rezerwacja i odwołanie.' },
+    { id: 'przyjecie', nazwa: 'Przyjęcie auta', opis: 'Wizyta, VIN, zdjęcia, uszkodzenia i protokół z podpisem.' },
+    { id: 'studio', nazwa: 'Auto w studiu', opis: 'Zadania, zmiany w wizycie, zdjęcia i dodatkowe usługi.' },
+    { id: 'wydanie', nazwa: 'Wydanie auta', opis: 'Protokół wydania, faktura, koszty i zysk wizyty.' },
+    { id: 'flota', nazwa: 'Klienci flotowi', opis: 'Kontrahenci i miesięczne zlecenia zbiorcze.' },
+    { id: 'marketing', nazwa: 'Marketing', opis: 'Kampanie SMS i konkurencja na Instagramie.' },
+    { id: 'firma', nazwa: 'Firma', opis: 'Finanse i statystyki studia.' },
 ];
 
 const gen = wygenerowane as Record<string, { czas: number; rozdzialy: string[] }>;

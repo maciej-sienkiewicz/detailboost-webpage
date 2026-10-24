@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="../osadzenie.css">
+<script>if (window.self !== window.top) { document.documentElement.classList.add('osadzona'); document.documentElement.dataset.theme = 'dark'; }</script>
+</head>
+<body>
+<title>Jak działa tablica zapytań</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-ext-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'InterDB'; src: url(../a/inter-latin-wght-normal.woff2) format('woff2'); font-weight: 100 900; font-display: swap; unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+/* Page: help-centre look. Stage: style B, caption column on the left, the app with the „Zapytania” inbox on the right. */
+:root {
+  --bg: #eef2f7; --surface: #ffffff; --ink: #0f172a; --ink-2: #475569; --muted: #64748b; --line: #e2e8f0;
+  --brand: #0ea5e9; --brand-ink: #0369a1; --brand-soft: #e0f2fe;
+  --font: 'InterDB', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bg: #0b1120; --surface: #111a2c; --ink: #e8eef7; --ink-2: #a5b4c8; --muted: #8394ab; --line: #1f2b40; --brand-ink: #7dd3fc; --brand-soft: #0c2a40; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased;
+  padding: 36px max(16px, env(safe-area-inset-right, 0px)) 72px max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--brand-ink); }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.08; letter-spacing: -0.035em; font-weight: 800; margin: 6px 0 0; text-wrap: balance; }
+.lede { font-size: 17px; color: var(--ink-2); margin: 0; max-width: 760px; }
+
+.player { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #eef2f7; box-shadow: 0 20px 50px rgba(15,23,42,.16); }
+.stage { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform-origin: 0 0; overflow: hidden; font-family: var(--font); color: #0f172a; background: #eef2f7; }
+.bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.bar button { font: 600 14px var(--font); height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.bar button.pri { background: #0ea5e9; border-color: #0ea5e9; color: #fff; min-width: 120px; justify-content: center; }
+.bar button:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.bar label { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); cursor: pointer; }
+.bar .sp { flex: 1; }
+.scrub { position: relative; height: 8px; border-radius: 4px; background: var(--line); cursor: pointer; }
+.scrub i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #0ea5e9; }
+.scrub b { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--muted); opacity: .45; }
+.chaps { display: flex; flex-wrap: wrap; gap: 8px; }
+.chaps button { font: 500 13.5px var(--font); padding: 7px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.chaps button.on { border-color: #0ea5e9; color: var(--brand-ink); background: var(--brand-soft); font-weight: 700; }
+
+/* ===== stage ===== */
+.bgx { position: absolute; inset: 0; background:
+  radial-gradient(900px 700px at 78% 45%, rgba(14,165,233,.10), transparent 70%),
+  radial-gradient(700px 600px at 8% 95%, rgba(37,99,235,.07), transparent 70%), #eef2f7; }
+.brand { position: absolute; left: 120px; top: 84px; display: flex; align-items: center; gap: 14px; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; z-index: 40; }
+.brand svg { height: 30px; width: auto; color: #0f172a; display: block; }
+.brand span { font-size: 19px; font-weight: 500; color: #64748b; margin-left: 6px; letter-spacing: -0.01em; }
+.cap { position: absolute; left: 120px; top: 262px; width: 600px; z-index: 40; }
+.cnum { height: 34px; position: relative; margin-bottom: 26px; }
+.cnum > div { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 14px; font-size: 22px; font-weight: 700; color: #0369a1; white-space: nowrap; }
+.cnum > div b { font-variant-numeric: tabular-nums; }
+.cnum > div i { display: block; width: 46px; height: 2px; background: linear-gradient(90deg, #38bdf8, rgba(56,189,248,0)); }
+.cnum > div span { color: #0f172a; font-weight: 600; }
+.ctx { position: relative; }
+.ctx .tl { position: absolute; left: 0; top: 0; width: 600px; }
+.ch { font-size: 56px; font-weight: 750; letter-spacing: -0.038em; line-height: 1.08; margin: 0; }
+.cbd { font-size: 28px; line-height: 1.45; color: #475569; margin-top: 28px; letter-spacing: -0.01em; }
+.ch .w, .cbd .w { display: inline-block; white-space: pre; will-change: transform, filter, opacity; }
+.prog { position: absolute; left: 120px; bottom: 96px; z-index: 40; }
+.prog .pl { font-size: 18px; color: #64748b; margin-bottom: 14px; font-weight: 500; }
+.prog .pl b { color: #0f172a; font-weight: 700; }
+.prog .pb { display: flex; gap: 7px; }
+.prog .pb i { display: block; width: 34px; height: 6px; border-radius: 3px; background: #d5dde8; overflow: hidden; }
+.prog .pb i b { display: block; height: 100%; width: 0; background: #0ea5e9; }
+
+.view { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 20; -webkit-mask-image: linear-gradient(90deg, transparent 735px, #000 800px); mask-image: linear-gradient(90deg, transparent 735px, #000 800px); }
+.scene { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.cursor { position: absolute; left: 0; top: 0; width: 40px; height: 40px; z-index: 90; filter: drop-shadow(0 4px 8px rgba(15,23,42,.32)); opacity: 0; pointer-events: none; }
+.ring { position: absolute; left: 0; top: 0; width: 84px; height: 84px; margin: -42px 0 0 -42px; border-radius: 50%; border: 3px solid #0ea5e9; opacity: 0; z-index: 89; pointer-events: none; }
+.kcap { position: absolute; z-index: 91; padding: 10px 18px; border-radius: 12px; background: #0f172a; color: #fff; font-size: 22px; font-weight: 700; box-shadow: 0 8px 24px rgba(15,23,42,.3); opacity: 0; border-bottom: 4px solid #334155; }
+.hl { position: absolute; z-index: 60; border-radius: 12px; border: 2.5px solid #0ea5e9; box-shadow: 0 0 0 5px rgba(14,165,233,.16), 0 0 26px rgba(14,165,233,.35); opacity: 0; pointer-events: none; }
+
+
+.touch { position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(15,23,42,.18); border: 2px solid rgba(255,255,255,.85); box-shadow: 0 4px 12px rgba(15,23,42,.25); opacity: 0; z-index: 88; pointer-events: none; }
+
+/* toast (common/components/Toast), top right of the page */
+.tst { position: absolute; z-index: 70; display: flex; align-items: center; gap: 16px; padding: 16px 24px; min-width: 320px; max-width: 500px; border-radius: 12px; background: #16a34a; color: #fff; box-shadow: 0 20px 25px -5px rgba(0,0,0,.1), 0 10px 10px -5px rgba(0,0,0,.04); opacity: 0; visibility: hidden; }
+.tst .ti { width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center; }
+.tst b { display: block; font-size: 16px; font-weight: 600; line-height: 1.35; }
+.tst small { display: block; font-size: 14px; line-height: 1.4; opacity: .95; white-space: nowrap; }
+.tst .tx { margin-left: 8px; opacity: .85; display: grid; place-items: center; }
+.tst { max-width: none; }
+
+/* ===== app frame: Layout + Sidebar (widgets/Sidebar), desktop ===== */
+.ap { position: absolute; left: 0; top: 0; width: 1440px; height: 1024px; border-radius: 22px; overflow: hidden; background: #0f172a; box-shadow: 0 1px 2px rgba(15,23,42,.08), 0 30px 70px -20px rgba(15,23,42,.38); font-size: 14px; line-height: normal; color: #0f172a; }
+.asb { position: absolute; left: 0; top: 0; bottom: 0; width: 248px; background: #0f172a; display: flex; flex-direction: column; padding: 0 12px; overflow: hidden; }
+.asbB { display: flex; align-items: center; gap: 12px; padding: 20px 4px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.07); margin: 0 -12px 0; }
+.asbL { width: 36px; height: 36px; border-radius: 10px; background: #1e293b; color: #e2e8f0; display: grid; place-items: center; font-size: 15px; font-weight: 700; }
+.asbN { color: #f1f5f9; font-size: 15px; font-weight: 600; }
+.asbS { padding: 14px 0 2px; }
+.asbS:first-of-type { padding-top: 6px; }
+.asbT { padding: 0 12px 5px; color: #64748b; font-size: 11.5px; font-weight: 600; }
+.asbI { display: flex; align-items: center; gap: 11px; padding: 9px 12px; margin-bottom: 1px; border-radius: 10px; color: #cbd5e1; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.asbI svg { width: 17px; height: 17px; stroke-width: 1.75; flex-shrink: 0; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+.asbI .bdg { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #0ea5e9; color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; }
+.asbI.hov { background: rgba(255,255,255,.04); color: #f1f5f9; }
+.asbI.on { background: rgba(14,165,233,.11); color: #38bdf8; font-weight: 600; }
+.asbP { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 12px 14px; background: #0f172a; border-top: 1px solid rgba(255,255,255,.07); }
+.amain { position: absolute; left: 248px; top: 8px; right: 8px; bottom: 8px; padding: 24px; background: #eef2f7; border-radius: 16px; box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 1px 3px rgba(0,0,0,.3); overflow: hidden; }
+.apg { position: absolute; inset: 24px; }
+
+/* calendar page behind the menu click (the same month card as in „Jak dodać rezerwację?”) */
+.bk.calpg .cal { position: relative; width: 100%; opacity: 1; }
+.bk.calpg .gr > div:not(.tile) { height: 132px; }
+
+/* ===== „Zapytania” (comms/inbox): one white card, list 320 px, conversation, case panel ===== */
+.ibx { position: absolute; inset: 0; display: flex; background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; }
+.lcol { flex: 0 0 320px; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid #e2e8f0; position: relative; }
+.lhd { display: flex; align-items: center; gap: 8px; padding: 18px 16px 10px 20px; }
+.lhd h1 { flex: 1; margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.ib { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; color: #475569; }
+.tabs { display: flex; gap: 2px; margin: 0 16px 6px; padding: 3px; border-radius: 999px; background: #f1f5f9; }
+.tab { flex: 1; height: 32px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 999px; font-size: 13px; font-weight: 500; color: #475569; white-space: nowrap; }
+.tab.on { background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.1); color: #0f172a; font-weight: 600; }
+.tab .cnt { color: #64748b; } .tab .cnt.ac { color: #0e6fa0; }
+.lscr { flex: 1; min-height: 0; padding: 0 6px 12px; overflow: hidden; }
+.sect { display: flex; align-items: center; gap: 8px; margin: 14px 14px 4px; font-size: 13px; font-weight: 600; color: #0f172a; }
+.sect span { font-weight: 500; color: #64748b; }
+.crow { display: flex; flex-direction: column; gap: 1px; padding: 9px 14px; border-radius: 10px; }
+.crow.act { background: #f1f5f9; }
+.crow.hov:not(.act) { background: #f8fafc; }
+.crow .top { display: flex; align-items: center; gap: 10px; }
+.crow .dot { flex: none; width: 8px; height: 8px; border-radius: 999px; background: #0ea5e9; }
+.crow .nodot { flex: none; width: 8px; }
+.crow .nm { flex: 1; min-width: 0; font-size: 14px; line-height: 20px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crow.q .nm { font-weight: 500; color: #475569; }
+.crow .age { flex: none; font-size: 12px; color: #64748b; font-variant-numeric: tabular-nums; }
+.crow .age.late { color: #b91c1c; font-weight: 600; }
+.crow .sub { padding-left: 18px; font-size: 13px; line-height: 18px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.crow .sub.hot { font-weight: 600; color: #0e6fa0; }
+.fold { display: flex; align-items: center; gap: 8px; margin: 4px 6px 0; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; color: #0f172a; }
+.fold .c { font-weight: 500; color: #64748b; font-variant-numeric: tabular-nums; }
+.fold svg { margin-left: auto; color: #64748b; }
+.fold.hov { background: #f8fafc; }
+.fold.first { margin-top: 12px; }
+.amenu { position: absolute; left: 92px; top: 62px; z-index: 30; width: 240px; padding: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(15,23,42,.22); opacity: 0; visibility: hidden; }
+.mi { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; font-size: 14px; color: #0f172a; white-space: nowrap; }
+.mi svg { color: #64748b; flex: none; }
+.mi.hov { background: #f1f5f9; }
+.mdiv { height: 1px; margin: 6px 4px; background: #e2e8f0; }
+
+.dcol { flex: 1; min-width: 0; position: relative; }
+.dpane { position: absolute; inset: 0; display: flex; }
+.phd { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 24px; text-align: center; color: #64748b; font-size: 14px; }
+.phd svg { color: #cbd5e1; }
+.pbtn { border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; padding: 10px 18px; font-size: 14px; font-weight: 500; color: #334155; }
+
+/* conversation column (inbox/Conversation.tsx) */
+.cv { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.chd { display: flex; align-items: center; gap: 12px; padding: 20px 28px; border-bottom: 1px solid #eef2f7; flex: none; }
+.chd .tt { flex: 1; min-width: 0; }
+.chd h2 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chd p { margin: 2px 0 0; font-size: 14px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.schip { flex: none; height: 28px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.schip.neutral { background: #f1f5f9; color: #334155; }
+.schip.accent { background: #e7f6fd; color: #0e6fa0; }
+.schip.ok { background: #f0fdf4; color: #15803d; }
+.cscr { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: 20px; padding: 28px; }
+.cscr > :first-child { margin-top: auto; }
+.bub { align-self: flex-start; max-width: 74%; min-width: 0; }
+.bub.out { align-self: flex-end; }
+.bub .lb { margin: 0 0 6px; font-size: 12px; color: #64748b; }
+.bub.out .lb { text-align: right; }
+.bub .bd { padding: 12px 16px; border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; font-size: 14px; line-height: 21px; color: #0f172a; }
+.bub.out .bd { border-color: #f1f5f9; background: #f1f5f9; }
+.bnote { border: 1px solid #bbf7d0; border-radius: 14px; background: #f0fdf4; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #475569; }
+.bnote .t { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; font-weight: 600; color: #0f172a; }
+.bnote .t svg { color: #15803d; flex: none; margin-top: 1px; }
+.bnote .f { padding-left: 26px; color: #64748b; }
+.bnote .s { display: flex; gap: 8px; color: #15803d; padding-left: 0; }
+.bnote .s svg { flex: none; margin-top: 1px; }
+
+/* reply composer (components/ReplyComposer, layout „collapsed”) */
+.cmp { flex: none; padding: 16px 28px 20px; border-top: 1px solid #eef2f7; }
+.cmp .row1 { display: flex; justify-content: flex-end; }
+.pill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 999px; background: linear-gradient(135deg, #0e7ab0 0%, #0e6491 100%); color: #fff; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.tint { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 20px; border-radius: 999px; border: 1px solid #93d7f5; background: #e7f6fd; color: #0e6fa0; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.ccard { border: 1px solid #e2e8f0; border-radius: 16px; background: #fff; overflow: hidden; }
+.ccard .to { padding: 10px 16px; border-bottom: 1px solid #f1f5f9; font-size: 13px; color: #64748b; }
+.ccard .to b { font-weight: 500; color: #0f172a; }
+.ccard .ed { min-height: 104px; padding: 12px 16px; font-size: 14px; line-height: 21px; color: #0f172a; white-space: pre-wrap; }
+.ccard .ed.ph { color: #94a3b8; }
+.ccard .bar2 { display: flex; align-items: center; gap: 8px; padding: 10px 12px 10px 16px; border-top: 1px solid #f1f5f9; }
+.ccard .bar2 .ai { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border: 1px solid #e2e8f0; border-radius: 999px; color: #475569; font-size: 13px; font-weight: 500; }
+.ccard .bar2 .sp { flex: 1; }
+
+/* case panel (inbox/CaseRail.tsx) */
+.rail { flex: 0 0 320px; min-height: 0; display: flex; flex-direction: column; gap: 24px; padding: 24px 20px; background: #f8fafc; border-left: 1px solid #e2e8f0; position: relative; }
+.qc { padding: 20px; border-top: 4px solid #0ea5e9; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 16px 40px rgba(15,23,42,.08); }
+.qc .hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: -6px; }
+.qc h3 { margin: 0; font-size: 13px; font-weight: 600; color: #475569; }
+.eb { width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 999px; color: #64748b; }
+.qc .tot { margin: 6px 0 14px; font-size: 32px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.qc .qr { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 6px; font-size: 14px; color: #334155; }
+.qc .qr .am { flex: none; font-variant-numeric: tabular-nums; }
+.qc .emp { margin: 6px 0 0; font-size: 14px; color: #64748b; }
+.sugs { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef2f7; }
+.sugs .sh { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 8px; }
+.sugs .sh span { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: #f1f5f9; color: #64748b; font-size: 11px; display: grid; place-items: center; }
+.sug { border: 1px dashed #cbd5e1; border-radius: 12px; padding: 10px 12px; display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; margin-bottom: 8px; background: #fbfdff; }
+.sug .n { font-size: 13px; font-weight: 600; color: #0f172a; }
+.sug .a { font-size: 13px; color: #334155; font-variant-numeric: tabular-nums; text-align: right; }
+.sug .acts2 { grid-column: 1 / -1; display: flex; gap: 6px; margin-top: 4px; }
+.sug .ok2 { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 8px; background: #0ea5e9; color: #fff; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.sug .no2 { display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; font-size: 12px; font-weight: 500; white-space: nowrap; }
+.sug .ok2.hov { background: #0284c7; }
+.cli { display: flex; align-items: center; gap: 12px; padding: 0 4px; }
+.cli .who { flex: 1; min-width: 0; }
+.cli h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.cli p { margin: 2px 0 0; font-size: 13px; color: #475569; }
+.str2 { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 4px; }
+.str2 .l { font-size: 13px; font-weight: 600; color: #475569; }
+.stt { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px 0 10px; border: 1px solid #e2e8f0; border-radius: 999px; font-size: 13px; font-weight: 600; white-space: nowrap; }
+.stt .d { width: 8px; height: 8px; border-radius: 999px; background: currentColor; }
+.stt.hov { border-color: #cbd5e1; }
+.rbot { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+.fp { display: flex; align-items: center; gap: 12px; height: 60px; padding: 0 18px 0 14px; border-radius: 16px; background: linear-gradient(135deg, #0e7ab0 0%, #0e6491 100%); color: #fff; box-shadow: 0 12px 24px -12px rgba(14,165,233,.75); }
+.fp .tile { width: 36px; height: 36px; flex: none; display: grid; place-items: center; border-radius: 12px; background: rgba(255,255,255,.18); }
+.fp .ln { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fp .ti { font-size: 15px; font-weight: 600; white-space: nowrap; }
+.fp .hi { font-size: 12px; color: rgba(255,255,255,.92); white-space: nowrap; }
+.fp .ar { margin-left: auto; flex: none; }
+.del { align-self: center; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; color: #b91c1c; font-size: 13px; font-weight: 500; }
+
+/* status picker (components/LeadStatusPicker) and „Dlaczego to zapytanie przepadło?” */
+.smenu { position: absolute; z-index: 40; width: 220px; padding: 6px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 12px 32px -8px rgba(15,23,42,.22); opacity: 0; visibility: hidden; }
+.so { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 13.5px; color: #0f172a; }
+.so .d { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.so.on { background: #f8fafc; font-weight: 600; }
+.so.hov { background: #f1f5f9; }
+.so .ck { margin-left: auto; color: #0ea5e9; }
+.scrim { position: absolute; inset: 0; z-index: 50; background: rgba(15,23,42,.48); opacity: 0; visibility: hidden; border-radius: 22px; }
+.lost { position: absolute; z-index: 55; width: 420px; padding: 20px; background: #fff; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.4); display: flex; flex-direction: column; gap: 8px; opacity: 0; visibility: hidden; }
+.lost h4 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.ro { padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13.5px; color: #334155; }
+.ro.on { border-color: #0ea5e9; background: #f0f9ff; color: #0369a1; font-weight: 600; }
+.ro.hov:not(.on) { background: #f8fafc; }
+.lost .nt { min-height: 56px; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13px; color: #94a3b8; }
+.lost .ft { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.lost .cn { padding: 9px 16px; border-radius: 10px; border: 1px solid #e2e8f0; font-size: 13.5px; font-weight: 500; color: #475569; }
+.lost .go { padding: 9px 16px; border-radius: 10px; background: #0ea5e9; color: #fff; font-size: 13.5px; font-weight: 600; }
+.lost .go.dis { opacity: .5; }
+
+/* booking from the case (calendar/components/BookingFlowModal): calendar first, then the filled form */
+.bkw { position: absolute; z-index: 52; opacity: 0; visibility: hidden; }
+.bkw.calw .cal { position: relative; opacity: 1; width: 980px; }
+.bk .cal .gr > div.pick { background: #f0f9ff; }
+
+/* toast */
+.tst { left: 0; top: 0; }
+/* ===== intro / outro calendar card ===== */
+.bk .cal { position: absolute; left: 0; top: 0; width: 980px; background: #fff; border-radius: 18px; padding: 22px 26px 26px; box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 30px 70px -20px rgba(15,23,42,.25); opacity: 0; }
+.bk .cal .tb { display: flex; align-items: center; gap: 6px; }
+.bk .cal .tb h4 { white-space: nowrap; margin: 0 auto 0 0; font-size: 22px; letter-spacing: -0.02em; }
+.bk .cal .tb small { display: block; font-size: 11px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+.bk .cal .b { height: 34px; padding: 0 11px; border-radius: 10px; border: 1.5px solid #e2e8f0; display: grid; place-items: center; font-size: 13px; font-weight: 600; color: #475569; background: #fff; white-space: nowrap; }
+.bk .cal .seg { display: flex; background: #f1f5f9; border-radius: 10px; padding: 3px; gap: 2px; }
+.bk .cal .seg span { padding: 6px 8px; font-size: 11.5px; font-weight: 700; letter-spacing: .04em; color: #64748b; border-radius: 8px; }
+.bk .cal .seg span.on { background: #fff; color: #0f172a; box-shadow: 0 1px 2px rgba(15,23,42,.1); }
+.bk .cal .b.ev { border-color: #fde68a; background: #fffbeb; color: #92400e; }
+.bk .cal .b.pr { background: #0ea5e9; border-color: #0ea5e9; color: #fff; border-radius: 999px; }
+.bk .cal .b.vi { border-color: #0ea5e9; color: #0284c7; border-radius: 999px; }
+.bk .cal .gh { display: grid; grid-template-columns: repeat(7, 1fr); margin-top: 18px; font-size: 11px; font-weight: 600; color: #94a3b8; text-align: center; letter-spacing: .06em; }
+.bk .cal .gr { display: grid; grid-template-columns: repeat(7, 1fr); border-top: 1px solid #f1f5f9; position: relative; }
+.bk .cal .gr > div:not(.tile) { height: 104px; border-right: 1px solid #f1f5f9; padding: 6px; font-size: 13px; color: #475569; text-align: center; }
+.bk .cal .gr > div:nth-child(7) { border-right: 0; }
+.bk .cal .gr > div.we { background: #f8fafc; }
+.bk .cal .tile { position: absolute; height: 20px; border-radius: 5px; font-size: 11.5px; font-weight: 600; color: #fff; padding: 0 7px; line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bk .cal .today { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #0ea5e9; color: #fff; font-weight: 700; }
+
+/* ===== reservation window (QuickEventModal, desktop) ===== */
+.bk .mw { position: absolute; left: 0; top: 0; display: flex; align-items: stretch; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.4); background: #fff; opacity: 0; }
+.bk .modal { width: 700px; height: 660px; background: #fff; border-radius: 16px 0 0 16px; display: flex; flex-direction: column; overflow: hidden; position: relative; flex: 0 0 auto; }
+.bk .mw.solo .modal { border-radius: 16px; }
+.bk .mh { padding: 24px 24px 16px 28px; display: flex; align-items: flex-start; gap: 12px; flex: 0 0 auto; }
+.bk .mtitle { flex: 1; font-size: 22px; font-weight: 700; color: #0f172a; letter-spacing: -0.4px; padding: 0 0 6px; border-bottom: 2px solid transparent; min-height: 37px; white-space: nowrap; }
+.bk .mtitle.ph { color: #cbd5e1; }
+.bk .mtitle.focus { border-bottom-color: #0ea5e9; }
+.bk .mx { width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; border: 1px solid #e2e8f0; display: grid; place-items: center; color: #64748b; flex: 0 0 auto; }
+.bk .mb { flex: 1; min-height: 0; overflow: hidden; position: relative; }
+.bk .mbi { padding: 4px 28px 20px; display: flex; flex-direction: column; gap: 2px; }
+.bk .row { display: flex; align-items: flex-start; gap: 12px; padding: 6px 0; }
+.bk .row > .ico { width: 16px; height: 16px; margin-top: 12px; color: #94a3b8; flex: 0 0 auto; }
+.bk .row > .ico.ac { color: #0ea5e9; }
+.bk .rc { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.bk .divd { height: 1px; background: #f1f5f9; margin: 4px 0; }
+.bk .tgs { display: flex; justify-content: flex-end; gap: 16px; }
+.bk .tg { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: #475569; }
+.bk .tg i { width: 40px; height: 22px; border-radius: 999px; padding: 2px; background: linear-gradient(#f1f5f9, #e2e8f0); border: 1px solid #e5e7eb; position: relative; display: block; }
+.bk .tg i::after { content: ''; position: absolute; left: 2px; top: 1px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.18); transform: translateX(var(--kx, 0px)); }
+.bk .tg i.on { background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); border-color: #0284c7; }
+.bk .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.bk .lab { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+.bk .inp { padding: 11px 16px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 15px; color: #0f172a; white-space: pre; min-height: 46px; position: relative; overflow: hidden; }
+.bk .inp.ph { color: #94a3b8; }
+.bk .inp.focus, .bk .cblk.focus, .bk .vbtn.focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.14); }
+.bk .inp.open, .bk .cblk.open, .bk .vbtn.open { border-color: #0ea5e9; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: 0 0 0 3px rgba(14,165,233,.10); }
+.bk .caret { display: inline-block; width: 2px; height: 1.1em; background: #0ea5e9; vertical-align: -3px; margin-left: 1px; }
+.bk .hint { font-size: 12px; color: #94a3b8; padding-bottom: 6px; }
+.bk .hint.ac { color: #0ea5e9; }
+.bk .cblk { border: 1.5px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.bk .cblk .cr { display: grid; grid-template-columns: 1fr 1fr; }
+.bk .cblk .cr + .cr { border-top: 1px solid #f1f5f9; }
+.bk .cblk .cc { padding: 8px 14px; min-width: 0; }
+.bk .cblk .cc + .cc { border-left: 1px solid #f1f5f9; }
+.bk .cblk .l { font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: .07em; display: flex; align-items: center; gap: 8px; height: 22px; }
+.bk .cblk .v { font-size: 14px; color: #0f172a; white-space: pre; min-height: 22px; display: flex; align-items: center; gap: 0; }
+.bk .cblk .v.ph { color: #c8d4e0; }
+.bk .cblk .pre { width: 44px; color: #94a3b8; border-right: 1px solid #e2e8f0; margin-right: 8px; padding-right: 8px; flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+.bk .cblk.dis { opacity: .5; }
+.bk .vrow { display: grid; grid-template-columns: 1fr 1fr 88px; }
+.bk .vrow .cc + .cc { border-left: 1px solid #f1f5f9; }
+.bk .kind { display: inline-flex; background: #f1f5f9; padding: 2px; border-radius: 8px; gap: 1px; }
+.bk .kind span { height: 22px; padding: 0 7px; border-radius: 6px; display: grid; place-items: center; color: #475569; }
+.bk .kind span.on { background: #fff; color: #0f172a; box-shadow: 0 1px 2px rgba(15,23,42,.12); }
+.bk .selv { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.bk .selv::after { content: ''; width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #94a3b8; }
+.bk .chip { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; }
+.bk .chip .ok { width: 20px; height: 20px; border-radius: 50%; background: #16a34a; color: #fff; font-size: 11px; font-weight: 700; display: grid; place-items: center; flex: 0 0 auto; }
+.bk .chip b { font-size: 14px; font-weight: 500; color: #0f172a; white-space: nowrap; }
+.bk .chip .nb { font-size: 10px; font-weight: 700; text-transform: uppercase; background: #dcfce7; color: #16a34a; padding: 2px 7px; border-radius: 999px; }
+.bk .chip .m { font-size: 12px; color: #94a3b8; display: flex; gap: 12px; white-space: nowrap; }
+.bk .chip .ib { padding: 4px; border-radius: 50%; color: #94a3b8; display: grid; place-items: center; }
+.bk .chip .ib.cl { margin-left: auto; }
+.bk .btnrow { display: flex; gap: 8px; }
+.bk .gbtn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: #16a34a; color: #fff; font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 10px; }
+.bk .sbtn { background: #f8fafc; border: 1.5px solid #e2e8f0; color: #64748b; font-size: 13px; font-weight: 500; padding: 8px 14px; border-radius: 10px; }
+.bk .vbtn { padding: 12px 14px; background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; color: #c8d4e0; display: flex; justify-content: space-between; align-items: center; }
+.bk .back { font-size: 12px; color: #0ea5e9; font-weight: 500; }
+.bk .sclr { position: absolute; right: 10px; top: 50%; margin-top: -10px; width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: grid; place-items: center; }
+
+/* services table (common/components/ServicesTable, wide layout) */
+.bk .stb { border: 1.5px solid #e2e8f0; border-radius: 14px; overflow: hidden; }
+.bk .sth, .bk .str { display: grid; grid-template-columns: 1fr 74px 52px 108px 64px; align-items: center; }
+.bk .sth { padding: 7px 8px 7px 14px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #b0bec5; letter-spacing: .08em; }
+.bk .sth span { text-align: right; } .bk .sth span:first-child { text-align: left; } .bk .sth span:nth-child(3) { text-align: center; display: flex; align-items: center; justify-content: center; gap: 2px; }
+.bk .vatb { width: 16px; height: 16px; border-radius: 4px; display: grid; place-items: center; color: #b0bec5; }
+.bk .sit { border-top: 1px solid #f1f5f9; overflow: hidden; }
+.bk .sit:first-of-type { border-top: 0; }
+.bk .sit.chg { background: #fffbeb; }
+.bk .str { padding: 10px 8px 10px 14px; }
+.bk .snm { min-width: 0; display: flex; flex-direction: column; gap: 3px; align-items: flex-start; }
+.bk .snm .n { font-size: 14px; font-weight: 500; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.bk .ptag { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: #dcfce7; color: #15803d; }
+.bk .snote { font-size: 11px; color: #64748b; }
+.bk .num { text-align: right; font-size: 13px; color: #64748b; font-variant-numeric: tabular-nums; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; }
+.bk .num.ch { color: #059669; }
+.bk .num s, .bk .gbx s { font-size: 10px; color: #b0bec5; }
+.bk .vatc { text-align: center; font-size: 12px; font-weight: 500; color: #64748b; }
+.bk .gbx { justify-self: end; display: flex; align-items: center; gap: 6px; padding: 4px 7px; border: 1px dashed transparent; border-radius: 9px; color: #94a3b8; }
+.bk .gbx .gv { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.25; }
+.bk .gbx b { font-size: 13px; font-weight: 600; color: #0f172a; font-variant-numeric: tabular-nums; }
+.bk .gbx.ch b { color: #059669; }
+.bk .gbx.hov { border-color: #7dd3fc; background: #f0f9ff; color: #0369a1; }
+.bk .acts { display: flex; justify-content: flex-end; gap: 2px; }
+.bk .acts span { width: 28px; height: 28px; border-radius: 7px; display: grid; place-items: center; color: #b0bec5; }
+.bk .acts span.on { color: #0284c7; background: #e0f2fe; }
+.bk .ned { padding: 0 14px 12px 14px; display: flex; gap: 8px; align-items: flex-start; overflow: hidden; }
+.bk .ned .ta { flex: 1; min-height: 52px; background: #fff; border: 1.5px solid #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.12); border-radius: 8px; padding: 7px 10px; font-size: 12.5px; color: #475569; white-space: pre; }
+.bk .ned .ta.ph { color: #94a3b8; }
+.bk .nok { background: #16a34a; color: #fff; font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 7px; display: flex; align-items: center; gap: 5px; }
+.bk .ssum { padding: 10px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.bk .rab { font-size: 11px; font-weight: 600; color: #92400e; background: #fef3c7; border: 1.5px solid #fde68a; border-radius: 7px; padding: 4px 10px; display: flex; align-items: center; gap: 5px; }
+.bk .tots { display: flex; }
+.bk .tots div { padding: 0 14px; border-right: 1px solid #e2e8f0; text-align: right; }
+.bk .tots div:last-child { border-right: 0; padding-right: 0; }
+.bk .tots small { display: block; font-size: 11px; font-weight: 500; text-transform: uppercase; color: #94a3b8; }
+.bk .tots b { font-size: 13px; font-weight: 500; color: #475569; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bk .tots b.big { font-size: 15px; font-weight: 700; color: #0f172a; }
+.bk .notes { min-height: 78px; padding: 11px 16px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; line-height: 1.5; color: #0f172a; white-space: pre; }
+.bk .notes.ph { color: #94a3b8; }
+.bk .d2h { display: flex; justify-content: space-between; align-items: center; padding-top: 9px; font-size: 13px; font-weight: 600; color: #0f172a; }
+.bk .d2s { width: 36px; height: 20px; border-radius: 999px; background: #cbd5e1; position: relative; }
+.bk .d2s::after { content: ''; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.2); transform: translateX(var(--kx, 0px)); }
+.bk .d2s.on { background: #0ea5e9; }
+.bk .d2f { overflow: hidden; }
+.bk .d2fi { margin-top: 10px; padding-top: 12px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 10px; }
+.bk .d2l { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; letter-spacing: .05em; margin-bottom: 6px; }
+.bk .d2g { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.bk .d2i { padding: 8px 11px; font-size: 13px; border: 1.5px solid #e2e8f0; border-radius: 9px; color: #0f172a; white-space: pre; min-height: 37px; }
+.bk .d2i.ph { color: #b0bec5; }
+.bk .d2i.focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,.12); }
+.bk .d2i.ta { min-height: 56px; }
+.bk .smsl { display: flex; flex-direction: column; gap: 9px; padding-top: 10px; }
+.bk .smsi { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: #334155; }
+.bk .cbx { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #cbd5e1; background: #fff; display: grid; place-items: center; flex: 0 0 auto; margin-top: 2px; }
+.bk .cbx svg { opacity: 0; }
+.bk .cbx.on { background: #0ea5e9; border-color: #0ea5e9; } .bk .cbx.on svg { opacity: 1; }
+.bk .smsi small { display: block; font-size: 11px; color: #94a3b8; }
+.bk .mf { padding: 14px 24px; border-top: 1px solid #f1f5f9; background: #fafbfd; display: flex; flex-direction: column; gap: 10px; flex: 0 0 auto; }
+.bk .cols { display: flex; align-items: center; gap: 8px; padding: 4px 6px; border: 2px solid transparent; border-radius: 10px; align-self: flex-start; }
+.bk .cols .sw { width: 26px; height: 26px; border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,.08); border: 2px solid transparent; }
+.bk .cols .more { height: 26px; padding: 0 9px; border-radius: 999px; border: 1.5px solid #e2e8f0; color: #64748b; font-size: 11px; font-weight: 700; display: grid; place-items: center; background: #fff; }
+.bk .cols .more.on { border-color: #0ea5e9; color: #0ea5e9; background: #f0f9ff; }
+.bk .cols .cn { font-size: 13px; font-weight: 500; color: #475569; margin-left: 4px; }
+.bk .fa { display: flex; justify-content: flex-end; gap: 8px; }
+.bk .fa span { padding: 10px 22px; font-size: 14px; font-weight: 600; border-radius: 999px; line-height: 1; border: 1.5px solid transparent; }
+.bk .fa .gh { color: #475569; }
+.bk .fa .se { background: #f1f5f9; border-color: #e2e8f0; color: #475569; }
+.bk .fa .pr { background: #0ea5e9; color: #fff; box-shadow: 0 2px 8px rgba(14,165,233,.28); }
+
+/* ===== „Sprawy” jako tablica (comms/inbox/board): BoardHeader, LeadBoard, BoardCard ===== */
+.bwrap { position: absolute; inset: 0; display: flex; flex-direction: column; background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; opacity: 0; visibility: hidden; }
+.bhd { display: flex; align-items: center; gap: 12px 16px; padding: 20px 24px 16px; }
+.bhd .tt { flex: 1 1 auto; min-width: 0; }
+.bhd h1 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #0f172a; }
+.bhd p { margin: 2px 0 0; font-size: 13px; color: #64748b; }
+.bsr { display: flex; align-items: center; gap: 8px; flex: 0 1 280px; width: 280px; height: 36px; padding: 0 6px 0 14px; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; color: #64748b; font-size: 14px; white-space: nowrap; }
+.bsr svg { flex: none; }
+.bseg { display: inline-flex; gap: 2px; padding: 3px; background: #f1f5f9; border-radius: 12px; }
+.bseg span { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 14px; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: #475569; white-space: nowrap; }
+.bseg span.on { background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.12); color: #0f172a; }
+.bsc { position: relative; flex: 1; min-height: 0; display: flex; gap: 14px; padding: 4px 24px 24px; }
+.bln { flex: 1 0 248px; max-width: 360px; min-height: 0; display: flex; flex-direction: column; border-radius: 18px; background: rgba(241,245,249,.72); box-shadow: inset 0 0 0 1px rgba(15,23,42,.04); }
+.blh { display: flex; align-items: center; gap: 8px; padding: 14px 14px 10px 16px; }
+.blh .dot { flex: none; width: 8px; height: 8px; border-radius: 999px; }
+.blh h2 { flex: 1; min-width: 0; margin: 0; font-size: 14px; font-weight: 650; letter-spacing: -0.01em; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.blh .cnt { flex: none; min-width: 22px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.blv { margin: -6px 14px 8px 32px; font-size: 12px; font-weight: 600; color: #64748b; font-variant-numeric: tabular-nums; }
+.blv:empty { display: none; }
+.brmw { padding: 0 10px 10px; }
+.brm { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 12px; border: 1px solid; border-radius: 12px; background: #fff; font-size: 13px; font-weight: 600; }
+.brm.hov { box-shadow: 0 6px 16px -10px #b45309; }
+.blb { flex: 1; min-height: 0; padding: 2px 10px 12px; }
+.bcards { position: absolute; inset: 0; pointer-events: none; }
+.bcd { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 6px; padding: 12px 14px 12px 12px; border-radius: 14px; background: #fff; border: 1px solid rgba(15,23,42,.06); box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 4px 14px -6px rgba(15,23,42,.08); color: #0f172a; transform-origin: 50% 40%; }
+.bcd.hov { box-shadow: 0 1px 2px rgba(15,23,42,.06), 0 10px 24px -10px rgba(15,23,42,.18); }
+.bcd .top { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.bcd .src { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 8px; background: #f1f5f9; color: #475569; }
+.bcd .tt { flex: 1; min-width: 0; }
+.bcd .nm { margin: 0; font-size: 14px; line-height: 20px; font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bcd .ps { margin: 0; font-size: 12.5px; line-height: 17px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bcd .am { flex: none; font-size: 13px; line-height: 20px; font-weight: 700; font-variant-numeric: tabular-nums; color: #334155; }
+.bcd .am:empty { display: none; }
+.bcd .sen { margin: 0 0 0 36px; font-size: 13px; line-height: 18px; color: #475569; }
+.bcd .sen.hot { color: #0e6fa0; font-weight: 600; }
+.bcd .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-left: 36px; font-size: 12px; color: #64748b; font-variant-numeric: tabular-nums; }
+.bcd .meta span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.bcd .meta .late { color: #b91c1c; font-weight: 600; }
+.bcd .meta .badge { padding: 2px 8px; border-radius: 999px; font-weight: 600; background: #f3effe; color: #6d28d9; }
+.bslot { position: absolute; border-radius: 14px; border: 1.5px dashed; opacity: 0; visibility: hidden; }
+
+/* ===== „Przypomnij się” (components/LeadReminderDialog.tsx, ModalShell lg 640 px) ===== */
+.rmd { position: absolute; z-index: 55; width: 640px; height: 730px; background: #fff; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,.4); display: flex; flex-direction: column; overflow: hidden; opacity: 0; visibility: hidden; }
+.rh { display: flex; align-items: flex-start; gap: 12px; padding: 22px 24px 16px; border-bottom: 1px solid #f1f5f9; }
+.rh .tt { flex: 1; min-width: 0; }
+.rh h3 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: #0f172a; }
+.rh p { margin: 3px 0 0; font-size: 13.5px; color: #64748b; }
+.rx { flex: none; width: 32px; height: 32px; border-radius: 999px; display: grid; place-items: center; color: #64748b; background: #f1f5f9; }
+.rcn { flex: 1; min-height: 0; overflow: hidden; padding: 18px 24px; }
+.rin { margin: 0 0 12px; font-size: 13.5px; line-height: 1.5; color: #475569; }
+.rl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ri { border: 1px solid #e2e8f0; border-radius: 14px; background: #fff; padding: 12px 14px; }
+.ri.mut header { opacity: .55; }
+.ri header { display: flex; align-items: center; gap: 10px; }
+.cbx { flex: none; width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid #94a3b8; display: grid; place-items: center; color: transparent; background: #fff; }
+.cbx.on { background: #0e6fa0; border-color: #0e6fa0; color: #fff; }
+.cbx.dis { background: #f1f5f9; border-color: #cbd5e1; }
+.ri .tt { flex: 1; min-width: 0; }
+.ri .nm { margin: 0; font-size: 14px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ri .mt { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 2px 0 0; font-size: 12.5px; color: #64748b; }
+.ri .why { color: #b91c1c; }
+.tag { flex: none; display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.tag.ok { background: #f0fdf4; color: #15803d; }
+.tag.neu { background: #f1f5f9; color: #334155; }
+.tag.warn { background: #fef6e4; color: #b45309; }
+.wr { margin-top: 10px; flex-direction: column; gap: 6px; }
+.wr span { display: block; height: 12px; border-radius: 6px; background: linear-gradient(90deg, #f1f5f9 0%, #ffffff 50%, #f1f5f9 100%); background-size: 640px 100%; }
+.wr p { margin: 2px 0 0; font-size: 12.5px; color: #64748b; }
+.dr { margin-top: 10px; min-height: 140px; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 14px; line-height: 1.5; color: #0f172a; white-space: pre-wrap; }
+.dr.dis { background: #f8fafc; color: #475569; }
+.dr .phs { border-radius: 3px; }
+.dr .phs.sel { background: #bfdbfe; }
+.dr .caret { display: inline-block; width: 2px; height: 17px; background: #0ea5e9; vertical-align: -3px; margin-left: 1px; }
+.nt { margin: 8px 0 0; align-items: flex-start; gap: 6px; font-size: 12.5px; line-height: 1.45; color: #b45309; }
+.nt svg { flex: none; margin-top: 1px; }
+.rft { display: flex; align-items: center; gap: 8px; padding: 14px 24px; border-top: 1px solid #f1f5f9; background: #fafbfd; }
+.rft .sig { display: inline-flex; align-items: center; gap: 8px; margin-right: auto; font-size: 13px; color: #475569; }
+.rft .gh { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 999px; font-size: 13.5px; font-weight: 600; color: #475569; }
+.rft .pr { height: 36px; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; background: linear-gradient(135deg, #0e7ab0 0%, #0e6491 100%); box-shadow: 0 12px 24px -12px rgba(14,165,233,.75); color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.rft .pr.dis { opacity: .55; box-shadow: none; }
+.ib.hov { background: #f8fafc; color: #0f172a; }
+
+.asbS { padding: 8px 0 0; }
+.asbT { padding-bottom: 3px; }
+.asbI { padding: 6px 12px; }
+/* ===== rama aplikacji DetailBoost (wspolne/shell.js): Layout/frame.ts + Sidebar/SidebarStyles.ts ===== */
+.dbapp { position: absolute; left: 0; top: 0; background: #0f172a; border-radius: 22px; overflow: hidden; box-shadow: 0 1px 2px rgba(15,23,42,.08), 0 30px 70px -20px rgba(15,23,42,.38); font-family: var(--font); line-height: normal; color: #0f172a; font-size: 14px; }
+.dbsb { position: absolute; left: 0; top: 0; bottom: 0; width: 248px; background: #0f172a; display: flex; flex-direction: column; overflow: hidden; }
+.dbhd { position: relative; padding: 20px 16px 18px; display: flex; align-items: center; flex-shrink: 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+.dblogo { display: flex; flex-direction: column; align-items: center; gap: 10px; flex: 1; min-width: 0; padding: 0 26px; }
+.dbWord { display: block; width: 100%; max-width: 176px; height: auto; }
+.dbcap { color: rgba(242,241,238,.6); font-size: 10px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; line-height: 1.6; text-align: center; padding-left: .2em; }
+.dbcol { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border-radius: 7px; color: #64748b; display: flex; align-items: center; justify-content: center; }
+.dbcol svg { width: 14px; height: 14px; }
+.dbmenu { flex: 1; overflow: hidden; padding: 6px 8px; }
+.dbsec { padding: 14px 0 2px; }
+.dbsec:first-child { padding-top: 6px; }
+.dbst { padding: 0 12px 4px; color: #64748b; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+.dbit { display: flex; align-items: center; gap: 11px; padding: 9px 12px; margin-bottom: 1px; color: #cbd5e1; border-radius: 10px; position: relative; font-size: 13px; font-weight: 500; white-space: nowrap; }
+.dbit::before { content: ''; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); height: 22px; width: 3px; background: #0ea5e9; border-radius: 0 3px 3px 0; opacity: 0; }
+.dbit.on { color: #38bdf8; background: rgba(14,165,233,.11); font-weight: 600; }
+.dbit.on::before { opacity: 1; }
+.dbit.hov:not(.on) { background: rgba(255,255,255,.04); color: #f1f5f9; }
+.dbit.al:not(.on) { color: #fca5a5; background: rgba(220,38,38,.09); }
+.dbic { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dbic svg { width: 17px; height: 17px; }
+.dbbd { margin-left: auto; padding: 2px 7px; background: rgba(239,68,68,.22); border-radius: 9999px; font-size: 10px; font-weight: 700; color: #fca5a5; line-height: 1.5; }
+.dbbd.nt { background: rgba(255,255,255,.14); color: #f8fafc; }
+.dbbd.on, .dbit.on .dbbd { background: rgba(14,165,233,.25); color: #7dd3fc; }
+.dbuser { padding: 12px; border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0; display: flex; align-items: center; gap: 10px; }
+.dbav { width: 34px; height: 34px; border-radius: 50%; background: #1e293b; box-shadow: inset 0 0 0 1px rgba(255,255,255,.08); display: flex; align-items: center; justify-content: center; color: #cbd5e1; font-weight: 700; font-size: 12px; letter-spacing: -.3px; flex-shrink: 0; }
+.dbui { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.dbun { font-size: 13px; font-weight: 600; color: #f1f5f9; line-height: 1.2; white-space: nowrap; }
+.dbur { font-size: 11px; color: #64748b; margin-top: 2px; }
+.dbout { width: 28px; height: 28px; border-radius: 8px; color: #94a3b8; display: flex; align-items: center; justify-content: center; }
+.dbout svg { width: 14px; height: 14px; stroke-width: 1.75; }
+.dbpanel { position: absolute; left: 248px; top: 8px; right: 8px; bottom: 8px; background: #eef2f7; border-radius: 16px; box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 1px 3px rgba(0,0,0,.3); overflow: hidden; }
+</style>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">DetailBoost, instrukcje</div>
+    <h1>Jak działa tablica zapytań?</h1>
+  </header>
+  <p class="lede">Pani Nowak dostała wycenę i nie odpisuje. Tablica układa zapytania w cztery kolumny według tego, kto ma ruch. Animacja pokazuje, co się dzieje z kartą po trzech dniach ciszy, jak przygotować przypomnienie i co dzieje się, gdy klientka odpisze. Wybierz rozdział pod animacją, żeby przejść od razu do niego.</p>
+
+  <div class="player" id="player" aria-label="Animacja: jak działa tablica zapytań">
+    <div class="stage" id="stage">
+      <div class="bgx"></div>
+      <div class="brand"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 684.48 80.64" role="img" aria-label="DetailBoost"><path fill="currentColor" fill-rule="evenodd" d="M73.32 20.16 L72.64 19.03 L71.92 17.92 L71.17 16.83 L70.39 15.77 L69.57 14.74 L68.71 13.74 L67.83 12.76 L66.91 11.81 L65.96 10.89 L64.98 10.01 L63.98 9.15 L62.95 8.33 L61.89 7.55 L60.80 6.80 L59.69 6.08 L58.56 5.40 L57.41 4.76 L56.23 4.16 L55.04 3.59 L53.83 3.07 L52.60 2.58 L51.36 2.14 L50.10 1.74 L48.84 1.37 L47.56 1.05 L46.27 0.77 L44.97 0.54 L43.66 0.34 L42.35 0.19 L41.04 0.09 L39.72 0.02 L38.40 0.00 L0.00 0.00 L0.00 80.64 L20.21 80.64 L75.74 25.11 L75.65 24.89 L75.13 23.68 L74.56 22.49 L73.96 21.31ZM151.93 59.26 L152.55 59.15 L153.16 59.02 L153.77 58.87 L154.37 58.69 L154.97 58.50 L155.56 58.29 L156.15 58.06 L156.72 57.81 L157.29 57.54 L157.85 57.25 L158.40 56.95 L158.94 56.63 L159.47 56.28 L159.98 55.93 L160.49 55.55 L160.98 55.16 L161.46 54.76 L161.93 54.33 L162.38 53.90 L162.81 53.45 L163.24 52.98 L163.64 52.50 L164.03 52.01 L164.41 51.50 L164.76 50.99 L165.11 50.46 L165.43 49.92 L165.73 49.37 L166.02 48.81 L166.29 48.24 L166.54 47.67 L166.77 47.08 L166.98 46.49 L167.17 45.89 L167.35 45.29 L167.50 44.68 L167.63 44.07 L167.74 43.45 L167.84 42.83 L167.91 42.20 L167.96 41.58 L167.99 40.95 L168.00 40.32 L167.99 39.69 L167.96 39.06 L167.91 38.44 L167.84 37.81 L167.74 37.19 L167.63 36.57 L167.50 35.96 L167.35 35.35 L167.17 34.75 L166.98 34.15 L166.77 33.56 L166.54 32.97 L166.29 32.40 L166.02 31.83 L165.73 31.27 L165.43 30.72 L165.11 30.18 L164.76 29.65 L164.41 29.14 L164.03 28.63 L163.64 28.14 L163.24 27.66 L162.81 27.19 L162.38 26.74 L161.93 26.31 L161.46 25.88 L160.98 25.48 L160.49 25.09 L159.98 24.71 L159.47 24.36 L158.94 24.01 L158.40 23.69 L157.85 23.39 L157.29 23.10 L156.72 22.83 L156.15 22.58 L155.56 22.35 L154.97 22.14 L154.37 21.95 L153.77 21.77 L153.16 21.62 L152.55 21.49 L151.93 21.38 L151.31 21.28 L150.68 21.21 L150.06 21.16 L149.43 21.13 L148.83 21.12 L124.48 21.12 L124.48 59.52 L148.83 59.52 L149.43 59.51 L150.06 59.48 L150.68 59.43 L151.31 59.36ZM151.17 28.39 L151.56 28.48 L151.95 28.57 L152.33 28.68 L152.71 28.81 L153.08 28.94 L153.45 29.09 L153.82 29.24 L154.18 29.41 L154.53 29.60 L154.88 29.79 L155.22 29.99 L155.56 30.21 L155.88 30.44 L156.20 30.67 L156.51 30.92 L156.82 31.18 L157.11 31.45 L157.40 31.72 L157.67 32.01 L157.94 32.30 L158.20 32.61 L158.45 32.92 L158.68 33.24 L158.91 33.56 L159.13 33.90 L159.33 34.24 L159.52 34.59 L159.71 34.94 L159.88 35.30 L160.03 35.67 L160.18 36.04 L160.31 36.41 L160.44 36.79 L160.55 37.17 L160.64 37.56 L160.73 37.95 L160.80 38.34 L160.86 38.73 L160.90 39.13 L160.93 39.52 L160.95 39.92 L160.96 40.32 L160.95 40.72 L160.93 41.12 L160.90 41.51 L160.86 41.91 L160.80 42.30 L160.73 42.69 L160.64 43.08 L160.55 43.47 L160.44 43.85 L160.31 44.23 L160.18 44.60 L160.03 44.97 L159.88 45.34 L159.71 45.70 L159.52 46.05 L159.33 46.40 L159.13 46.74 L158.91 47.08 L158.68 47.40 L158.45 47.72 L158.20 48.03 L157.94 48.34 L157.67 48.63 L157.40 48.92 L157.11 49.19 L156.82 49.46 L156.51 49.72 L156.20 49.97 L155.88 50.20 L155.56 50.43 L155.22 50.65 L154.88 50.85 L154.53 51.04 L154.18 51.23 L153.82 51.40 L153.45 51.55 L153.08 51.70 L152.71 51.83 L152.33 51.96 L151.95 52.07 L151.56 52.16 L151.17 52.25 L150.78 52.32 L150.39 52.38 L149.99 52.42 L149.60 52.45 L149.20 52.47 L148.77 52.48 L131.52 52.48 L131.52 28.16 L148.77 28.16 L149.20 28.17 L149.60 28.19 L149.99 28.22 L150.39 28.26 L150.78 28.32ZM219.20 59.52 L219.20 52.48 L189.12 52.48 L189.12 43.84 L214.08 43.84 L214.08 36.80 L189.12 36.80 L189.12 28.16 L219.20 28.16 L219.20 21.12 L182.08 21.12 L182.08 59.52ZM274.24 28.16 L274.24 21.12 L233.28 21.12 L233.28 28.16 L250.24 28.16 L250.24 59.52 L257.28 59.52 L257.28 28.16ZM296.28 59.52 L310.08 30.98 L323.88 59.52 L331.84 59.52 L313.28 21.12 L306.88 21.12 L288.32 59.52ZM78.63 37.68 L78.53 36.37 L78.38 35.06 L78.18 33.75 L77.95 32.45 L77.94 32.41 L29.71 80.64 L38.40 80.64 L38.56 80.64 L78.72 40.48 L78.72 40.32 L78.70 39.00ZM47.56 79.59 L48.84 79.27 L50.10 78.90 L51.36 78.50 L52.60 78.06 L53.83 77.57 L55.04 77.05 L56.23 76.48 L57.41 75.88 L58.56 75.24 L59.69 74.56 L60.80 73.84 L61.89 73.09 L62.95 72.31 L63.98 71.49 L64.98 70.63 L65.96 69.75 L66.91 68.83 L67.83 67.88 L68.71 66.90 L69.57 65.90 L70.39 64.87 L71.17 63.81 L71.92 62.72 L72.64 61.61 L73.32 60.48 L73.96 59.33 L74.56 58.15 L75.13 56.96 L75.65 55.75 L76.14 54.52 L76.58 53.28 L76.98 52.02 L77.35 50.76 L77.67 49.48 L77.95 48.19 L78.18 46.89 L78.38 45.58 L78.53 44.27 L78.53 44.19 L42.27 80.45 L42.35 80.45 L43.66 80.30 L44.97 80.10 L46.27 79.87ZM345.92 21.12 L345.92 59.52 L352.96 59.52 L352.96 21.12ZM402.88 59.52 L402.88 52.48 L374.08 52.48 L374.08 21.12 L367.04 21.12 L367.04 59.52ZM446.97 59.37 L447.34 59.30 L447.70 59.22 L448.06 59.13 L448.42 59.03 L448.77 58.92 L449.12 58.79 L449.47 58.66 L449.81 58.51 L450.14 58.35 L450.48 58.18 L450.80 58.00 L451.12 57.81 L451.43 57.61 L451.74 57.39 L452.04 57.17 L452.33 56.94 L452.61 56.70 L452.89 56.45 L453.15 56.19 L453.41 55.93 L453.66 55.65 L453.90 55.37 L454.13 55.08 L454.35 54.78 L454.57 54.47 L454.77 54.16 L454.96 53.84 L455.14 53.52 L455.31 53.18 L455.47 52.85 L455.62 52.51 L455.75 52.16 L455.88 51.81 L455.99 51.46 L456.09 51.10 L456.18 50.74 L456.26 50.38 L456.33 50.01 L456.38 49.64 L456.43 49.27 L456.46 48.90 L456.47 48.53 L456.48 48.16 L456.47 47.79 L456.46 47.42 L456.43 47.05 L456.38 46.68 L456.33 46.31 L456.26 45.94 L456.18 45.58 L456.09 45.22 L455.99 44.86 L455.88 44.51 L455.75 44.16 L455.62 43.81 L455.47 43.47 L455.31 43.14 L455.14 42.80 L454.96 42.48 L454.77 42.16 L454.57 41.85 L454.35 41.54 L454.13 41.24 L453.90 40.95 L453.66 40.67 L453.41 40.39 L453.34 40.32 L453.41 40.25 L453.66 39.97 L453.90 39.69 L454.13 39.40 L454.35 39.10 L454.57 38.79 L454.77 38.48 L454.96 38.16 L455.14 37.84 L455.31 37.50 L455.47 37.17 L455.62 36.83 L455.75 36.48 L455.88 36.13 L455.99 35.78 L456.09 35.42 L456.18 35.06 L456.26 34.70 L456.33 34.33 L456.38 33.96 L456.43 33.59 L456.46 33.22 L456.47 32.85 L456.48 32.48 L456.47 32.11 L456.46 31.74 L456.43 31.37 L456.38 31.00 L456.33 30.63 L456.26 30.26 L456.18 29.90 L456.09 29.54 L455.99 29.18 L455.88 28.83 L455.75 28.48 L455.62 28.13 L455.47 27.79 L455.31 27.46 L455.14 27.12 L454.96 26.80 L454.77 26.48 L454.57 26.17 L454.35 25.86 L454.13 25.56 L453.90 25.27 L453.66 24.99 L453.41 24.71 L453.15 24.45 L452.89 24.19 L452.61 23.94 L452.33 23.70 L452.04 23.47 L451.74 23.25 L451.43 23.03 L451.12 22.83 L450.80 22.64 L450.48 22.46 L450.14 22.29 L449.81 22.13 L449.47 21.98 L449.12 21.85 L448.77 21.72 L448.42 21.61 L448.06 21.51 L447.70 21.42 L447.34 21.34 L446.97 21.27 L446.60 21.22 L446.23 21.17 L445.86 21.14 L445.49 21.13 L445.15 21.12 L416.96 21.12 L416.96 36.80 L416.96 43.84 L416.96 59.52 L445.15 59.52 L445.49 59.51 L445.86 59.50 L446.23 59.47 L446.60 59.42ZM446.24 43.99 L446.37 44.03 L446.51 44.07 L446.64 44.12 L446.77 44.17 L446.90 44.23 L447.03 44.29 L447.16 44.35 L447.28 44.42 L447.40 44.49 L447.52 44.57 L447.64 44.65 L447.75 44.73 L447.86 44.82 L447.97 44.91 L448.07 45.01 L448.17 45.11 L448.27 45.21 L448.37 45.31 L448.46 45.42 L448.55 45.53 L448.63 45.64 L448.71 45.76 L448.79 45.88 L448.86 46.00 L448.93 46.12 L448.99 46.25 L449.05 46.38 L449.11 46.51 L449.16 46.64 L449.21 46.77 L449.25 46.91 L449.29 47.04 L449.33 47.18 L449.36 47.32 L449.38 47.46 L449.40 47.60 L449.42 47.74 L449.43 47.88 L449.44 48.02 L449.44 48.16 L449.44 48.30 L449.43 48.44 L449.42 48.58 L449.40 48.72 L449.38 48.86 L449.36 49.00 L449.33 49.14 L449.29 49.28 L449.25 49.41 L449.21 49.55 L449.16 49.68 L449.11 49.81 L449.05 49.94 L448.99 50.07 L448.93 50.20 L448.86 50.32 L448.79 50.44 L448.71 50.56 L448.63 50.68 L448.55 50.79 L448.46 50.90 L448.37 51.01 L448.27 51.11 L448.17 51.21 L448.07 51.31 L447.97 51.41 L447.86 51.50 L447.75 51.59 L447.64 51.67 L447.52 51.75 L447.40 51.83 L447.28 51.90 L447.16 51.97 L447.03 52.03 L446.90 52.09 L446.77 52.15 L446.64 52.20 L446.51 52.25 L446.37 52.29 L446.24 52.33 L446.10 52.37 L445.96 52.40 L445.82 52.42 L445.68 52.44 L445.54 52.46 L445.40 52.47 L445.26 52.48 L445.09 52.48 L424.00 52.48 L424.00 43.84 L445.09 43.84 L445.26 43.84 L445.40 43.85 L445.54 43.86 L445.68 43.88 L445.82 43.90 L445.96 43.92 L446.10 43.95ZM446.24 28.31 L446.37 28.35 L446.51 28.39 L446.64 28.44 L446.77 28.49 L446.90 28.55 L447.03 28.61 L447.16 28.67 L447.28 28.74 L447.40 28.81 L447.52 28.89 L447.64 28.97 L447.75 29.05 L447.86 29.14 L447.97 29.23 L448.07 29.33 L448.17 29.43 L448.27 29.53 L448.37 29.63 L448.46 29.74 L448.55 29.85 L448.63 29.96 L448.71 30.08 L448.79 30.20 L448.86 30.32 L448.93 30.44 L448.99 30.57 L449.05 30.70 L449.11 30.83 L449.16 30.96 L449.21 31.09 L449.25 31.23 L449.29 31.36 L449.33 31.50 L449.36 31.64 L449.38 31.78 L449.40 31.92 L449.42 32.06 L449.43 32.20 L449.44 32.34 L449.44 32.48 L449.44 32.62 L449.43 32.76 L449.42 32.90 L449.40 33.04 L449.38 33.18 L449.36 33.32 L449.33 33.46 L449.29 33.60 L449.25 33.73 L449.21 33.87 L449.16 34.00 L449.11 34.13 L449.05 34.26 L448.99 34.39 L448.93 34.52 L448.86 34.64 L448.79 34.76 L448.71 34.88 L448.63 35.00 L448.55 35.11 L448.46 35.22 L448.37 35.33 L448.27 35.43 L448.17 35.53 L448.07 35.63 L447.97 35.73 L447.86 35.82 L447.75 35.91 L447.64 35.99 L447.52 36.07 L447.40 36.15 L447.28 36.22 L447.16 36.29 L447.03 36.35 L446.90 36.41 L446.77 36.47 L446.64 36.52 L446.51 36.57 L446.37 36.61 L446.24 36.65 L446.10 36.69 L445.96 36.72 L445.82 36.74 L445.68 36.76 L445.54 36.78 L445.40 36.79 L445.26 36.80 L445.09 36.80 L424.00 36.80 L424.00 28.16 L445.09 28.16 L445.26 28.16 L445.40 28.17 L445.54 28.18 L445.68 28.20 L445.82 28.22 L445.96 28.24 L446.10 28.27ZM484.95 21.77 L484.35 21.95 L483.75 22.14 L483.16 22.35 L482.57 22.58 L482.00 22.83 L481.43 23.10 L480.87 23.39 L480.32 23.69 L479.78 24.01 L479.25 24.36 L478.74 24.71 L478.23 25.09 L477.74 25.48 L477.26 25.88 L476.79 26.31 L476.34 26.74 L475.91 27.19 L475.48 27.66 L475.08 28.14 L474.69 28.63 L474.31 29.14 L473.96 29.65 L473.61 30.18 L473.29 30.72 L472.99 31.27 L472.70 31.83 L472.43 32.40 L472.18 32.97 L471.95 33.56 L471.74 34.15 L471.55 34.75 L471.37 35.35 L471.22 35.96 L471.09 36.57 L470.98 37.19 L470.88 37.81 L470.81 38.44 L470.76 39.06 L470.73 39.69 L470.72 40.32 L470.73 40.95 L470.76 41.58 L470.81 42.20 L470.88 42.83 L470.98 43.45 L471.09 44.07 L471.22 44.68 L471.37 45.29 L471.55 45.89 L471.74 46.49 L471.95 47.08 L472.18 47.67 L472.43 48.24 L472.70 48.81 L472.99 49.37 L473.29 49.92 L473.61 50.46 L473.96 50.99 L474.31 51.50 L474.69 52.01 L475.08 52.50 L475.48 52.98 L475.91 53.45 L476.34 53.90 L476.79 54.33 L477.26 54.76 L477.74 55.16 L478.23 55.55 L478.74 55.93 L479.25 56.28 L479.78 56.63 L480.32 56.95 L480.87 57.25 L481.43 57.54 L482.00 57.81 L482.57 58.06 L483.16 58.29 L483.75 58.50 L484.35 58.69 L484.95 58.87 L485.56 59.02 L486.17 59.15 L486.79 59.26 L487.41 59.36 L488.04 59.43 L488.66 59.48 L489.29 59.51 L489.89 59.52 L495.07 59.52 L495.67 59.51 L496.30 59.48 L496.92 59.43 L497.55 59.36 L498.17 59.26 L498.79 59.15 L499.40 59.02 L500.01 58.87 L500.61 58.69 L501.21 58.50 L501.80 58.29 L502.39 58.06 L502.96 57.81 L503.53 57.54 L504.09 57.25 L504.64 56.95 L505.18 56.63 L505.71 56.28 L506.22 55.93 L506.73 55.55 L507.22 55.16 L507.70 54.76 L508.17 54.33 L508.62 53.90 L509.05 53.45 L509.48 52.98 L509.88 52.50 L510.27 52.01 L510.65 51.50 L511.00 50.99 L511.35 50.46 L511.67 49.92 L511.97 49.37 L512.26 48.81 L512.53 48.24 L512.78 47.67 L513.01 47.08 L513.22 46.49 L513.41 45.89 L513.59 45.29 L513.74 44.68 L513.87 44.07 L513.98 43.45 L514.08 42.83 L514.15 42.20 L514.20 41.58 L514.23 40.95 L514.24 40.32 L514.23 39.69 L514.20 39.06 L514.15 38.44 L514.08 37.81 L513.98 37.19 L513.87 36.57 L513.74 35.96 L513.59 35.35 L513.41 34.75 L513.22 34.15 L513.01 33.56 L512.78 32.97 L512.53 32.40 L512.26 31.83 L511.97 31.27 L511.67 30.72 L511.35 30.18 L511.00 29.65 L510.65 29.14 L510.27 28.63 L509.88 28.14 L509.48 27.66 L509.05 27.19 L508.62 26.74 L508.17 26.31 L507.70 25.88 L507.22 25.48 L506.73 25.09 L506.22 24.71 L505.71 24.36 L505.18 24.01 L504.64 23.69 L504.09 23.39 L503.53 23.10 L502.96 22.83 L502.39 22.58 L501.80 22.35 L501.21 22.14 L500.61 21.95 L500.01 21.77 L499.40 21.62 L498.79 21.49 L498.17 21.38 L497.55 21.28 L496.92 21.21 L496.30 21.16 L495.67 21.13 L495.07 21.12 L489.89 21.12 L489.29 21.13 L488.66 21.16 L488.04 21.21 L487.41 21.28 L486.79 21.38 L486.17 21.49 L485.56 21.62ZM497.80 28.48 L498.19 28.57 L498.57 28.68 L498.95 28.81 L499.32 28.94 L499.69 29.09 L500.06 29.24 L500.42 29.41 L500.77 29.60 L501.12 29.79 L501.46 29.99 L501.80 30.21 L502.12 30.44 L502.44 30.67 L502.75 30.92 L503.06 31.18 L503.35 31.45 L503.64 31.72 L503.91 32.01 L504.18 32.30 L504.44 32.61 L504.69 32.92 L504.92 33.24 L505.15 33.56 L505.37 33.90 L505.57 34.24 L505.76 34.59 L505.95 34.94 L506.12 35.30 L506.27 35.67 L506.42 36.04 L506.55 36.41 L506.68 36.79 L506.79 37.17 L506.88 37.56 L506.97 37.95 L507.04 38.34 L507.10 38.73 L507.14 39.13 L507.17 39.52 L507.19 39.92 L507.20 40.32 L507.19 40.72 L507.17 41.12 L507.14 41.51 L507.10 41.91 L507.04 42.30 L506.97 42.69 L506.88 43.08 L506.79 43.47 L506.68 43.85 L506.55 44.23 L506.42 44.60 L506.27 44.97 L506.12 45.34 L505.95 45.70 L505.76 46.05 L505.57 46.40 L505.37 46.74 L505.15 47.08 L504.92 47.40 L504.69 47.72 L504.44 48.03 L504.18 48.34 L503.91 48.63 L503.64 48.92 L503.35 49.19 L503.06 49.46 L502.75 49.72 L502.44 49.97 L502.12 50.20 L501.80 50.43 L501.46 50.65 L501.12 50.85 L500.77 51.04 L500.42 51.23 L500.06 51.40 L499.69 51.55 L499.32 51.70 L498.95 51.83 L498.57 51.96 L498.19 52.07 L497.80 52.16 L497.41 52.25 L497.02 52.32 L496.63 52.38 L496.23 52.42 L495.84 52.45 L495.44 52.47 L495.01 52.48 L489.95 52.48 L489.52 52.47 L489.12 52.45 L488.73 52.42 L488.33 52.38 L487.94 52.32 L487.55 52.25 L487.16 52.16 L486.77 52.07 L486.39 51.96 L486.01 51.83 L485.64 51.70 L485.27 51.55 L484.90 51.40 L484.54 51.23 L484.19 51.04 L483.84 50.85 L483.50 50.65 L483.16 50.43 L482.84 50.20 L482.52 49.97 L482.21 49.72 L481.90 49.46 L481.61 49.19 L481.32 48.92 L481.05 48.63 L480.78 48.34 L480.52 48.03 L480.27 47.72 L480.04 47.40 L479.81 47.08 L479.59 46.74 L479.39 46.40 L479.20 46.05 L479.01 45.70 L478.84 45.34 L478.69 44.97 L478.54 44.60 L478.41 44.23 L478.28 43.85 L478.17 43.47 L478.08 43.08 L477.99 42.69 L477.92 42.30 L477.86 41.91 L477.82 41.51 L477.79 41.12 L477.77 40.72 L477.76 40.32 L477.77 39.92 L477.79 39.52 L477.82 39.13 L477.86 38.73 L477.92 38.34 L477.99 37.95 L478.08 37.56 L478.17 37.17 L478.28 36.79 L478.41 36.41 L478.54 36.04 L478.69 35.67 L478.84 35.30 L479.01 34.94 L479.20 34.59 L479.39 34.24 L479.59 33.90 L479.81 33.56 L480.04 33.24 L480.27 32.92 L480.52 32.61 L480.78 32.30 L481.05 32.01 L481.32 31.72 L481.61 31.45 L481.90 31.18 L482.21 30.92 L482.52 30.67 L482.84 30.44 L483.16 30.21 L483.50 29.99 L483.84 29.79 L484.19 29.60 L484.54 29.41 L484.90 29.24 L485.27 29.09 L485.64 28.94 L486.01 28.81 L486.39 28.68 L486.77 28.57 L487.16 28.48 L487.55 28.39 L487.94 28.32 L488.33 28.26 L488.73 28.22 L489.12 28.19 L489.52 28.17 L489.95 28.16 L495.01 28.16 L495.44 28.17 L495.84 28.19 L496.23 28.22 L496.63 28.26 L497.02 28.32 L497.41 28.39ZM543.16 21.62 L542.55 21.77 L541.95 21.95 L541.35 22.14 L540.76 22.35 L540.17 22.58 L539.60 22.83 L539.03 23.10 L538.47 23.39 L537.92 23.69 L537.38 24.01 L536.85 24.36 L536.34 24.71 L535.83 25.09 L535.34 25.48 L534.86 25.88 L534.39 26.31 L533.94 26.74 L533.51 27.19 L533.08 27.66 L532.68 28.14 L532.29 28.63 L531.91 29.14 L531.56 29.65 L531.21 30.18 L530.89 30.72 L530.59 31.27 L530.30 31.83 L530.03 32.40 L529.78 32.97 L529.55 33.56 L529.34 34.15 L529.15 34.75 L528.97 35.35 L528.82 35.96 L528.69 36.57 L528.58 37.19 L528.48 37.81 L528.41 38.44 L528.36 39.06 L528.33 39.69 L528.32 40.32 L528.33 40.95 L528.36 41.58 L528.41 42.20 L528.48 42.83 L528.58 43.45 L528.69 44.07 L528.82 44.68 L528.97 45.29 L529.15 45.89 L529.34 46.49 L529.55 47.08 L529.78 47.67 L530.03 48.24 L530.30 48.81 L530.59 49.37 L530.89 49.92 L531.21 50.46 L531.56 50.99 L531.91 51.50 L532.29 52.01 L532.68 52.50 L533.08 52.98 L533.51 53.45 L533.94 53.90 L534.39 54.33 L534.86 54.76 L535.34 55.16 L535.83 55.55 L536.34 55.93 L536.85 56.28 L537.38 56.63 L537.92 56.95 L538.47 57.25 L539.03 57.54 L539.60 57.81 L540.17 58.06 L540.76 58.29 L541.35 58.50 L541.95 58.69 L542.55 58.87 L543.16 59.02 L543.77 59.15 L544.39 59.26 L545.01 59.36 L545.64 59.43 L546.26 59.48 L546.89 59.51 L547.49 59.52 L552.67 59.52 L553.27 59.51 L553.90 59.48 L554.52 59.43 L555.15 59.36 L555.77 59.26 L556.39 59.15 L557.00 59.02 L557.61 58.87 L558.21 58.69 L558.81 58.50 L559.40 58.29 L559.99 58.06 L560.56 57.81 L561.13 57.54 L561.69 57.25 L562.24 56.95 L562.78 56.63 L563.31 56.28 L563.82 55.93 L564.33 55.55 L564.82 55.16 L565.30 54.76 L565.77 54.33 L566.22 53.90 L566.65 53.45 L567.08 52.98 L567.48 52.50 L567.87 52.01 L568.25 51.50 L568.60 50.99 L568.95 50.46 L569.27 49.92 L569.57 49.37 L569.86 48.81 L570.13 48.24 L570.38 47.67 L570.61 47.08 L570.82 46.49 L571.01 45.89 L571.19 45.29 L571.34 44.68 L571.47 44.07 L571.58 43.45 L571.68 42.83 L571.75 42.20 L571.80 41.58 L571.83 40.95 L571.84 40.32 L571.83 39.69 L571.80 39.06 L571.75 38.44 L571.68 37.81 L571.58 37.19 L571.47 36.57 L571.34 35.96 L571.19 35.35 L571.01 34.75 L570.82 34.15 L570.61 33.56 L570.38 32.97 L570.13 32.40 L569.86 31.83 L569.57 31.27 L569.27 30.72 L568.95 30.18 L568.60 29.65 L568.25 29.14 L567.87 28.63 L567.48 28.14 L567.08 27.66 L566.65 27.19 L566.22 26.74 L565.77 26.31 L565.30 25.88 L564.82 25.48 L564.33 25.09 L563.82 24.71 L563.31 24.36 L562.78 24.01 L562.24 23.69 L561.69 23.39 L561.13 23.10 L560.56 22.83 L559.99 22.58 L559.40 22.35 L558.81 22.14 L558.21 21.95 L557.61 21.77 L557.00 21.62 L556.39 21.49 L555.77 21.38 L555.15 21.28 L554.52 21.21 L553.90 21.16 L553.27 21.13 L552.67 21.12 L547.49 21.12 L546.89 21.13 L546.26 21.16 L545.64 21.21 L545.01 21.28 L544.39 21.38 L543.77 21.49ZM555.01 28.39 L555.40 28.48 L555.79 28.57 L556.17 28.68 L556.55 28.81 L556.92 28.94 L557.29 29.09 L557.66 29.24 L558.02 29.41 L558.37 29.60 L558.72 29.79 L559.06 29.99 L559.40 30.21 L559.72 30.44 L560.04 30.67 L560.35 30.92 L560.66 31.18 L560.95 31.45 L561.24 31.72 L561.51 32.01 L561.78 32.30 L562.04 32.61 L562.29 32.92 L562.52 33.24 L562.75 33.56 L562.97 33.90 L563.17 34.24 L563.36 34.59 L563.55 34.94 L563.72 35.30 L563.87 35.67 L564.02 36.04 L564.15 36.41 L564.28 36.79 L564.39 37.17 L564.48 37.56 L564.57 37.95 L564.64 38.34 L564.70 38.73 L564.74 39.13 L564.77 39.52 L564.79 39.92 L564.80 40.32 L564.79 40.72 L564.77 41.12 L564.74 41.51 L564.70 41.91 L564.64 42.30 L564.57 42.69 L564.48 43.08 L564.39 43.47 L564.28 43.85 L564.15 44.23 L564.02 44.60 L563.87 44.97 L563.72 45.34 L563.55 45.70 L563.36 46.05 L563.17 46.40 L562.97 46.74 L562.75 47.08 L562.52 47.40 L562.29 47.72 L562.04 48.03 L561.78 48.34 L561.51 48.63 L561.24 48.92 L560.95 49.19 L560.66 49.46 L560.35 49.72 L560.04 49.97 L559.72 50.20 L559.40 50.43 L559.06 50.65 L558.72 50.85 L558.37 51.04 L558.02 51.23 L557.66 51.40 L557.29 51.55 L556.92 51.70 L556.55 51.83 L556.17 51.96 L555.79 52.07 L555.40 52.16 L555.01 52.25 L554.62 52.32 L554.23 52.38 L553.83 52.42 L553.44 52.45 L553.04 52.47 L552.61 52.48 L547.55 52.48 L547.12 52.47 L546.72 52.45 L546.33 52.42 L545.93 52.38 L545.54 52.32 L545.15 52.25 L544.76 52.16 L544.37 52.07 L543.99 51.96 L543.61 51.83 L543.24 51.70 L542.87 51.55 L542.50 51.40 L542.14 51.23 L541.79 51.04 L541.44 50.85 L541.10 50.65 L540.76 50.43 L540.44 50.20 L540.12 49.97 L539.81 49.72 L539.50 49.46 L539.21 49.19 L538.92 48.92 L538.65 48.63 L538.38 48.34 L538.12 48.03 L537.87 47.72 L537.64 47.40 L537.41 47.08 L537.19 46.74 L536.99 46.40 L536.80 46.05 L536.61 45.70 L536.44 45.34 L536.29 44.97 L536.14 44.60 L536.01 44.23 L535.88 43.85 L535.77 43.47 L535.68 43.08 L535.59 42.69 L535.52 42.30 L535.46 41.91 L535.42 41.51 L535.39 41.12 L535.37 40.72 L535.36 40.32 L535.37 39.92 L535.39 39.52 L535.42 39.13 L535.46 38.73 L535.52 38.34 L535.59 37.95 L535.68 37.56 L535.77 37.17 L535.88 36.79 L536.01 36.41 L536.14 36.04 L536.29 35.67 L536.44 35.30 L536.61 34.94 L536.80 34.59 L536.99 34.24 L537.19 33.90 L537.41 33.56 L537.64 33.24 L537.87 32.92 L538.12 32.61 L538.38 32.30 L538.65 32.01 L538.92 31.72 L539.21 31.45 L539.50 31.18 L539.81 30.92 L540.12 30.67 L540.44 30.44 L540.76 30.21 L541.10 29.99 L541.44 29.79 L541.79 29.60 L542.14 29.41 L542.50 29.24 L542.87 29.09 L543.24 28.94 L543.61 28.81 L543.99 28.68 L544.37 28.57 L544.76 28.48 L545.15 28.39 L545.54 28.32 L545.93 28.26 L546.33 28.22 L546.72 28.19 L547.12 28.17 L547.55 28.16 L552.61 28.16 L553.04 28.17 L553.44 28.19 L553.83 28.22 L554.23 28.26 L554.62 28.32ZM594.50 21.51 L594.14 21.61 L593.79 21.72 L593.44 21.85 L593.09 21.98 L592.75 22.13 L592.42 22.29 L592.08 22.46 L591.76 22.64 L591.44 22.83 L591.13 23.03 L590.82 23.25 L590.52 23.47 L590.23 23.70 L589.95 23.94 L589.67 24.19 L589.41 24.45 L589.15 24.71 L588.90 24.99 L588.66 25.27 L588.43 25.56 L588.21 25.86 L587.99 26.17 L587.79 26.48 L587.60 26.80 L587.42 27.12 L587.25 27.46 L587.09 27.79 L586.94 28.13 L586.81 28.48 L586.68 28.83 L586.57 29.18 L586.47 29.54 L586.38 29.90 L586.30 30.26 L586.23 30.63 L586.18 31.00 L586.13 31.37 L586.10 31.74 L586.09 32.11 L586.08 32.48 L586.09 32.85 L586.10 33.22 L586.13 33.59 L586.18 33.96 L586.23 34.33 L586.30 34.70 L586.38 35.06 L586.47 35.42 L586.57 35.78 L586.68 36.13 L586.81 36.48 L586.94 36.83 L587.09 37.17 L587.25 37.50 L587.42 37.84 L587.60 38.16 L587.79 38.48 L587.99 38.79 L588.21 39.10 L588.43 39.40 L588.66 39.69 L588.90 39.97 L589.15 40.25 L589.41 40.51 L589.67 40.77 L589.95 41.02 L590.23 41.26 L590.52 41.49 L590.82 41.71 L591.13 41.93 L591.44 42.13 L591.76 42.32 L592.08 42.50 L592.42 42.67 L592.75 42.83 L593.09 42.98 L593.44 43.11 L593.79 43.24 L594.14 43.35 L594.50 43.45 L594.86 43.54 L595.22 43.62 L595.59 43.69 L595.96 43.74 L596.33 43.79 L596.70 43.82 L597.07 43.83 L597.41 43.84 L617.89 43.84 L618.06 43.84 L618.20 43.85 L618.34 43.86 L618.48 43.88 L618.62 43.90 L618.76 43.92 L618.90 43.95 L619.04 43.99 L619.17 44.03 L619.31 44.07 L619.44 44.12 L619.57 44.17 L619.70 44.23 L619.83 44.29 L619.96 44.35 L620.08 44.42 L620.20 44.49 L620.32 44.57 L620.44 44.65 L620.55 44.73 L620.66 44.82 L620.77 44.91 L620.87 45.01 L620.97 45.11 L621.07 45.21 L621.17 45.31 L621.26 45.42 L621.35 45.53 L621.43 45.64 L621.51 45.76 L621.59 45.88 L621.66 46.00 L621.73 46.12 L621.79 46.25 L621.85 46.38 L621.91 46.51 L621.96 46.64 L622.01 46.77 L622.05 46.91 L622.09 47.04 L622.13 47.18 L622.16 47.32 L622.18 47.46 L622.20 47.60 L622.22 47.74 L622.23 47.88 L622.24 48.02 L622.24 48.16 L622.24 48.30 L622.23 48.44 L622.22 48.58 L622.20 48.72 L622.18 48.86 L622.16 49.00 L622.13 49.14 L622.09 49.28 L622.05 49.41 L622.01 49.55 L621.96 49.68 L621.91 49.81 L621.85 49.94 L621.79 50.07 L621.73 50.20 L621.66 50.32 L621.59 50.44 L621.51 50.56 L621.43 50.68 L621.35 50.79 L621.26 50.90 L621.17 51.01 L621.07 51.11 L620.97 51.21 L620.87 51.31 L620.77 51.41 L620.66 51.50 L620.55 51.59 L620.44 51.67 L620.32 51.75 L620.20 51.83 L620.08 51.90 L619.96 51.97 L619.83 52.03 L619.70 52.09 L619.57 52.15 L619.44 52.20 L619.31 52.25 L619.17 52.29 L619.04 52.33 L618.90 52.37 L618.76 52.40 L618.62 52.42 L618.48 52.44 L618.34 52.46 L618.20 52.47 L618.06 52.48 L617.89 52.48 L585.92 52.48 L585.92 59.52 L617.95 59.52 L618.29 59.51 L618.66 59.50 L619.03 59.47 L619.40 59.42 L619.77 59.37 L620.14 59.30 L620.50 59.22 L620.86 59.13 L621.22 59.03 L621.57 58.92 L621.92 58.79 L622.27 58.66 L622.61 58.51 L622.94 58.35 L623.28 58.18 L623.60 58.00 L623.92 57.81 L624.23 57.61 L624.54 57.39 L624.84 57.17 L625.13 56.94 L625.41 56.70 L625.69 56.45 L625.95 56.19 L626.21 55.93 L626.46 55.65 L626.70 55.37 L626.93 55.08 L627.15 54.78 L627.37 54.47 L627.57 54.16 L627.76 53.84 L627.94 53.52 L628.11 53.18 L628.27 52.85 L628.42 52.51 L628.55 52.16 L628.68 51.81 L628.79 51.46 L628.89 51.10 L628.98 50.74 L629.06 50.38 L629.13 50.01 L629.18 49.64 L629.23 49.27 L629.26 48.90 L629.27 48.53 L629.28 48.16 L629.27 47.79 L629.26 47.42 L629.23 47.05 L629.18 46.68 L629.13 46.31 L629.06 45.94 L628.98 45.58 L628.89 45.22 L628.79 44.86 L628.68 44.51 L628.55 44.16 L628.42 43.81 L628.27 43.47 L628.11 43.14 L627.94 42.80 L627.76 42.48 L627.57 42.16 L627.37 41.85 L627.15 41.54 L626.93 41.24 L626.70 40.95 L626.46 40.67 L626.21 40.39 L625.95 40.13 L625.69 39.87 L625.41 39.62 L625.13 39.38 L624.84 39.15 L624.54 38.93 L624.23 38.71 L623.92 38.51 L623.60 38.32 L623.28 38.14 L622.94 37.97 L622.61 37.81 L622.27 37.66 L621.92 37.53 L621.57 37.40 L621.22 37.29 L620.86 37.19 L620.50 37.10 L620.14 37.02 L619.77 36.95 L619.40 36.90 L619.03 36.85 L618.66 36.82 L618.29 36.81 L617.95 36.80 L597.47 36.80 L597.30 36.80 L597.16 36.79 L597.02 36.78 L596.88 36.76 L596.74 36.74 L596.60 36.72 L596.46 36.69 L596.32 36.65 L596.19 36.61 L596.05 36.57 L595.92 36.52 L595.79 36.47 L595.66 36.41 L595.53 36.35 L595.40 36.29 L595.28 36.22 L595.16 36.15 L595.04 36.07 L594.92 35.99 L594.81 35.91 L594.70 35.82 L594.59 35.73 L594.49 35.63 L594.39 35.53 L594.29 35.43 L594.19 35.33 L594.10 35.22 L594.01 35.11 L593.93 35.00 L593.85 34.88 L593.77 34.76 L593.70 34.64 L593.63 34.52 L593.57 34.39 L593.51 34.26 L593.45 34.13 L593.40 34.00 L593.35 33.87 L593.31 33.73 L593.27 33.60 L593.23 33.46 L593.20 33.32 L593.18 33.18 L593.16 33.04 L593.14 32.90 L593.13 32.76 L593.12 32.62 L593.12 32.48 L593.12 32.34 L593.13 32.20 L593.14 32.06 L593.16 31.92 L593.18 31.78 L593.20 31.64 L593.23 31.50 L593.27 31.36 L593.31 31.23 L593.35 31.09 L593.40 30.96 L593.45 30.83 L593.51 30.70 L593.57 30.57 L593.63 30.44 L593.70 30.32 L593.77 30.20 L593.85 30.08 L593.93 29.96 L594.01 29.85 L594.10 29.74 L594.19 29.63 L594.29 29.53 L594.39 29.43 L594.49 29.33 L594.59 29.23 L594.70 29.14 L594.81 29.05 L594.92 28.97 L595.04 28.89 L595.16 28.81 L595.28 28.74 L595.40 28.67 L595.53 28.61 L595.66 28.55 L595.79 28.49 L595.92 28.44 L596.05 28.39 L596.19 28.35 L596.32 28.31 L596.46 28.27 L596.60 28.24 L596.74 28.22 L596.88 28.20 L597.02 28.18 L597.16 28.17 L597.30 28.16 L597.47 28.16 L626.88 28.16 L626.88 21.12 L597.41 21.12 L597.07 21.13 L596.70 21.14 L596.33 21.17 L595.96 21.22 L595.59 21.27 L595.22 21.34 L594.86 21.42ZM684.48 21.12 L643.52 21.12 L643.52 28.16 L660.48 28.16 L660.48 59.52 L667.52 59.52 L667.52 28.16 L684.48 28.16Z"/></svg><span>Instrukcja</span></div>
+      <div class="cap">
+        <div class="cnum" id="cnum"></div>
+        <div class="ctx" id="ctx"></div>
+      </div>
+      <div class="prog"><div class="pl" id="pl"></div><div class="pb" id="pb"></div></div>
+
+      <div class="view" id="view"><div class="scene" id="scene"></div></div>
+
+      <div class="hl" id="hl"></div>
+      <div class="ring" id="ring"></div>
+      <div class="touch" id="touch"></div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9.5-7 1.6-3.2 6.9z" fill="#0f172a" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+
+  <div class="scrub" id="scrub"><i id="scrubI"></i></div>
+  <div class="bar">
+    <button type="button" id="bPrev">‹ Poprzedni krok</button>
+    <button type="button" class="pri" id="bPlay">Odtwórz</button>
+    <button type="button" id="bNext">Następny krok ›</button>
+    <span class="sp"></span>
+    <label><input type="checkbox" id="optStop"> Zatrzymuj po każdym kroku</label>
+    <button type="button" id="bRate">Tempo 1×</button>
+  </div>
+  <div class="chaps" id="chaps"></div>
+</div>
+<script>
+// Rama aplikacji DetailBoost (widgets/Layout + widgets/Sidebar, frontend @ bf5ca0b), wspólna dla całego kursu.
+// Na komputerze ciemny kolor menu (#0f172a) obiega całe okno, a widok leży w jasnym panelu: odstęp 8 px
+// u góry, z prawej i u dołu, zaokrąglenie 16 px (Layout/frame.ts). Menu właściciela: Marek Wiśniewski.
+// Ikony menu to bryły z widgets/Sidebar/menuIcons.tsx, logo z public/brand.
+(() => {
+  const DB_ICONS = {
+"Dashboard": "<g><mask id=\"miDashboard\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M9.58 27L27 9.58\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M7.18 27L27 7.18\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miDashboard)\"><path d=\"M3 3h8v10H3zM13 3h8v6h-8zM3 15h8v6H3zM13 11H21V15A6 6 0 0 1 15 21H13Z\" fill=\"currentColor\"/></g></g>",
+"Notifications": "<g><g><path d=\"M12 2.6a6.2 6.2 0 0 1 6.2 6.2V13l2.3 3.4v1.2h-17v-1.2L5.8 13V8.8A6.2 6.2 0 0 1 12 2.6ZM9.6 19.2h4.8a2.4 2.4 0 0 1-4.8 0Z\" fill=\"currentColor\"/></g></g>",
+"WorkTime": "<g><mask id=\"miWorkTime\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M12 6.6V12.4l3.6 2.4\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.1\" stroke-linecap=\"square\"/><path d=\"M8.03 27.5L27.5 8.03\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M5.63 27.5L27.5 5.63\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miWorkTime)\"><path d=\"M2.5 12a9.5 9.5 0 1 0 19 0a9.5 9.5 0 1 0 -19 0Z\" fill=\"currentColor\"/></g></g>",
+"Leave": "<g><mask id=\"miLeave\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M3 9.6h18v1.3H3z\" fill=\"#000\"/><path d=\"M6.2 19.4 12.6 13h2.2l-6.4 6.4z\" fill=\"#000\"/><path d=\"M10.4 19.4 16.8 13H19l-6.4 6.4z\" fill=\"#000\"/></mask><g mask=\"url(#miLeave)\"><path d=\"M7 2.5h2.4v4.2H7zM14.6 2.5H17v4.2h-2.4zM3 5H21V14.5A6.5 6.5 0 0 1 14.5 21H3Z\" fill=\"currentColor\"/></g></g>",
+"Visits": "<g><mask id=\"miVisits\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M3 9.6h18v1.3H3z\" fill=\"#000\"/><path d=\"M7.4 15.6l2.6 2.5 5.2-5.2\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.1\" stroke-linecap=\"square\"/><path d=\"M9.29 27L27 9.29\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M6.89 27L27 6.89\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miVisits)\"><path d=\"M7 2.5h2.4v4.2H7zM14.6 2.5H17v4.2h-2.4zM3 5H21V14.5A6.5 6.5 0 0 1 14.5 21H3Z\" fill=\"currentColor\"/></g></g>",
+"Calendar": "<g><mask id=\"miCalendar\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M3 9.6h18v1.3H3z\" fill=\"#000\"/><path d=\"M6 13.2h3v3H6z\" fill=\"#000\"/><path d=\"M10.6 13.2h3v3h-3z\" fill=\"#000\"/><path d=\"M6 17.4h3v2H6z\" fill=\"#000\"/><path d=\"M9.29 27L27 9.29\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M6.89 27L27 6.89\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miCalendar)\"><path d=\"M7 2.5h2.4v4.2H7zM14.6 2.5H17v4.2h-2.4zM3 5H21V14.5A6.5 6.5 0 0 1 14.5 21H3Z\" fill=\"currentColor\"/></g></g>",
+"BatchOrders": "<g><g><path d=\"M12 2.5l9.5 5-9.5 5-9.5-5zM4.3 11.4 12 15.5l7.7-4.1 1.8 1-9.5 5-9.5-5zM4.3 15.9 12 20l7.7-4.1 1.8 1-9.5 5-9.5-5z\" fill=\"currentColor\"/></g></g>",
+"Gallery": "<g><mask id=\"miGallery\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M8.6 18.6l3.6-5 2.6 3.2 1.7-2 2.6 3.8z\" fill=\"#000\"/><path d=\"M9.7 10.4a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0Z\" fill=\"#000\"/><path d=\"M10.08 27.5L27.5 10.08\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M7.68 27.5L27.5 7.68\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miGallery)\"><path d=\"M2.5 2.5h15v2.2H4.7V17.5H2.5zM6.5 6.5H21.5V15.5A6 6 0 0 1 15.5 21.5H6.5Z\" fill=\"currentColor\"/></g></g>",
+"Inquiries": "<g><mask id=\"miInquiries\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M9.58 27L27 9.58\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M7.18 27L27 7.18\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miInquiries)\"><path d=\"M3 12.6h5.4l1.6 2.6h4l1.6-2.6H21V15a6 6 0 0 1-6 6H3z\" fill=\"currentColor\"/><path d=\"M3.9 12.6 6.6 4.6h10.8l2.7 8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\"/></g></g>",
+"Mail": "<g><mask id=\"miMail\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M4.6 6.6L12 12.2L19.4 6.6\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.6\" stroke-linecap=\"square\"/><path d=\"M7.58 27L27 7.58\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M5.18 27L27 5.18\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miMail)\"><path d=\"M3 5H21V13a6 6 0 0 1-6 6H3z\" fill=\"currentColor\"/></g></g>",
+"Customers": "<g><mask id=\"miCustomers\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M3.700000000000001 7.6a5.1 5.1 0 1 0 10.2 0a5.1 5.1 0 1 0 -10.2 0Z\" fill=\"#000\"/><path d=\"M0.6 22.4v-3.2A6.6 6.6 0 0 1 7.2 12.6h3.2A6.6 6.6 0 0 1 17 19.2v3.2z\" fill=\"#000\"/><path d=\"M5.1000000000000005 7.6a3.7 3.7 0 1 0 7.4 0a3.7 3.7 0 1 0 -7.4 0Z\" fill=\"#fff\"/><path d=\"M2 21v-1.8A5.2 5.2 0 0 1 7.2 14h3.2A5.2 5.2 0 0 1 15.6 19.2V21z\" fill=\"#fff\"/></mask><g mask=\"url(#miCustomers)\"><path d=\"M13.299999999999999 6.6a3.1 3.1 0 1 0 6.2 0a3.1 3.1 0 1 0 -6.2 0ZM12.6 12.7A5 5 0 0 1 15.8 11.6h1.2a5 5 0 0 1 5 5v2.6h-9.4zM5.1000000000000005 7.6a3.7 3.7 0 1 0 7.4 0a3.7 3.7 0 1 0 -7.4 0ZM2 21v-1.8A5.2 5.2 0 0 1 7.2 14h3.2A5.2 5.2 0 0 1 15.6 19.2V21z\" fill=\"currentColor\"/></g></g>",
+"ScheduledContent": "<g><mask id=\"miScheduledContent\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M7.4 11.2a4.6 4.6 0 1 0 9.2 0a4.6 4.6 0 1 0 -9.2 0Z\" fill=\"#000\"/><path d=\"M8.8 11.2a3.2 3.2 0 1 0 6.4 0a3.2 3.2 0 1 0 -6.4 0Z\" fill=\"#fff\"/><path d=\"M12 9.2v2.4l1.4 1\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.1\" stroke-linecap=\"square\"/><path d=\"M10.08 25.5L27.5 8.08\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M7.68 25.5L27.5 5.68\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miScheduledContent)\"><path d=\"M2.5 3h19v10.5a6 6 0 0 1-6 6H9l-5 3.5v-3.5H2.5z\" fill=\"currentColor\"/></g></g>",
+"Vehicles": "<g><mask id=\"miVehicles\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M4.7 12a7.3 7.3 0 1 0 14.6 0a7.3 7.3 0 1 0 -14.6 0Z\" fill=\"#000\"/><path d=\"M5.3 12a6.7 6.7 0 1 0 13.4 0a6.7 6.7 0 1 0 -13.4 0Z\" fill=\"#fff\"/><path d=\"M12.92 9.04L13.8 6.17A6.1 6.1 0 0 1 16.99 8.48L14.53 10.21A3.1 3.1 0 0 0 12.92 9.04Z\" fill=\"#000\"/><path d=\"M15.1 11.96L18.1 11.91A6.1 6.1 0 0 1 16.88 15.66L14.48 13.86A3.1 3.1 0 0 0 15.1 11.96Z\" fill=\"#000\"/><path d=\"M13 14.93L13.97 17.77A6.1 6.1 0 0 1 10.03 17.77L11 14.93A3.1 3.1 0 0 0 13 14.93Z\" fill=\"#000\"/><path d=\"M9.52 13.86L7.12 15.66A6.1 6.1 0 0 1 5.9 11.91L8.9 11.96A3.1 3.1 0 0 0 9.52 13.86Z\" fill=\"#000\"/><path d=\"M9.47 10.21L7.01 8.48A6.1 6.1 0 0 1 10.2 6.17L11.08 9.04A3.1 3.1 0 0 0 9.47 10.21Z\" fill=\"#000\"/><path d=\"M10.9 12a1.1 1.1 0 1 0 2.2 0a1.1 1.1 0 1 0 -2.2 0Z\" fill=\"#000\"/><path d=\"M8.03 27.5L27.5 8.03\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M5.63 27.5L27.5 5.63\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miVehicles)\"><path d=\"M2.5 12a9.5 9.5 0 1 0 19 0a9.5 9.5 0 1 0 -19 0Z\" fill=\"currentColor\"/></g></g>",
+"Employees": "<g><mask id=\"miEmployees\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M5.999999999999999 10.4a2.2 2.2 0 1 0 4.4 0a2.2 2.2 0 1 0 -4.4 0Z\" fill=\"#000\"/><path d=\"M4.9 16.4a3.3 3.3 0 0 1 6.6 0z\" fill=\"#000\"/><path d=\"M13.4 9.2h5v1.4h-5z\" fill=\"#000\"/><path d=\"M13.4 12.2h3.6v1.4h-3.6z\" fill=\"#000\"/><path d=\"M10.08 25.5L27.5 8.08\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M7.68 25.5L27.5 5.68\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miEmployees)\"><path d=\"M2.5 4.5H21.5V13.5A6 6 0 0 1 15.5 19.5H2.5Z\" fill=\"currentColor\"/></g></g>",
+"Finances": "<g><mask id=\"miFinances\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M13.2 2.5v6.3H20\" fill=\"#000\"/><path d=\"M7.2 11.4h6.6v1.4H7.2z\" fill=\"#000\"/><path d=\"M7.2 14.6h4.6V16H7.2z\" fill=\"#000\"/><path d=\"M13.6 2.2v6.2H20.3\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.4\" stroke-linecap=\"square\"/><path d=\"M8.58 27.5L26 10.08\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M6.18 27.5L26 7.68\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miFinances)\"><path d=\"M4 2.5h10l6 6V15.5a6 6 0 0 1-6 6H4z\" fill=\"currentColor\"/></g></g>",
+"Statistics": "<g><g><path d=\"M3 14h4v7H3zM10 9.5h4V21h-4zM17 3H21V21A0 0 0 0 1 21 21H17Z\" fill=\"currentColor\"/></g></g>",
+"Products": "<g><mask id=\"miProducts\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M9.6 12h4.8v1.6H9.6z\" fill=\"#000\"/><path d=\"M8.62 27.5L25.8 10.32\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M6.22 27.5L25.8 7.92\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miProducts)\"><path d=\"M3 3h18v4.6H3zM4.2 9H19.8V15.9A5.6 5.6 0 0 1 14.200000000000001 21.5H4.2Z\" fill=\"currentColor\"/></g></g>",
+"Activity": "<g><g><path d=\"M2.5 12.5h4.2l2.6-7 5.2 13.4 2.6-6.4h4.4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\"/></g></g>",
+"Campaigns": "<g><mask id=\"miCampaigns\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M9.8 13.1 21.5 2.5l-10.3 12.3z\" fill=\"#000\"/></mask><g mask=\"url(#miCampaigns)\"><path d=\"M21.5 2.5 2.5 10.2l7.3 2.9 2.4 7.4z\" fill=\"currentColor\"/></g></g>",
+"Instagram": "<g><mask id=\"miInstagram\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M7.6 12a4.4 4.4 0 1 0 8.8 0a4.4 4.4 0 1 0 -8.8 0Z\" fill=\"#000\"/><path d=\"M15.600000000000001 7.2a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0 -2.4 0Z\" fill=\"#000\"/><path d=\"M9 27L27 9\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M6.6 27L27 6.6\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miInstagram)\"><path d=\"M3 3H21V14A7 7 0 0 1 14 21H3Z\" fill=\"currentColor\"/></g><path d=\"M9.7 12a2.3 2.3 0 1 0 4.6 0a2.3 2.3 0 1 0 -4.6 0Z\" fill=\"currentColor\"/></g>",
+"Settings": "<g><mask id=\"miSettings\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M8.7 12a3.3 3.3 0 1 0 6.6 0a3.3 3.3 0 1 0 -6.6 0Z\" fill=\"#000\"/></mask><g mask=\"url(#miSettings)\"><path d=\"M10.24 4.61L10.28 2.15L13.72 2.15L13.76 4.61L14.91 4.98L15.99 5.53L17.75 3.82L20.18 6.25L18.47 8.01L19.02 9.09L19.39 10.24L21.85 10.28L21.85 13.72L19.39 13.76L19.02 14.91L18.47 15.99L20.18 17.75L17.75 20.18L15.99 18.47L14.91 19.02L13.76 19.39L13.72 21.85L10.28 21.85L10.24 19.39L9.09 19.02L8.01 18.47L6.25 20.18L3.82 17.75L5.53 15.99L4.98 14.91L4.61 13.76L2.15 13.72L2.15 10.28L4.61 10.24L4.98 9.09L5.53 8.01L3.82 6.25L6.25 3.82L8.01 5.53L9.09 4.98Z\" fill=\"currentColor\"/></g></g>",
+"ReportProblem": "<g><mask id=\"miReportProblem\" maskUnits=\"userSpaceOnUse\" x=\"0\" y=\"0\" width=\"24\" height=\"24\"><rect width=\"24\" height=\"24\" fill=\"#fff\"/><path d=\"M10.8 6.2h2.4l-.4 7.6h-1.6z\" fill=\"#000\"/><path d=\"M10.65 16.8a1.35 1.35 0 1 0 2.7 0a1.35 1.35 0 1 0 -2.7 0Z\" fill=\"#000\"/><path d=\"M8.07 27.6L27.6 8.07\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/><path d=\"M5.67 27.6L27.6 5.67\" fill=\"none\" stroke=\"#000\" stroke-width=\"1.3\" stroke-linecap=\"square\"/></mask><g mask=\"url(#miReportProblem)\"><path d=\"M2.4000000000000004 12a9.6 9.6 0 1 0 19.2 0a9.6 9.6 0 1 0 -19.2 0Z\" fill=\"currentColor\"/></g></g>"
+};
+  const WORD = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 684.48 80.64" class="dbWord" aria-label="DetailBoost"><path fill="#F2F1EE" fill-rule="evenodd" d="M73.32 20.16 L72.64 19.03 L71.92 17.92 L71.17 16.83 L70.39 15.77 L69.57 14.74 L68.71 13.74 L67.83 12.76 L66.91 11.81 L65.96 10.89 L64.98 10.01 L63.98 9.15 L62.95 8.33 L61.89 7.55 L60.80 6.80 L59.69 6.08 L58.56 5.40 L57.41 4.76 L56.23 4.16 L55.04 3.59 L53.83 3.07 L52.60 2.58 L51.36 2.14 L50.10 1.74 L48.84 1.37 L47.56 1.05 L46.27 0.77 L44.97 0.54 L43.66 0.34 L42.35 0.19 L41.04 0.09 L39.72 0.02 L38.40 0.00 L0.00 0.00 L0.00 80.64 L20.21 80.64 L75.74 25.11 L75.65 24.89 L75.13 23.68 L74.56 22.49 L73.96 21.31ZM151.93 59.26 L152.55 59.15 L153.16 59.02 L153.77 58.87 L154.37 58.69 L154.97 58.50 L155.56 58.29 L156.15 58.06 L156.72 57.81 L157.29 57.54 L157.85 57.25 L158.40 56.95 L158.94 56.63 L159.47 56.28 L159.98 55.93 L160.49 55.55 L160.98 55.16 L161.46 54.76 L161.93 54.33 L162.38 53.90 L162.81 53.45 L163.24 52.98 L163.64 52.50 L164.03 52.01 L164.41 51.50 L164.76 50.99 L165.11 50.46 L165.43 49.92 L165.73 49.37 L166.02 48.81 L166.29 48.24 L166.54 47.67 L166.77 47.08 L166.98 46.49 L167.17 45.89 L167.35 45.29 L167.50 44.68 L167.63 44.07 L167.74 43.45 L167.84 42.83 L167.91 42.20 L167.96 41.58 L167.99 40.95 L168.00 40.32 L167.99 39.69 L167.96 39.06 L167.91 38.44 L167.84 37.81 L167.74 37.19 L167.63 36.57 L167.50 35.96 L167.35 35.35 L167.17 34.75 L166.98 34.15 L166.77 33.56 L166.54 32.97 L166.29 32.40 L166.02 31.83 L165.73 31.27 L165.43 30.72 L165.11 30.18 L164.76 29.65 L164.41 29.14 L164.03 28.63 L163.64 28.14 L163.24 27.66 L162.81 27.19 L162.38 26.74 L161.93 26.31 L161.46 25.88 L160.98 25.48 L160.49 25.09 L159.98 24.71 L159.47 24.36 L158.94 24.01 L158.40 23.69 L157.85 23.39 L157.29 23.10 L156.72 22.83 L156.15 22.58 L155.56 22.35 L154.97 22.14 L154.37 21.95 L153.77 21.77 L153.16 21.62 L152.55 21.49 L151.93 21.38 L151.31 21.28 L150.68 21.21 L150.06 21.16 L149.43 21.13 L148.83 21.12 L124.48 21.12 L124.48 59.52 L148.83 59.52 L149.43 59.51 L150.06 59.48 L150.68 59.43 L151.31 59.36ZM151.17 28.39 L151.56 28.48 L151.95 28.57 L152.33 28.68 L152.71 28.81 L153.08 28.94 L153.45 29.09 L153.82 29.24 L154.18 29.41 L154.53 29.60 L154.88 29.79 L155.22 29.99 L155.56 30.21 L155.88 30.44 L156.20 30.67 L156.51 30.92 L156.82 31.18 L157.11 31.45 L157.40 31.72 L157.67 32.01 L157.94 32.30 L158.20 32.61 L158.45 32.92 L158.68 33.24 L158.91 33.56 L159.13 33.90 L159.33 34.24 L159.52 34.59 L159.71 34.94 L159.88 35.30 L160.03 35.67 L160.18 36.04 L160.31 36.41 L160.44 36.79 L160.55 37.17 L160.64 37.56 L160.73 37.95 L160.80 38.34 L160.86 38.73 L160.90 39.13 L160.93 39.52 L160.95 39.92 L160.96 40.32 L160.95 40.72 L160.93 41.12 L160.90 41.51 L160.86 41.91 L160.80 42.30 L160.73 42.69 L160.64 43.08 L160.55 43.47 L160.44 43.85 L160.31 44.23 L160.18 44.60 L160.03 44.97 L159.88 45.34 L159.71 45.70 L159.52 46.05 L159.33 46.40 L159.13 46.74 L158.91 47.08 L158.68 47.40 L158.45 47.72 L158.20 48.03 L157.94 48.34 L157.67 48.63 L157.40 48.92 L157.11 49.19 L156.82 49.46 L156.51 49.72 L156.20 49.97 L155.88 50.20 L155.56 50.43 L155.22 50.65 L154.88 50.85 L154.53 51.04 L154.18 51.23 L153.82 51.40 L153.45 51.55 L153.08 51.70 L152.71 51.83 L152.33 51.96 L151.95 52.07 L151.56 52.16 L151.17 52.25 L150.78 52.32 L150.39 52.38 L149.99 52.42 L149.60 52.45 L149.20 52.47 L148.77 52.48 L131.52 52.48 L131.52 28.16 L148.77 28.16 L149.20 28.17 L149.60 28.19 L149.99 28.22 L150.39 28.26 L150.78 28.32ZM219.20 59.52 L219.20 52.48 L189.12 52.48 L189.12 43.84 L214.08 43.84 L214.08 36.80 L189.12 36.80 L189.12 28.16 L219.20 28.16 L219.20 21.12 L182.08 21.12 L182.08 59.52ZM274.24 28.16 L274.24 21.12 L233.28 21.12 L233.28 28.16 L250.24 28.16 L250.24 59.52 L257.28 59.52 L257.28 28.16ZM296.28 59.52 L310.08 30.98 L323.88 59.52 L331.84 59.52 L313.28 21.12 L306.88 21.12 L288.32 59.52ZM78.63 37.68 L78.53 36.37 L78.38 35.06 L78.18 33.75 L77.95 32.45 L77.94 32.41 L29.71 80.64 L38.40 80.64 L38.56 80.64 L78.72 40.48 L78.72 40.32 L78.70 39.00ZM47.56 79.59 L48.84 79.27 L50.10 78.90 L51.36 78.50 L52.60 78.06 L53.83 77.57 L55.04 77.05 L56.23 76.48 L57.41 75.88 L58.56 75.24 L59.69 74.56 L60.80 73.84 L61.89 73.09 L62.95 72.31 L63.98 71.49 L64.98 70.63 L65.96 69.75 L66.91 68.83 L67.83 67.88 L68.71 66.90 L69.57 65.90 L70.39 64.87 L71.17 63.81 L71.92 62.72 L72.64 61.61 L73.32 60.48 L73.96 59.33 L74.56 58.15 L75.13 56.96 L75.65 55.75 L76.14 54.52 L76.58 53.28 L76.98 52.02 L77.35 50.76 L77.67 49.48 L77.95 48.19 L78.18 46.89 L78.38 45.58 L78.53 44.27 L78.53 44.19 L42.27 80.45 L42.35 80.45 L43.66 80.30 L44.97 80.10 L46.27 79.87ZM345.92 21.12 L345.92 59.52 L352.96 59.52 L352.96 21.12ZM402.88 59.52 L402.88 52.48 L374.08 52.48 L374.08 21.12 L367.04 21.12 L367.04 59.52ZM446.97 59.37 L447.34 59.30 L447.70 59.22 L448.06 59.13 L448.42 59.03 L448.77 58.92 L449.12 58.79 L449.47 58.66 L449.81 58.51 L450.14 58.35 L450.48 58.18 L450.80 58.00 L451.12 57.81 L451.43 57.61 L451.74 57.39 L452.04 57.17 L452.33 56.94 L452.61 56.70 L452.89 56.45 L453.15 56.19 L453.41 55.93 L453.66 55.65 L453.90 55.37 L454.13 55.08 L454.35 54.78 L454.57 54.47 L454.77 54.16 L454.96 53.84 L455.14 53.52 L455.31 53.18 L455.47 52.85 L455.62 52.51 L455.75 52.16 L455.88 51.81 L455.99 51.46 L456.09 51.10 L456.18 50.74 L456.26 50.38 L456.33 50.01 L456.38 49.64 L456.43 49.27 L456.46 48.90 L456.47 48.53 L456.48 48.16 L456.47 47.79 L456.46 47.42 L456.43 47.05 L456.38 46.68 L456.33 46.31 L456.26 45.94 L456.18 45.58 L456.09 45.22 L455.99 44.86 L455.88 44.51 L455.75 44.16 L455.62 43.81 L455.47 43.47 L455.31 43.14 L455.14 42.80 L454.96 42.48 L454.77 42.16 L454.57 41.85 L454.35 41.54 L454.13 41.24 L453.90 40.95 L453.66 40.67 L453.41 40.39 L453.34 40.32 L453.41 40.25 L453.66 39.97 L453.90 39.69 L454.13 39.40 L454.35 39.10 L454.57 38.79 L454.77 38.48 L454.96 38.16 L455.14 37.84 L455.31 37.50 L455.47 37.17 L455.62 36.83 L455.75 36.48 L455.88 36.13 L455.99 35.78 L456.09 35.42 L456.18 35.06 L456.26 34.70 L456.33 34.33 L456.38 33.96 L456.43 33.59 L456.46 33.22 L456.47 32.85 L456.48 32.48 L456.47 32.11 L456.46 31.74 L456.43 31.37 L456.38 31.00 L456.33 30.63 L456.26 30.26 L456.18 29.90 L456.09 29.54 L455.99 29.18 L455.88 28.83 L455.75 28.48 L455.62 28.13 L455.47 27.79 L455.31 27.46 L455.14 27.12 L454.96 26.80 L454.77 26.48 L454.57 26.17 L454.35 25.86 L454.13 25.56 L453.90 25.27 L453.66 24.99 L453.41 24.71 L453.15 24.45 L452.89 24.19 L452.61 23.94 L452.33 23.70 L452.04 23.47 L451.74 23.25 L451.43 23.03 L451.12 22.83 L450.80 22.64 L450.48 22.46 L450.14 22.29 L449.81 22.13 L449.47 21.98 L449.12 21.85 L448.77 21.72 L448.42 21.61 L448.06 21.51 L447.70 21.42 L447.34 21.34 L446.97 21.27 L446.60 21.22 L446.23 21.17 L445.86 21.14 L445.49 21.13 L445.15 21.12 L416.96 21.12 L416.96 36.80 L416.96 43.84 L416.96 59.52 L445.15 59.52 L445.49 59.51 L445.86 59.50 L446.23 59.47 L446.60 59.42ZM446.24 43.99 L446.37 44.03 L446.51 44.07 L446.64 44.12 L446.77 44.17 L446.90 44.23 L447.03 44.29 L447.16 44.35 L447.28 44.42 L447.40 44.49 L447.52 44.57 L447.64 44.65 L447.75 44.73 L447.86 44.82 L447.97 44.91 L448.07 45.01 L448.17 45.11 L448.27 45.21 L448.37 45.31 L448.46 45.42 L448.55 45.53 L448.63 45.64 L448.71 45.76 L448.79 45.88 L448.86 46.00 L448.93 46.12 L448.99 46.25 L449.05 46.38 L449.11 46.51 L449.16 46.64 L449.21 46.77 L449.25 46.91 L449.29 47.04 L449.33 47.18 L449.36 47.32 L449.38 47.46 L449.40 47.60 L449.42 47.74 L449.43 47.88 L449.44 48.02 L449.44 48.16 L449.44 48.30 L449.43 48.44 L449.42 48.58 L449.40 48.72 L449.38 48.86 L449.36 49.00 L449.33 49.14 L449.29 49.28 L449.25 49.41 L449.21 49.55 L449.16 49.68 L449.11 49.81 L449.05 49.94 L448.99 50.07 L448.93 50.20 L448.86 50.32 L448.79 50.44 L448.71 50.56 L448.63 50.68 L448.55 50.79 L448.46 50.90 L448.37 51.01 L448.27 51.11 L448.17 51.21 L448.07 51.31 L447.97 51.41 L447.86 51.50 L447.75 51.59 L447.64 51.67 L447.52 51.75 L447.40 51.83 L447.28 51.90 L447.16 51.97 L447.03 52.03 L446.90 52.09 L446.77 52.15 L446.64 52.20 L446.51 52.25 L446.37 52.29 L446.24 52.33 L446.10 52.37 L445.96 52.40 L445.82 52.42 L445.68 52.44 L445.54 52.46 L445.40 52.47 L445.26 52.48 L445.09 52.48 L424.00 52.48 L424.00 43.84 L445.09 43.84 L445.26 43.84 L445.40 43.85 L445.54 43.86 L445.68 43.88 L445.82 43.90 L445.96 43.92 L446.10 43.95ZM446.24 28.31 L446.37 28.35 L446.51 28.39 L446.64 28.44 L446.77 28.49 L446.90 28.55 L447.03 28.61 L447.16 28.67 L447.28 28.74 L447.40 28.81 L447.52 28.89 L447.64 28.97 L447.75 29.05 L447.86 29.14 L447.97 29.23 L448.07 29.33 L448.17 29.43 L448.27 29.53 L448.37 29.63 L448.46 29.74 L448.55 29.85 L448.63 29.96 L448.71 30.08 L448.79 30.20 L448.86 30.32 L448.93 30.44 L448.99 30.57 L449.05 30.70 L449.11 30.83 L449.16 30.96 L449.21 31.09 L449.25 31.23 L449.29 31.36 L449.33 31.50 L449.36 31.64 L449.38 31.78 L449.40 31.92 L449.42 32.06 L449.43 32.20 L449.44 32.34 L449.44 32.48 L449.44 32.62 L449.43 32.76 L449.42 32.90 L449.40 33.04 L449.38 33.18 L449.36 33.32 L449.33 33.46 L449.29 33.60 L449.25 33.73 L449.21 33.87 L449.16 34.00 L449.11 34.13 L449.05 34.26 L448.99 34.39 L448.93 34.52 L448.86 34.64 L448.79 34.76 L448.71 34.88 L448.63 35.00 L448.55 35.11 L448.46 35.22 L448.37 35.33 L448.27 35.43 L448.17 35.53 L448.07 35.63 L447.97 35.73 L447.86 35.82 L447.75 35.91 L447.64 35.99 L447.52 36.07 L447.40 36.15 L447.28 36.22 L447.16 36.29 L447.03 36.35 L446.90 36.41 L446.77 36.47 L446.64 36.52 L446.51 36.57 L446.37 36.61 L446.24 36.65 L446.10 36.69 L445.96 36.72 L445.82 36.74 L445.68 36.76 L445.54 36.78 L445.40 36.79 L445.26 36.80 L445.09 36.80 L424.00 36.80 L424.00 28.16 L445.09 28.16 L445.26 28.16 L445.40 28.17 L445.54 28.18 L445.68 28.20 L445.82 28.22 L445.96 28.24 L446.10 28.27ZM484.95 21.77 L484.35 21.95 L483.75 22.14 L483.16 22.35 L482.57 22.58 L482.00 22.83 L481.43 23.10 L480.87 23.39 L480.32 23.69 L479.78 24.01 L479.25 24.36 L478.74 24.71 L478.23 25.09 L477.74 25.48 L477.26 25.88 L476.79 26.31 L476.34 26.74 L475.91 27.19 L475.48 27.66 L475.08 28.14 L474.69 28.63 L474.31 29.14 L473.96 29.65 L473.61 30.18 L473.29 30.72 L472.99 31.27 L472.70 31.83 L472.43 32.40 L472.18 32.97 L471.95 33.56 L471.74 34.15 L471.55 34.75 L471.37 35.35 L471.22 35.96 L471.09 36.57 L470.98 37.19 L470.88 37.81 L470.81 38.44 L470.76 39.06 L470.73 39.69 L470.72 40.32 L470.73 40.95 L470.76 41.58 L470.81 42.20 L470.88 42.83 L470.98 43.45 L471.09 44.07 L471.22 44.68 L471.37 45.29 L471.55 45.89 L471.74 46.49 L471.95 47.08 L472.18 47.67 L472.43 48.24 L472.70 48.81 L472.99 49.37 L473.29 49.92 L473.61 50.46 L473.96 50.99 L474.31 51.50 L474.69 52.01 L475.08 52.50 L475.48 52.98 L475.91 53.45 L476.34 53.90 L476.79 54.33 L477.26 54.76 L477.74 55.16 L478.23 55.55 L478.74 55.93 L479.25 56.28 L479.78 56.63 L480.32 56.95 L480.87 57.25 L481.43 57.54 L482.00 57.81 L482.57 58.06 L483.16 58.29 L483.75 58.50 L484.35 58.69 L484.95 58.87 L485.56 59.02 L486.17 59.15 L486.79 59.26 L487.41 59.36 L488.04 59.43 L488.66 59.48 L489.29 59.51 L489.89 59.52 L495.07 59.52 L495.67 59.51 L496.30 59.48 L496.92 59.43 L497.55 59.36 L498.17 59.26 L498.79 59.15 L499.40 59.02 L500.01 58.87 L500.61 58.69 L501.21 58.50 L501.80 58.29 L502.39 58.06 L502.96 57.81 L503.53 57.54 L504.09 57.25 L504.64 56.95 L505.18 56.63 L505.71 56.28 L506.22 55.93 L506.73 55.55 L507.22 55.16 L507.70 54.76 L508.17 54.33 L508.62 53.90 L509.05 53.45 L509.48 52.98 L509.88 52.50 L510.27 52.01 L510.65 51.50 L511.00 50.99 L511.35 50.46 L511.67 49.92 L511.97 49.37 L512.26 48.81 L512.53 48.24 L512.78 47.67 L513.01 47.08 L513.22 46.49 L513.41 45.89 L513.59 45.29 L513.74 44.68 L513.87 44.07 L513.98 43.45 L514.08 42.83 L514.15 42.20 L514.20 41.58 L514.23 40.95 L514.24 40.32 L514.23 39.69 L514.20 39.06 L514.15 38.44 L514.08 37.81 L513.98 37.19 L513.87 36.57 L513.74 35.96 L513.59 35.35 L513.41 34.75 L513.22 34.15 L513.01 33.56 L512.78 32.97 L512.53 32.40 L512.26 31.83 L511.97 31.27 L511.67 30.72 L511.35 30.18 L511.00 29.65 L510.65 29.14 L510.27 28.63 L509.88 28.14 L509.48 27.66 L509.05 27.19 L508.62 26.74 L508.17 26.31 L507.70 25.88 L507.22 25.48 L506.73 25.09 L506.22 24.71 L505.71 24.36 L505.18 24.01 L504.64 23.69 L504.09 23.39 L503.53 23.10 L502.96 22.83 L502.39 22.58 L501.80 22.35 L501.21 22.14 L500.61 21.95 L500.01 21.77 L499.40 21.62 L498.79 21.49 L498.17 21.38 L497.55 21.28 L496.92 21.21 L496.30 21.16 L495.67 21.13 L495.07 21.12 L489.89 21.12 L489.29 21.13 L488.66 21.16 L488.04 21.21 L487.41 21.28 L486.79 21.38 L486.17 21.49 L485.56 21.62ZM497.80 28.48 L498.19 28.57 L498.57 28.68 L498.95 28.81 L499.32 28.94 L499.69 29.09 L500.06 29.24 L500.42 29.41 L500.77 29.60 L501.12 29.79 L501.46 29.99 L501.80 30.21 L502.12 30.44 L502.44 30.67 L502.75 30.92 L503.06 31.18 L503.35 31.45 L503.64 31.72 L503.91 32.01 L504.18 32.30 L504.44 32.61 L504.69 32.92 L504.92 33.24 L505.15 33.56 L505.37 33.90 L505.57 34.24 L505.76 34.59 L505.95 34.94 L506.12 35.30 L506.27 35.67 L506.42 36.04 L506.55 36.41 L506.68 36.79 L506.79 37.17 L506.88 37.56 L506.97 37.95 L507.04 38.34 L507.10 38.73 L507.14 39.13 L507.17 39.52 L507.19 39.92 L507.20 40.32 L507.19 40.72 L507.17 41.12 L507.14 41.51 L507.10 41.91 L507.04 42.30 L506.97 42.69 L506.88 43.08 L506.79 43.47 L506.68 43.85 L506.55 44.23 L506.42 44.60 L506.27 44.97 L506.12 45.34 L505.95 45.70 L505.76 46.05 L505.57 46.40 L505.37 46.74 L505.15 47.08 L504.92 47.40 L504.69 47.72 L504.44 48.03 L504.18 48.34 L503.91 48.63 L503.64 48.92 L503.35 49.19 L503.06 49.46 L502.75 49.72 L502.44 49.97 L502.12 50.20 L501.80 50.43 L501.46 50.65 L501.12 50.85 L500.77 51.04 L500.42 51.23 L500.06 51.40 L499.69 51.55 L499.32 51.70 L498.95 51.83 L498.57 51.96 L498.19 52.07 L497.80 52.16 L497.41 52.25 L497.02 52.32 L496.63 52.38 L496.23 52.42 L495.84 52.45 L495.44 52.47 L495.01 52.48 L489.95 52.48 L489.52 52.47 L489.12 52.45 L488.73 52.42 L488.33 52.38 L487.94 52.32 L487.55 52.25 L487.16 52.16 L486.77 52.07 L486.39 51.96 L486.01 51.83 L485.64 51.70 L485.27 51.55 L484.90 51.40 L484.54 51.23 L484.19 51.04 L483.84 50.85 L483.50 50.65 L483.16 50.43 L482.84 50.20 L482.52 49.97 L482.21 49.72 L481.90 49.46 L481.61 49.19 L481.32 48.92 L481.05 48.63 L480.78 48.34 L480.52 48.03 L480.27 47.72 L480.04 47.40 L479.81 47.08 L479.59 46.74 L479.39 46.40 L479.20 46.05 L479.01 45.70 L478.84 45.34 L478.69 44.97 L478.54 44.60 L478.41 44.23 L478.28 43.85 L478.17 43.47 L478.08 43.08 L477.99 42.69 L477.92 42.30 L477.86 41.91 L477.82 41.51 L477.79 41.12 L477.77 40.72 L477.76 40.32 L477.77 39.92 L477.79 39.52 L477.82 39.13 L477.86 38.73 L477.92 38.34 L477.99 37.95 L478.08 37.56 L478.17 37.17 L478.28 36.79 L478.41 36.41 L478.54 36.04 L478.69 35.67 L478.84 35.30 L479.01 34.94 L479.20 34.59 L479.39 34.24 L479.59 33.90 L479.81 33.56 L480.04 33.24 L480.27 32.92 L480.52 32.61 L480.78 32.30 L481.05 32.01 L481.32 31.72 L481.61 31.45 L481.90 31.18 L482.21 30.92 L482.52 30.67 L482.84 30.44 L483.16 30.21 L483.50 29.99 L483.84 29.79 L484.19 29.60 L484.54 29.41 L484.90 29.24 L485.27 29.09 L485.64 28.94 L486.01 28.81 L486.39 28.68 L486.77 28.57 L487.16 28.48 L487.55 28.39 L487.94 28.32 L488.33 28.26 L488.73 28.22 L489.12 28.19 L489.52 28.17 L489.95 28.16 L495.01 28.16 L495.44 28.17 L495.84 28.19 L496.23 28.22 L496.63 28.26 L497.02 28.32 L497.41 28.39ZM543.16 21.62 L542.55 21.77 L541.95 21.95 L541.35 22.14 L540.76 22.35 L540.17 22.58 L539.60 22.83 L539.03 23.10 L538.47 23.39 L537.92 23.69 L537.38 24.01 L536.85 24.36 L536.34 24.71 L535.83 25.09 L535.34 25.48 L534.86 25.88 L534.39 26.31 L533.94 26.74 L533.51 27.19 L533.08 27.66 L532.68 28.14 L532.29 28.63 L531.91 29.14 L531.56 29.65 L531.21 30.18 L530.89 30.72 L530.59 31.27 L530.30 31.83 L530.03 32.40 L529.78 32.97 L529.55 33.56 L529.34 34.15 L529.15 34.75 L528.97 35.35 L528.82 35.96 L528.69 36.57 L528.58 37.19 L528.48 37.81 L528.41 38.44 L528.36 39.06 L528.33 39.69 L528.32 40.32 L528.33 40.95 L528.36 41.58 L528.41 42.20 L528.48 42.83 L528.58 43.45 L528.69 44.07 L528.82 44.68 L528.97 45.29 L529.15 45.89 L529.34 46.49 L529.55 47.08 L529.78 47.67 L530.03 48.24 L530.30 48.81 L530.59 49.37 L530.89 49.92 L531.21 50.46 L531.56 50.99 L531.91 51.50 L532.29 52.01 L532.68 52.50 L533.08 52.98 L533.51 53.45 L533.94 53.90 L534.39 54.33 L534.86 54.76 L535.34 55.16 L535.83 55.55 L536.34 55.93 L536.85 56.28 L537.38 56.63 L537.92 56.95 L538.47 57.25 L539.03 57.54 L539.60 57.81 L540.17 58.06 L540.76 58.29 L541.35 58.50 L541.95 58.69 L542.55 58.87 L543.16 59.02 L543.77 59.15 L544.39 59.26 L545.01 59.36 L545.64 59.43 L546.26 59.48 L546.89 59.51 L547.49 59.52 L552.67 59.52 L553.27 59.51 L553.90 59.48 L554.52 59.43 L555.15 59.36 L555.77 59.26 L556.39 59.15 L557.00 59.02 L557.61 58.87 L558.21 58.69 L558.81 58.50 L559.40 58.29 L559.99 58.06 L560.56 57.81 L561.13 57.54 L561.69 57.25 L562.24 56.95 L562.78 56.63 L563.31 56.28 L563.82 55.93 L564.33 55.55 L564.82 55.16 L565.30 54.76 L565.77 54.33 L566.22 53.90 L566.65 53.45 L567.08 52.98 L567.48 52.50 L567.87 52.01 L568.25 51.50 L568.60 50.99 L568.95 50.46 L569.27 49.92 L569.57 49.37 L569.86 48.81 L570.13 48.24 L570.38 47.67 L570.61 47.08 L570.82 46.49 L571.01 45.89 L571.19 45.29 L571.34 44.68 L571.47 44.07 L571.58 43.45 L571.68 42.83 L571.75 42.20 L571.80 41.58 L571.83 40.95 L571.84 40.32 L571.83 39.69 L571.80 39.06 L571.75 38.44 L571.68 37.81 L571.58 37.19 L571.47 36.57 L571.34 35.96 L571.19 35.35 L571.01 34.75 L570.82 34.15 L570.61 33.56 L570.38 32.97 L570.13 32.40 L569.86 31.83 L569.57 31.27 L569.27 30.72 L568.95 30.18 L568.60 29.65 L568.25 29.14 L567.87 28.63 L567.48 28.14 L567.08 27.66 L566.65 27.19 L566.22 26.74 L565.77 26.31 L565.30 25.88 L564.82 25.48 L564.33 25.09 L563.82 24.71 L563.31 24.36 L562.78 24.01 L562.24 23.69 L561.69 23.39 L561.13 23.10 L560.56 22.83 L559.99 22.58 L559.40 22.35 L558.81 22.14 L558.21 21.95 L557.61 21.77 L557.00 21.62 L556.39 21.49 L555.77 21.38 L555.15 21.28 L554.52 21.21 L553.90 21.16 L553.27 21.13 L552.67 21.12 L547.49 21.12 L546.89 21.13 L546.26 21.16 L545.64 21.21 L545.01 21.28 L544.39 21.38 L543.77 21.49ZM555.01 28.39 L555.40 28.48 L555.79 28.57 L556.17 28.68 L556.55 28.81 L556.92 28.94 L557.29 29.09 L557.66 29.24 L558.02 29.41 L558.37 29.60 L558.72 29.79 L559.06 29.99 L559.40 30.21 L559.72 30.44 L560.04 30.67 L560.35 30.92 L560.66 31.18 L560.95 31.45 L561.24 31.72 L561.51 32.01 L561.78 32.30 L562.04 32.61 L562.29 32.92 L562.52 33.24 L562.75 33.56 L562.97 33.90 L563.17 34.24 L563.36 34.59 L563.55 34.94 L563.72 35.30 L563.87 35.67 L564.02 36.04 L564.15 36.41 L564.28 36.79 L564.39 37.17 L564.48 37.56 L564.57 37.95 L564.64 38.34 L564.70 38.73 L564.74 39.13 L564.77 39.52 L564.79 39.92 L564.80 40.32 L564.79 40.72 L564.77 41.12 L564.74 41.51 L564.70 41.91 L564.64 42.30 L564.57 42.69 L564.48 43.08 L564.39 43.47 L564.28 43.85 L564.15 44.23 L564.02 44.60 L563.87 44.97 L563.72 45.34 L563.55 45.70 L563.36 46.05 L563.17 46.40 L562.97 46.74 L562.75 47.08 L562.52 47.40 L562.29 47.72 L562.04 48.03 L561.78 48.34 L561.51 48.63 L561.24 48.92 L560.95 49.19 L560.66 49.46 L560.35 49.72 L560.04 49.97 L559.72 50.20 L559.40 50.43 L559.06 50.65 L558.72 50.85 L558.37 51.04 L558.02 51.23 L557.66 51.40 L557.29 51.55 L556.92 51.70 L556.55 51.83 L556.17 51.96 L555.79 52.07 L555.40 52.16 L555.01 52.25 L554.62 52.32 L554.23 52.38 L553.83 52.42 L553.44 52.45 L553.04 52.47 L552.61 52.48 L547.55 52.48 L547.12 52.47 L546.72 52.45 L546.33 52.42 L545.93 52.38 L545.54 52.32 L545.15 52.25 L544.76 52.16 L544.37 52.07 L543.99 51.96 L543.61 51.83 L543.24 51.70 L542.87 51.55 L542.50 51.40 L542.14 51.23 L541.79 51.04 L541.44 50.85 L541.10 50.65 L540.76 50.43 L540.44 50.20 L540.12 49.97 L539.81 49.72 L539.50 49.46 L539.21 49.19 L538.92 48.92 L538.65 48.63 L538.38 48.34 L538.12 48.03 L537.87 47.72 L537.64 47.40 L537.41 47.08 L537.19 46.74 L536.99 46.40 L536.80 46.05 L536.61 45.70 L536.44 45.34 L536.29 44.97 L536.14 44.60 L536.01 44.23 L535.88 43.85 L535.77 43.47 L535.68 43.08 L535.59 42.69 L535.52 42.30 L535.46 41.91 L535.42 41.51 L535.39 41.12 L535.37 40.72 L535.36 40.32 L535.37 39.92 L535.39 39.52 L535.42 39.13 L535.46 38.73 L535.52 38.34 L535.59 37.95 L535.68 37.56 L535.77 37.17 L535.88 36.79 L536.01 36.41 L536.14 36.04 L536.29 35.67 L536.44 35.30 L536.61 34.94 L536.80 34.59 L536.99 34.24 L537.19 33.90 L537.41 33.56 L537.64 33.24 L537.87 32.92 L538.12 32.61 L538.38 32.30 L538.65 32.01 L538.92 31.72 L539.21 31.45 L539.50 31.18 L539.81 30.92 L540.12 30.67 L540.44 30.44 L540.76 30.21 L541.10 29.99 L541.44 29.79 L541.79 29.60 L542.14 29.41 L542.50 29.24 L542.87 29.09 L543.24 28.94 L543.61 28.81 L543.99 28.68 L544.37 28.57 L544.76 28.48 L545.15 28.39 L545.54 28.32 L545.93 28.26 L546.33 28.22 L546.72 28.19 L547.12 28.17 L547.55 28.16 L552.61 28.16 L553.04 28.17 L553.44 28.19 L553.83 28.22 L554.23 28.26 L554.62 28.32ZM594.50 21.51 L594.14 21.61 L593.79 21.72 L593.44 21.85 L593.09 21.98 L592.75 22.13 L592.42 22.29 L592.08 22.46 L591.76 22.64 L591.44 22.83 L591.13 23.03 L590.82 23.25 L590.52 23.47 L590.23 23.70 L589.95 23.94 L589.67 24.19 L589.41 24.45 L589.15 24.71 L588.90 24.99 L588.66 25.27 L588.43 25.56 L588.21 25.86 L587.99 26.17 L587.79 26.48 L587.60 26.80 L587.42 27.12 L587.25 27.46 L587.09 27.79 L586.94 28.13 L586.81 28.48 L586.68 28.83 L586.57 29.18 L586.47 29.54 L586.38 29.90 L586.30 30.26 L586.23 30.63 L586.18 31.00 L586.13 31.37 L586.10 31.74 L586.09 32.11 L586.08 32.48 L586.09 32.85 L586.10 33.22 L586.13 33.59 L586.18 33.96 L586.23 34.33 L586.30 34.70 L586.38 35.06 L586.47 35.42 L586.57 35.78 L586.68 36.13 L586.81 36.48 L586.94 36.83 L587.09 37.17 L587.25 37.50 L587.42 37.84 L587.60 38.16 L587.79 38.48 L587.99 38.79 L588.21 39.10 L588.43 39.40 L588.66 39.69 L588.90 39.97 L589.15 40.25 L589.41 40.51 L589.67 40.77 L589.95 41.02 L590.23 41.26 L590.52 41.49 L590.82 41.71 L591.13 41.93 L591.44 42.13 L591.76 42.32 L592.08 42.50 L592.42 42.67 L592.75 42.83 L593.09 42.98 L593.44 43.11 L593.79 43.24 L594.14 43.35 L594.50 43.45 L594.86 43.54 L595.22 43.62 L595.59 43.69 L595.96 43.74 L596.33 43.79 L596.70 43.82 L597.07 43.83 L597.41 43.84 L617.89 43.84 L618.06 43.84 L618.20 43.85 L618.34 43.86 L618.48 43.88 L618.62 43.90 L618.76 43.92 L618.90 43.95 L619.04 43.99 L619.17 44.03 L619.31 44.07 L619.44 44.12 L619.57 44.17 L619.70 44.23 L619.83 44.29 L619.96 44.35 L620.08 44.42 L620.20 44.49 L620.32 44.57 L620.44 44.65 L620.55 44.73 L620.66 44.82 L620.77 44.91 L620.87 45.01 L620.97 45.11 L621.07 45.21 L621.17 45.31 L621.26 45.42 L621.35 45.53 L621.43 45.64 L621.51 45.76 L621.59 45.88 L621.66 46.00 L621.73 46.12 L621.79 46.25 L621.85 46.38 L621.91 46.51 L621.96 46.64 L622.01 46.77 L622.05 46.91 L622.09 47.04 L622.13 47.18 L622.16 47.32 L622.18 47.46 L622.20 47.60 L622.22 47.74 L622.23 47.88 L622.24 48.02 L622.24 48.16 L622.24 48.30 L622.23 48.44 L622.22 48.58 L622.20 48.72 L622.18 48.86 L622.16 49.00 L622.13 49.14 L622.09 49.28 L622.05 49.41 L622.01 49.55 L621.96 49.68 L621.91 49.81 L621.85 49.94 L621.79 50.07 L621.73 50.20 L621.66 50.32 L621.59 50.44 L621.51 50.56 L621.43 50.68 L621.35 50.79 L621.26 50.90 L621.17 51.01 L621.07 51.11 L620.97 51.21 L620.87 51.31 L620.77 51.41 L620.66 51.50 L620.55 51.59 L620.44 51.67 L620.32 51.75 L620.20 51.83 L620.08 51.90 L619.96 51.97 L619.83 52.03 L619.70 52.09 L619.57 52.15 L619.44 52.20 L619.31 52.25 L619.17 52.29 L619.04 52.33 L618.90 52.37 L618.76 52.40 L618.62 52.42 L618.48 52.44 L618.34 52.46 L618.20 52.47 L618.06 52.48 L617.89 52.48 L585.92 52.48 L585.92 59.52 L617.95 59.52 L618.29 59.51 L618.66 59.50 L619.03 59.47 L619.40 59.42 L619.77 59.37 L620.14 59.30 L620.50 59.22 L620.86 59.13 L621.22 59.03 L621.57 58.92 L621.92 58.79 L622.27 58.66 L622.61 58.51 L622.94 58.35 L623.28 58.18 L623.60 58.00 L623.92 57.81 L624.23 57.61 L624.54 57.39 L624.84 57.17 L625.13 56.94 L625.41 56.70 L625.69 56.45 L625.95 56.19 L626.21 55.93 L626.46 55.65 L626.70 55.37 L626.93 55.08 L627.15 54.78 L627.37 54.47 L627.57 54.16 L627.76 53.84 L627.94 53.52 L628.11 53.18 L628.27 52.85 L628.42 52.51 L628.55 52.16 L628.68 51.81 L628.79 51.46 L628.89 51.10 L628.98 50.74 L629.06 50.38 L629.13 50.01 L629.18 49.64 L629.23 49.27 L629.26 48.90 L629.27 48.53 L629.28 48.16 L629.27 47.79 L629.26 47.42 L629.23 47.05 L629.18 46.68 L629.13 46.31 L629.06 45.94 L628.98 45.58 L628.89 45.22 L628.79 44.86 L628.68 44.51 L628.55 44.16 L628.42 43.81 L628.27 43.47 L628.11 43.14 L627.94 42.80 L627.76 42.48 L627.57 42.16 L627.37 41.85 L627.15 41.54 L626.93 41.24 L626.70 40.95 L626.46 40.67 L626.21 40.39 L625.95 40.13 L625.69 39.87 L625.41 39.62 L625.13 39.38 L624.84 39.15 L624.54 38.93 L624.23 38.71 L623.92 38.51 L623.60 38.32 L623.28 38.14 L622.94 37.97 L622.61 37.81 L622.27 37.66 L621.92 37.53 L621.57 37.40 L621.22 37.29 L620.86 37.19 L620.50 37.10 L620.14 37.02 L619.77 36.95 L619.40 36.90 L619.03 36.85 L618.66 36.82 L618.29 36.81 L617.95 36.80 L597.47 36.80 L597.30 36.80 L597.16 36.79 L597.02 36.78 L596.88 36.76 L596.74 36.74 L596.60 36.72 L596.46 36.69 L596.32 36.65 L596.19 36.61 L596.05 36.57 L595.92 36.52 L595.79 36.47 L595.66 36.41 L595.53 36.35 L595.40 36.29 L595.28 36.22 L595.16 36.15 L595.04 36.07 L594.92 35.99 L594.81 35.91 L594.70 35.82 L594.59 35.73 L594.49 35.63 L594.39 35.53 L594.29 35.43 L594.19 35.33 L594.10 35.22 L594.01 35.11 L593.93 35.00 L593.85 34.88 L593.77 34.76 L593.70 34.64 L593.63 34.52 L593.57 34.39 L593.51 34.26 L593.45 34.13 L593.40 34.00 L593.35 33.87 L593.31 33.73 L593.27 33.60 L593.23 33.46 L593.20 33.32 L593.18 33.18 L593.16 33.04 L593.14 32.90 L593.13 32.76 L593.12 32.62 L593.12 32.48 L593.12 32.34 L593.13 32.20 L593.14 32.06 L593.16 31.92 L593.18 31.78 L593.20 31.64 L593.23 31.50 L593.27 31.36 L593.31 31.23 L593.35 31.09 L593.40 30.96 L593.45 30.83 L593.51 30.70 L593.57 30.57 L593.63 30.44 L593.70 30.32 L593.77 30.20 L593.85 30.08 L593.93 29.96 L594.01 29.85 L594.10 29.74 L594.19 29.63 L594.29 29.53 L594.39 29.43 L594.49 29.33 L594.59 29.23 L594.70 29.14 L594.81 29.05 L594.92 28.97 L595.04 28.89 L595.16 28.81 L595.28 28.74 L595.40 28.67 L595.53 28.61 L595.66 28.55 L595.79 28.49 L595.92 28.44 L596.05 28.39 L596.19 28.35 L596.32 28.31 L596.46 28.27 L596.60 28.24 L596.74 28.22 L596.88 28.20 L597.02 28.18 L597.16 28.17 L597.30 28.16 L597.47 28.16 L626.88 28.16 L626.88 21.12 L597.41 21.12 L597.07 21.13 L596.70 21.14 L596.33 21.17 L595.96 21.22 L595.59 21.27 L595.22 21.34 L594.86 21.42ZM684.48 21.12 L643.52 21.12 L643.52 28.16 L660.48 28.16 L660.48 59.52 L667.52 59.52 L667.52 28.16 L684.48 28.16Z"/></svg>';
+  const LU = { close: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="m16 15-3-3 3-3"/>',
+    out: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>' };
+  const lu = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${LU[k]}</svg>`;
+  // menuSections.ts, kolejność i grupy z 21.10.2026; klucz = id pozycji (nv + klucz)
+  const MENU = [
+    [null, [['dash', 'Tablica', 'Dashboard'], ['act', 'Aktywność', 'Activity']]],
+    ['Praca', [['visits', 'Wizyty', 'Visits'], ['cal', 'Kalendarz', 'Calendar'], ['batch', 'Zlecenia zbiorcze', 'BatchOrders']]],
+    ['Klienci', [['inbox', 'Zapytania', 'Inquiries'], ['mail', 'Poczta', 'Mail'], ['cust', 'Klienci', 'Customers'], ['veh', 'Pojazdy', 'Vehicles'], ['gal', 'Galeria', 'Gallery']]],
+    ['Marketing', [['camp', 'Kampanie', 'Campaigns'], ['sched', 'Zaplanowane treści', 'ScheduledContent'], ['ig', 'Instagram', 'Instagram']]],
+    ['Firma', [['fin', 'Finanse', 'Finances'], ['stats', 'Statystyki', 'Statistics'], ['emp', 'Pracownicy', 'Employees'], ['prod', 'Produkty', 'Products']]],
+    [null, [['set', 'Ustawienia', 'Settings'], ['report', 'Zgłoś problem', 'ReportProblem']]],
+  ];
+  // badges: { inbox: 3 } czerwony licznik z poświatą (nowe zapytania), { mail: 2 } biały licznik poczty
+  const sidebar = ({ active, badges = {} } = {}) => `<aside class="dbsb" id="dbsb">
+    <div class="dbhd"><div class="dblogo">${WORD}<span class="dbcap">Detal Studio</span></div><span class="dbcol">${lu('close')}</span></div>
+    <nav class="dbmenu">${MENU.map(([t, items]) => `<div class="dbsec">${t ? `<div class="dbst">${t}</div>` : ''}${items.map(([k, l, ic]) => {
+      const b = badges[k], on = k === active, al = b && k === 'inbox' && !on;
+      return `<div class="dbit${on ? ' on' : ''}${al ? ' al' : ''}" id="nv${k}"><span class="dbic"><svg viewBox="0 0 24 24" fill="none">${DB_ICONS[ic]}</svg></span><span class="dbtx">${l}</span>${b ? `<span class="dbbd${k === 'mail' ? ' nt' : ''}${on ? ' on' : ''}" id="nv${k}B">${b}</span>` : ''}</div>`;
+    }).join('')}</div>`).join('')}</nav>
+    <div class="dbuser"><span class="dbav">MW</span><span class="dbui"><span class="dbun">Marek Wiśniewski</span><span class="dbur">Właściciel</span></span><span class="dbout">${lu('out')}</span></div>
+  </aside>`;
+  // Całe okno aplikacji: rama, menu i pusty panel treści (id+'P'), do którego widok wkłada swoją stronę.
+  const app = ({ id = 'app', w = 1440, h = 1040, active, badges, panel = '' } = {}) =>
+    `<div class="dbapp" id="${id}" style="width:${w}px;height:${h}px">${sidebar({ active, badges })}<main class="dbpanel" id="${id}P">${panel}</main></div>`;
+  window.DBShell = { app, sidebar, SB: 248, GAP: 8 };
+})();
+
+(() => {
+  const $ = id => document.getElementById(id);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const P = (t, a, b) => clamp((t - a) / (b - a), 0, 1);
+  const lerp = (a, b, k) => a + (b - a) * k;
+  const out3 = k => 1 - Math.pow(1 - k, 3);
+  const io3 = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const back = k => { if (k <= 0) return 0; if (k >= 1) return 1; const c = 1.5; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+  const type = (s, k) => s.slice(0, Math.round(s.length * clamp(k, 0, 1)));
+  const W = 1920, H = 1080, CX = 1340, CY = 540;
+
+  const stage = $('stage'), scene = $('scene');
+
+  // ---------- icons (lucide, as in the app) ----------
+  const sv = (p, s = 16, sw = 2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+  const I = {
+    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+    settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    kanban: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M8 7v7M12 7v4M16 7v9"/>',
+    inbox: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    chevR: '<path d="m9 18 6-6-6-6"/>',
+    chevD: '<path d="m6 9 6 6 6-6"/>',
+    pencil: '<path d="M21.17 6.81a1 1 0 0 0-3.99-3.99L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5z"/><path d="m15 5 4 4"/>',
+    trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+    reply: '<polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/>',
+    send: '<path d="M14.54 21.69a.5.5 0 0 0 .94-.03l6.5-19a.5.5 0 0 0-.64-.64l-19 6.5a.5.5 0 0 0-.03.94l7.93 3.18a2 2 0 0 1 1.11 1.11z"/><path d="m21.85 2.15-10.94 10.94"/>',
+    calPlus: '<path d="M8 2v4M16 2v4"/><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18M16 19h6M19 16v6"/>',
+    calCheck: '<path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
+    arrowR: '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    sparkles: '<path d="M9.94 14.06A2 2 0 0 0 8.5 12.6L2.4 11a.5.5 0 0 1 0-.96L8.5 8.5a2 2 0 0 0 1.44-1.44L11.5.96a.5.5 0 0 1 .96 0L14.06 7a2 2 0 0 0 1.44 1.44l6.1 1.58a.5.5 0 0 1 0 .96L15.5 12.6a2 2 0 0 0-1.44 1.44L12.5 20.1a.5.5 0 0 1-.96 0z"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    bell: '<path d="M10.27 21a2 2 0 0 0 3.46 0"/><path d="M22 8c0-2.3-.8-4.3-2-6"/><path d="M3.26 15.33A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.67C19.41 13.96 18 12.5 18 8A6 6 0 0 0 6 8c0 4.5-1.41 5.96-2.74 7.33"/><path d="M4 2C2.8 3.7 2 5.7 2 8"/>',
+    sms: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7M17 12H7"/>',
+    more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+    archive: '<rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/>',
+    check2: '<path d="M8 2v4M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+    penSq: '<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.38 2.62a1 1 0 0 1 3 3l-9.01 9.02a2 2 0 0 1-.85.5l-2.87.84a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.85z"/>',
+    checkSq: '<path d="m9 11 3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>',
+    penLine: '<path d="M12 20h9"/><path d="M16.38 3.62a1 1 0 0 1 3 3L7.37 18.64a2 2 0 0 1-.86.5l-2.87.84a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.85z"/>',
+    bar: '<path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-3"/>',
+    okCircle: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  };
+  const SB = {
+    dash: '<rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>',
+    visits: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>',
+    cal: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>',
+    layers: '<path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+    gallery: '<path d="M18 22H4a2 2 0 0 1-2-2V6"/><path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18"/><circle cx="12" cy="8" r="2"/><rect width="16" height="16" x="6" y="2" rx="2"/>',
+    users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    sched: '<path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h5"/><path d="M17.5 17.5 16 16.3V14"/><circle cx="16" cy="16" r="6"/>',
+    car: '<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',
+    inbox: '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    act: '<path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/>',
+    mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    ig: '<rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><path d="M17.5 6.5h.01"/>',
+    prod: '<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+    team: '<path d="M16 10h2"/><path d="M16 14h2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><circle cx="9" cy="11" r="2"/><rect x="2" y="5" width="20" height="14" rx="2"/>',
+    fin: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    stats: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    camp: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    gear: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    alert: '<circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>',
+  };
+  const sbi = (ic, l, id, extra = '') => `<div class="asbI"${id ? ` id="${id}"` : ''}><svg viewBox="0 0 24 24">${SB[ic]}</svg>${l}${extra}</div>`;
+
+  Object.assign(I, {
+    mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    phone: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
+    form: '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+    ig: '<rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
+    hourglass: '<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/>',
+    hand: '<path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/>',
+    list: '<path d="M3 12h.01"/><path d="M3 18h.01"/><path d="M3 6h.01"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M8 6h13"/>',
+    warn: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  });
+
+  // ---------- data (series sample data: Piotr Wiśniewski, Volvo XC60) ----------
+  const row = (id, name, age, sub, o = {}) => `<div class="crow${o.q ? ' q' : ''}" id="${id}"><div class="top">${o.q ? '<span class="nodot"></span>' : '<span class="dot"></span>'}<span class="nm">${name}</span><span class="age${o.late ? ' late' : ''}">${age}</span></div><div class="sub${o.hot ? ' hot' : ''}">${sub}</div></div>`;
+  const fold = (l, c, first) => `<div class="fold${first ? ' first' : ''}">${l} <span class="c">${c}</span><span>${sv(I.chevR, 16)}</span></div>`;
+
+  // board columns (utils/leadBoard.ts BOARD_COLUMNS)
+  const LANES = [
+    ['AW', 'Oczekuje na odpowiedź', '#0ea5e9', '#e7f6fd', '#0e6fa0', 0],
+    ['RE', 'Odpowiedzieliśmy', '#8b5cf6', '#f3effe', '#6d28d9', 1],
+    ['NR', 'Wymaga przypomnienia', '#f59e0b', '#fef6e4', '#b45309', 1],
+    ['LA', 'Utrata', '#f43f5e', '#fff0f2', '#be123c', 1],
+  ];
+  // cards: h = hours since the clock of the card started (client waiting / client silent); amt in grosze
+  const CD0 = {
+    aud: { t: 'Audi RS6', p: 'Tomasz Zieliński', src: 'mail', lane: 'AW', h: 27, amt: 0, sen: 'Nowe zapytanie' },
+    bmw: { t: 'BMW X5', p: 'Piotr Kaczmarek', src: 'form', lane: 'AW', h: 5, amt: 0, sen: 'Odpisał', hot: 1 },
+    sko: { t: 'Skoda Superb', p: 'Paweł Lewandowski', src: 'phone', lane: 'AW', h: 30, amt: 0, sen: 'Nowe zapytanie' },
+    vol: { t: 'Volvo XC60', p: 'Anna Nowak', src: 'mail', lane: 'RE', h: 0, amt: 235000, sen: 'Wycena wysłana' },
+    tes: { t: 'Tesla Model 3', p: 'Marta Kowalczyk', src: 'mail', lane: 'RE', h: 30, amt: 240000, sen: 'Wycena wysłana' },
+    toy: { t: 'Toyota RAV4', p: 'Ewa Wójcik', src: 'mail', lane: 'LA', h: 300, amt: 90000, sen: 'Wycena wysłana' },
+  };
+  const CIDS = Object.keys(CD0);
+
+  // reminder drafts (the assistant writes them from each conversation; amounts only from the quote)
+  const DR_TES = 'Dzień dobry,\n\nwracam do naszej wyceny powłoki ceramicznej dla Tesli Model 3 (2 400,00 zł). Chętnie odpowiem na pytania i zarezerwuję dla Pani termin. Wystarczy odpisać na tę wiadomość.\n\nPozdrawiam';
+  const DR_VOL_A = 'Dzień dobry,\n\nprzypominam się w sprawie wyceny prania tapicerki i powłoki ceramicznej dla Volvo XC60 na 2 350,00 zł. Najbliższy wolny termin to ';
+  const DR_PH = '[proponowany termin]';
+  const DR_FILL = 'wtorek 27 października';
+  const DR_VOL_B = '. Jeśli pasuje, wystarczy odpisać na tę wiadomość, a zarezerwujemy go dla Pani.\n\nPozdrawiam';
+
+  const laneHtml = ([k, title, dot, tint, ink]) => `<section class="bln" id="L${k}">
+      <div class="blt" id="L${k}h"><header class="blh"><span class="dot" style="background:${dot}"></span><h2>${title}</h2><span class="cnt" id="L${k}c" style="background:${tint};color:${ink}">0</span></header>
+      <p class="blv" id="L${k}v"></p></div>
+      ${k === 'NR' ? `<div class="brmw" id="bRem"><div class="brm" id="bRemB" style="color:${ink};border-color:${dot}66">${sv(I.bell, 14)}<span id="bRemT">Przypomnij (2)</span></div></div>` : ''}
+      <div class="blb" id="L${k}b"></div>
+    </section>`;
+  const cardHtml = id => `<div class="bcd" id="c_${id}"><div class="top"><span class="src">${sv(I[CD0[id].src], 14)}</span><div class="tt"><p class="nm">${CD0[id].t}</p>${CD0[id].p ? `<p class="ps">${CD0[id].p}</p>` : ''}</div><span class="am" id="c_${id}A"></span></div><p class="sen" id="c_${id}S"></p><div class="meta" id="c_${id}M"></div></div>`;
+  const rItem = (id, name, who) => `<li class="ri" id="ri_${id}"><header><span class="cbx" id="ri_${id}C">${sv(I.check, 11, 4)}</span><div class="tt"><p class="nm">${name}</p><p class="mt">${who ? `<span>${who}</span>` : ''}<span id="ri_${id}S"></span>${id === 'ola' ? '<span class="why">Instagram - przypomnij się w aplikacji</span>' : ''}</p></div><span class="tag" id="ri_${id}T"></span></header>
+      <div class="wr" id="ri_${id}W"><span style="width:92%"></span><span style="width:78%"></span><span style="width:64%"></span><p>Asystent pisze przypomnienie na podstawie rozmowy…</p></div>
+      <div class="dr" id="ri_${id}D"></div>
+      <p class="nt" id="ri_${id}N">${sv(I.warn, 14)}<span>Uzupełnij [proponowany termin] - inaczej przypomnienie nie wyjdzie.</span></p>
+    </li>`;
+
+  scene.innerHTML = `
+  <div class="ap" id="ap">
+    ${DBShell.sidebar({ active: 'inbox', badges: { inbox: 3 } }).replace('id="dbsb"', 'id="asb"').replace('id="nvcal"', 'id="nvK"').replace('id="nvinboxB"', 'id="nvZb"').replace('id="nvinbox"', 'id="nvZ"').replace('id="nvreport"', 'id="nvR"')}
+    <div class="amain" id="amain">
+      <div class="apg" id="pgIn">
+        <div class="ibx" id="ibx">
+          <section class="lcol" id="lcol">
+            <div class="lhd"><h1>Zapytania</h1><span class="ib">${sv(I.search, 16)}</span><span class="ib" id="ibK">${sv(I.kanban, 16)}</span><span class="ib">${sv(I.settings, 16)}</span></div>
+            <div class="lscr">
+              <h2 class="sect">Czeka na nas <span>3</span></h2>
+              ${row('rA', 'Audi RS6', '27 godz.', 'Nowe zapytanie', { late: 1 })}
+              ${row('rB', 'BMW X5', '5 godz.', 'Odpisał', { hot: 1 })}
+              ${row('rP', 'Volvo XC60', '40 min', 'Nowe zapytanie')}
+              ${fold('Ucichło', 1, 1)}${fold('Czeka na klienta', 4)}${fold('Rezerwacje', 4)}
+            </div>
+          </section>
+          <div class="dcol"><div class="dpane"><div class="phd">${sv(I.inbox, 36)}<span>Wybierz sprawę z listy.</span><span class="pbtn">Zacznij od najdłużej czekającej: Audi RS6</span></div></div></div>
+        </div>
+        <div class="bwrap" id="bwrap">
+          <header class="bhd" id="bhd">
+            <div class="tt"><h1>Zapytania</h1><p>Otwarte: 12 spraw</p></div>
+            <label class="bsr">${sv(I.search, 16)}<span>Szukaj: auto, osoba, adres</span></label>
+            <div class="bseg" id="bseg"><span id="sgL">${sv(I.list, 14)}Lista</span><span class="on">${sv(I.kanban, 14)}Tablica</span></div>
+          </header>
+          <div class="bsc" id="bsc">${LANES.map(laneHtml).join('')}</div>
+          <div class="bcards" id="bcards">${CIDS.map(cardHtml).join('')}<div class="bslot" id="bslot"></div><div class="bslot" id="bslot0"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="scrim" id="scrim"></div>
+    <div class="rmd" id="rmd">
+      <div class="rh"><div class="tt"><h3>Przypomnij się</h3><p>2 sprawy czekają na przypomnienie</p></div><span class="rx">${sv(I.x, 16)}</span></div>
+      <div class="rcn" id="rcn">
+        <p class="rin" id="rIn"></p>
+        <ul class="rl">${rItem('tes', 'Tesla Model 3', 'Marta Kowalczyk')}${rItem('vol', 'Volvo XC60', 'Anna Nowak')}</ul>
+      </div>
+      <div class="rft"><span class="sig" id="rSig"><span class="cbx on">${sv(I.check, 11, 4)}</span>Dodaj moją stopkę</span><span class="gh" id="rCn">Anuluj</span><span class="pr" id="rGo"></span></div>
+    </div>
+  </div>`;
+
+  // ---------- chapters and beats ----------
+  const CH = ['Wycena wysłana', 'Cisza klientki', 'Przypomnienia', 'Odpowiedź klientki', 'Ręczne przeniesienie'];
+  const beats = [];
+  const words = s => (s || '').split(/\s+/).filter(Boolean).length;
+  window.beat = (ch, o, f) => beats.push({ ch, h: o.h, b: o.b, lead: o.lead ?? .6, act: o.act ?? 1, hold: o.hold ?? .6, f: f || (() => {}) });
+
+  const ageOf = (S, c) => c.h + S.shift;
+  // lanes -> card ids, longest waiting first (leadBoard.ts byWaiting)
+  const lay = S => {
+    const L = {}; LANES.forEach(([k]) => { L[k] = []; });
+    CIDS.forEach(id => { const c = S.cd[id]; if (c.lane) L[c.lane].push(id); });
+    LANES.forEach(([k]) => L[k].sort((a, b) => ageOf(S, S.cd[b]) - ageOf(S, S.cd[a])));
+    return L;
+  };
+
+  window.H = {
+    P, lerp, out3, io3, back, type, clamp, lay,
+    mv: (S, to, k, o = {}) => { S.cur = { to, k, dx: o.dx || 0, dy: o.dy || 0, from: o.from || null, fdx: o.fdx || 0, fdy: o.fdy || 0, vis: S.cur.vis }; },
+    tap: (S, a, at, id) => { const k = P(S._s, S._lead + at * S._act, S._lead + at * S._act + .6); if (k > 0 && k < 1) S.tap = k; if (id && a > at && a < at + .14) S.press = id; },
+    cam: (S, to, k) => { S.cam = { to, k }; },
+    hl: (S, el, k = 1, pad = 6) => { S.hl = { el, k, pad }; },
+    foc: (S, sec) => { S.foc = sec; },
+  };
+
+  const fresh = () => ({
+    ap: 0, board: 1, navOn: 'nvZ',
+    cd: JSON.parse(JSON.stringify(CD0)), shift: 0, tr: null, drag: null,
+    scrim: 0, rmd: 0, rStep: 'sel', rRow: {}, rTyped: {}, rSel: 0, rFill: 0, rSending: 0, rSent: 0,
+    foc: null, focPrev: null, hov: null,
+    hl: null, hlLast: null,
+    cam: { to: 'ap', k: 1 },
+    cur: { to: null, k: 1, vis: 0, dx: 0, dy: 0 },
+    tap: 0, press: null, _s: 0,
+  });
+
+  let DUR = 0, chStart = [];
+  const layout = () => {
+    let t = 0, lastText = null;
+    beats.forEach((b, i) => {
+      const txt = b.h + '|' + b.b;
+      b.newText = txt !== lastText; lastText = txt;
+      b.textIdx = b.newText ? i : beats[i - 1].textIdx;
+      if (b.newText) b.lead = Math.max(b.lead, .7);
+      const read = b.newText ? 1.5 + words(b.h) * .26 + words(b.b) * .24 : 0;
+      const slack = read - (b.lead + b.act + b.hold);
+      if (slack > 0) b.act = Math.min(b.act * 1.7, b.act + slack * .5);
+      b.d = Math.max(b.lead + b.act + b.hold, read);
+      b.t0 = t; t += b.d;
+      if (chStart[b.ch] === undefined) chStart[b.ch] = b.t0;
+    });
+    DUR = t;
+  };
+
+  const beatAt = t => { let i = 0; while (i < beats.length - 1 && beats[i + 1].t0 <= t) i++; return i; };
+  const runBeat = (S, i, s) => {
+    const b = beats[i];
+    S.hlLast = S.hl; S.hl = null; S.focPrev = S.foc; S.foc = null; S.tap = 0; S.press = null; S.hov = null; S.tr = null; S.drag = null; S._s = s; S._i = i; S._lead = b.lead; S._act = b.act; S._T = b.t0 + s;
+    b.f(S, P(s, b.lead, b.lead + b.act), s);
+  };
+  const stateAtBeat = (i, s) => { const S = fresh(); for (let j = 0; j < i; j++) runBeat(S, j, beats[j].d); runBeat(S, i, s); return S; };
+
+  // ---------- geometry ----------
+  const sRect = el => { const r = el.getBoundingClientRect(), s0 = stage.getBoundingClientRect(), k = s0.width / W; return { x: (r.left - s0.left) / k, y: (r.top - s0.top) / k, w: r.width / k, h: r.height / k }; };
+  const offR = el => { let x = 0, y = 0, n = el; while (n && n !== scene) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+
+  // ---------- flow-in ----------
+  const enter = (el, k, dy = 22, sc = .975, blur = 7) => {
+    k = clamp(k, 0, 1);
+    el.style.opacity = k; el.style.visibility = k > .001 ? 'visible' : 'hidden';
+    if (k >= 1) { el.style.transform = ''; el.style.filter = ''; return; }
+    el.style.transform = `translateY(${(1 - out3(k)) * dy}px) scale(${lerp(sc, 1, out3(k))})`;
+    el.style.filter = `blur(${(1 - k) * blur}px)`;
+  };
+  const screen = (el, k) => {
+    k = clamp(k, 0, 1); el.style.visibility = k > .001 ? 'visible' : 'hidden'; el.style.opacity = k;
+    const bl = (1 - k) * 9; el.style.filter = bl > .01 ? `blur(${bl}px)` : '';
+    el.style.transform = k < 1 ? `translateY(${(1 - out3(k)) * 30}px) scale(${lerp(.96, 1, out3(k))})` : '';
+  };
+  // a part that folds open (or shut) so the column around it grows smoothly
+  const fold2 = (el, k, disp = 'flex') => {
+    k = clamp(k, 0, 1);
+    if (k <= .001) { el.style.display = 'none'; return; }
+    el.style.display = disp; el.style.height = ''; el.style.overflow = ''; el.style.opacity = ''; el.style.filter = ''; el.style.marginTop = '';
+    if (k >= 1) return;
+    const h = el.offsetHeight, e = io3(k);
+    el.style.overflow = 'hidden'; el.style.height = (h * e) + 'px';
+    el.style.opacity = clamp((k - .3) / .7, 0, 1); el.style.filter = `blur(${(1 - k) * 4}px)`;
+  };
+  const xfade = (els, on, k) => { Object.entries(els).forEach(([key, el]) => { const o = key === on ? k : 0; if (o <= .001 && key !== on) { el.style.visibility = 'hidden'; el.style.opacity = 0; return; } el.style.visibility = 'visible'; el.style.opacity = o; el.style.filter = o < 1 ? `blur(${(1 - o) * 5}px)` : ''; }); };
+
+  // ---------- caption text (style B: words flow in from below with blur) ----------
+  const ctx = $('ctx'), cnum = $('cnum');
+  const textEls = {}, chEls = {};
+  // one-letter words (z, w, i, a, o, u) never end a line: glued to the next word
+  const mkWords = s => s.split(' ').reduce((a, w) => { const p = a[a.length - 1]; if (p !== undefined && /^\p{L}$/u.test(p)) a[a.length - 1] = p + ' ' + w; else a.push(w); return a; }, []).map(w => `<span class="w">${w} </span>`).join('');
+  const textEl = i => {
+    if (textEls[i]) return textEls[i];
+    const b = beats[i], d = document.createElement('div'); d.className = 'tl';
+    d.innerHTML = `<h2 class="ch">${mkWords(b.h)}</h2>` + (b.b ? `<div class="cbd">${mkWords(b.b)}</div>` : '');
+    d.style.display = 'none'; ctx.appendChild(d);
+    textEls[i] = { el: d, hw: Array.from(d.querySelectorAll('.ch .w')), bw: Array.from(d.querySelectorAll('.cbd .w')) };
+    return textEls[i];
+  };
+  const chEl = c => {
+    if (chEls[c]) return chEls[c];
+    const d = document.createElement('div'); d.innerHTML = `<b>${String(c + 1).padStart(2, '0')}</b><i></i><span>${CH[c]}</span>`;
+    d.style.display = 'none'; cnum.appendChild(d); return (chEls[c] = d);
+  };
+  const wIn = (w, k, dy = 32, bl = 9) => { w.style.opacity = k; w.style.transform = k >= 1 ? '' : `translateY(${(1 - out3(k)) * dy}px)`; w.style.filter = k >= 1 ? '' : `blur(${(1 - k) * bl}px)`; };
+  const wOut = (w, k) => { w.style.opacity = 1 - k; w.style.transform = `translateY(${-io3(k) * 26}px)`; w.style.filter = `blur(${k * 7}px)`; };
+  let shownT = [], shownC = [];
+  const paintText = (i, t) => {
+    const cur = beats[i].textIdx, tS = beats[cur].t0, tau = t - tS;
+    const prevIdx = cur > 0 ? beats[cur - 1].textIdx : -1;
+    const want = [cur]; if (prevIdx >= 0 && tau < .75) want.push(prevIdx);
+    shownT.forEach(j => { if (!want.includes(j)) textEls[j].el.style.display = 'none'; });
+    shownT = want;
+    const T = textEl(cur); T.el.style.display = 'block';
+    const nh = T.hw.length;
+    T.hw.forEach((w, j) => wIn(w, P(tau, .3 + j * .05, .3 + j * .05 + .65)));
+    const b0 = .3 + nh * .05 + .25;
+    T.bw.forEach((w, j) => wIn(w, P(tau, b0 + j * .018, b0 + j * .018 + .6), 18, 6));
+    if (want[1] !== undefined) { const O = textEl(prevIdx); O.el.style.display = 'block'; [...O.hw, ...O.bw].forEach((w, j) => wOut(w, P(tau, j * .01, j * .01 + .42))); }
+    const c = beats[i].ch, cS = chStart[c], ct = t - cS, wantC = [c]; if (c > 0 && ct < .6) wantC.push(c - 1);
+    shownC.forEach(j => { if (!wantC.includes(j)) chEls[j].style.display = 'none'; });
+    shownC = wantC;
+    const C = chEl(c); C.style.display = 'flex'; wIn(C, c === 0 && t < .3 ? 0 : P(ct, .15, .75), 20, 6);
+    if (wantC[1] !== undefined) { const O = chEl(c - 1); O.style.display = 'flex'; wOut(O, P(ct, 0, .4)); }
+    $('pl').innerHTML = `Rozdział <b>${c + 1}</b> z ${CH.length}`;
+    const bars = $('pb').children;
+    for (let j = 0; j < CH.length; j++) { const a = chStart[j], b = j + 1 < CH.length ? chStart[j + 1] : DUR; bars[j].firstChild.style.width = (P(t, a, b) * 100) + '%'; }
+  };
+  $('pb').innerHTML = CH.map(() => '<i><b></b></i>').join('');
+
+  // ---------- paint ----------
+  const camR = {};
+  const camTarget = to => {
+    if (typeof to === 'string') {
+      const el = $(to), r = offR(el); const s = Math.min(.95, 1040 / el.offsetWidth, 960 / el.offsetHeight);
+      return { fx: r.x + r.w / 2, fy: r.y + r.h / 2, s };
+    }
+    const el = $(to.el); let r = offR(el);
+    if (el.offsetParent) camR[to.el] = r; else r = camR[to.el] || r;
+    return { fx: r.x + r.w / 2 + (to.dx || 0), fy: r.y + (to.top ? 0 : r.h / 2) + (to.dy || 0), s: to.s };
+  };
+  const fmt = c => { const z = Math.floor(c / 100), g = c % 100, s = String(z).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); return (g ? `${s},${String(g).padStart(2, '0')}` : s) + ' zł'; };
+  // caseModel.ts rowAge
+  const rowAge = h => { if (h < 1 / 60) return 'teraz'; if (h < 1) return `${Math.floor(h * 60)} min`; if (h < 48) return `${Math.floor(h)} godz.`; const d = Math.floor(h / 24); return d === 1 ? '1 dzień' : `${d} dni`; };
+  const vanish = h => { const d = Math.ceil(h / 24); return d <= 0 ? 'znika dziś' : d === 1 ? 'znika jutro' : `znika za ${d} dni`; };
+  const plR = n => n === 1 ? 'przypomnienie' : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? 'przypomnienia' : 'przypomnień';
+  const offIn = (el, root) => { let x = 0, y = 0, n = el; while (n && n !== root) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; } return { x, y, w: el.offsetWidth, h: el.offsetHeight }; };
+  const LT = Object.fromEntries(LANES.map(l => [l[0], l]));
+  const REMINDABLE = id => CD0[id].src === 'mail' || CD0[id].src === 'form';
+  let lastCur = { x: 1500, y: 1180 }, hovEls = [], pressEl = null;
+  const htmlCache = {};
+  const setH = (id, h) => { if (htmlCache[id] !== h) { htmlCache[id] = h; $(id).innerHTML = h; } };
+
+  function paint(S, prev) {
+    const s = S._s;
+    screen($('ap'), S.ap);
+
+    // --- list ↔ board
+    { const k = clamp(S.board, 0, 1), a = $('ibx'), b = $('bwrap');
+      a.style.opacity = 1 - k; a.style.visibility = k < .999 ? 'visible' : 'hidden'; a.style.filter = k > 0 && k < 1 ? `blur(${k * 6}px)` : '';
+      b.style.opacity = k; b.style.visibility = k > .001 ? 'visible' : 'hidden'; b.style.filter = k > 0 && k < 1 ? `blur(${(1 - k) * 6}px)` : '';
+      b.style.transform = k > 0 && k < 1 ? `scale(${lerp(.985, 1, out3(k))})` : ''; }
+
+    // --- hover and press
+    hovEls.forEach(e => e.classList.remove('hov')); hovEls = [];
+    (Array.isArray(S.hov) ? S.hov : S.hov ? [S.hov] : []).forEach(id => { const e = $(id); if (e) { e.classList.add('hov'); hovEls.push(e); } });
+    if (pressEl && pressEl.id !== S.press) pressEl.style.transform = '';
+    pressEl = S.press ? $(S.press) : null; if (pressEl) pressEl.style.transform = 'scale(.95)';
+
+    // --- cards: content first (their height decides the stacking)
+    CIDS.forEach(id => {
+      const c = S.cd[id], cl = c.cl || c.lane, age = ageOf(S, c);
+      const sen = cl === 'NR' ? 'Czas się przypomnieć' : cl === 'LA' ? 'Klient przestał odpowiadać' : c.sen;
+      const S2 = $('c_' + id + 'S'); if (S2.textContent !== sen) S2.textContent = sen; S2.classList.toggle('hot', !!c.hot && cl === 'AW');
+      setH('c_' + id + 'A', c.amt > 0 ? fmt(c.amt) : '');
+      let m = '';
+      if (c.rem && cl === 'RE') m += `<span class="badge">${sv(I.bell, 12)}Przypomnienie wysłane</span>`;
+      m += `<span class="${cl === 'AW' && age > 24 ? 'late' : ''}">${sv(I.clock, 12)}${rowAge(age)}</span>`;
+      if (cl === 'LA') m += `<span>${sv(I.hourglass, 12)}${vanish(c.man ? 240 : 480 - age)}</span>`;
+      if (c.man) m += `<span>${sv(I.hand, 12)}przesunięta ręcznie</span>`;
+      setH('c_' + id + 'M', m);
+    });
+
+    // --- lanes: count, quote value, „Przypomnij”
+    const B = lay(S), A = S.tr ? S.tr.from : B, tk = S.tr ? io3(clamp(S.tr.k, 0, 1)) : 1;
+    const shownL = tk < .5 ? A : B;
+    LANES.forEach(([k, , dot, tint, , val]) => {
+      $('L' + k + 'c').textContent = shownL[k].length;
+      const v = shownL[k].reduce((a, id) => a + S.cd[id].amt, 0);
+      if (val) setH('L' + k + 'v', v > 0 ? `${fmt(v)} w wycenach` : '');
+      const ln = $('L' + k), ov = S.drag && S.drag.to === k ? clamp(S.drag.over, 0, 1) : 0;
+      ln.style.background = ov > 0 ? tint : '';
+      ln.style.boxShadow = ov > 0 ? `inset 0 0 0 2px ${dot}${Math.round(ov * 0x66).toString(16).padStart(2, '0')}` : '';
+    });
+    { const n = shownL.NR.filter(REMINDABLE).length; if (n) $('bRemT').textContent = `Przypomnij (${n})`; fold2($('bRem'), S.remBtn ?? (n ? 1 : 0), 'block'); }
+
+    // --- card positions (FLIP-like glide between the layout before and after)
+    const bw = $('bwrap'), geo = {};
+    LANES.forEach(([k]) => { const r = offIn($('L' + k + 'b'), bw); geo[k] = { x: r.x + 10, y: r.y + 2, w: r.w - 20 }; });
+    const hgt = {}; CIDS.forEach(id => { const el = $('c_' + id); el.style.width = geo.AW.w + 'px'; hgt[id] = el.offsetHeight; });
+    const posOf = L => { const p = {}; LANES.forEach(([k]) => { let y = geo[k].y; L[k].forEach(id => { p[id] = { x: geo[k].x, y }; y += hgt[id] + 10; }); }); return p; };
+    const pA = posOf(A), pB = posOf(B);
+    const fo = S.foc ? S.foc : null, fp = S.focPrev ? S.focPrev : null, fk = io3(P(s, 0, .7));
+    const dimOf = (f, key) => f && !f.includes(key) ? 1 : 0;
+    CIDS.forEach(id => {
+      const el = $('c_' + id), a = pA[id], b = pB[id];
+      let x, y, o = 1;
+      if (a && b) { x = lerp(a.x, b.x, tk); y = lerp(a.y, b.y, tk); }
+      else if (b) { x = b.x; y = b.y; o = tk; }
+      else if (a) { x = a.x; y = a.y; o = 1 - tk; }
+      else { el.style.visibility = 'hidden'; return; }
+      let tf = '';
+      const dg = S.drag && S.drag.id === id ? S.drag : null;
+      if (dg) {
+        const p = io3(clamp(dg.p, 0, 1)), lift = clamp(dg.lift, 0, 1), a2 = a || b, b2 = b || a;
+        x = lerp(a2.x, b2.x, p); y = lerp(a2.y, b2.y, p) - 14 * lift * (1 - clamp(dg.land, 0, 1)); o = 1;
+        tf = `scale(${1 + .04 * lift}) rotate(${-1.6 * lift}deg)`;
+        el.style.boxShadow = lift > 0 ? `0 2px 4px rgba(15,23,42,.06), 0 ${28 * lift}px ${48 * lift}px -16px rgba(15,23,42,${.35 * lift})` : '';
+        el.style.zIndex = 5;
+        const sl = $('bslot'), sk = clamp(dg.over, 0, 1) * (1 - clamp(dg.land, 0, 1));
+        sl.style.left = b2.x + 'px'; sl.style.top = b2.y + 'px'; sl.style.width = geo.AW.w + 'px'; sl.style.height = hgt[id] + 'px';
+        sl.style.opacity = sk * .85; sl.style.visibility = sk > .001 ? 'visible' : 'hidden';
+        sl.style.borderColor = LT[dg.to][2] + '99'; sl.style.background = LT[dg.to][3];
+        // until the card is over another column, its place waits in the column it came from
+        const s0 = $('bslot0'), k0 = clamp(dg.lift, 0, 1) * (1 - clamp(dg.over, 0, 1)), o0 = pA[id] || a2, from = Object.keys(A).find(k => A[k].includes(id)) || dg.to;
+        s0.style.left = o0.x + 'px'; s0.style.top = o0.y + 'px'; s0.style.width = geo.AW.w + 'px'; s0.style.height = hgt[id] + 'px';
+        s0.style.opacity = k0 * .85; s0.style.visibility = k0 > .001 ? 'visible' : 'hidden';
+        s0.style.borderColor = LT[from][2] + '99'; s0.style.background = LT[from][3];
+      } else { el.style.boxShadow = ''; el.style.zIndex = ''; }
+      el.style.left = x + 'px'; el.style.top = y + 'px'; el.style.transform = tf;
+      // focus: cards follow the lane they stand in
+      const key = (b ? Object.keys(B).find(k => B[k].includes(id)) : Object.keys(A).find(k => A[k].includes(id)));
+      const d = dg ? 0 : lerp(dimOf(fp, key), dimOf(fo, key), fk);
+      el.style.opacity = o * (d > .001 ? 1 - d * .6 : 1); el.style.visibility = o > .001 ? 'visible' : 'hidden';
+      el.style.filter = d > .001 ? `blur(${d * 1.8}px)` : (o < 1 ? `blur(${(1 - o) * 5}px)` : '');
+    });
+    if (!S.drag) ['bslot', 'bslot0'].forEach(i => { $(i).style.opacity = 0; $(i).style.visibility = 'hidden'; });
+    // focus on lanes and the header
+    [['LAW', 'AW'], ['LRE', 'RE'], ['LNR', 'NR'], ['LLA', 'LA'], ['bhd', 'bhd'], ['asb', 'asb']].forEach(([el, key]) => {
+      const d = lerp(dimOf(fp, key), dimOf(fo, key), fk), r = $(el);
+      r.style.opacity = d > .001 ? 1 - d * .6 : ''; r.style.filter = d > .001 ? `blur(${d * 1.8}px)` : '';
+    });
+
+    // --- reminder window (components/LeadReminderDialog.tsx)
+    { const sc = $('scrim'); sc.style.opacity = S.scrim; sc.style.visibility = S.scrim > .001 ? 'visible' : 'hidden'; }
+    { const m = $('rmd'), r = offR(bw); m.style.left = (r.x + r.w / 2 - 320) + 'px'; m.style.top = (r.y + r.h / 2 - 365) + 'px'; enter(m, S.rmd, 18, .97, 8); }
+    const st = S.rStep, rw = S.rRow;
+    $('rIn').textContent = st === 'sel' ? 'Asystent napisze osobne przypomnienie dla każdej zaznaczonej sprawy, na podstawie jej rozmowy. Przeczytasz je i poprawisz, zanim cokolwiek wyjdzie.'
+      : st === 'rev' ? 'Przeczytaj i popraw, jeśli trzeba. Odznaczone sprawy zostaną w „Wymaga przypomnienia”.'
+      : `Wysłano 2 przypomnienia. Karty wróciły do „Odpowiedzieliśmy” z plakietką przypomnienia.`;
+    $('rcn').style.opacity = S.rFade != null ? S.rFade : ''; $('rcn').style.filter = S.rFade != null && S.rFade < 1 ? `blur(${(1 - S.rFade) * 4}px)` : '';
+    ['tes', 'vol'].forEach(id => {
+      const ph = rw[id] || '', dk = clamp((S.rDraft || {})[id] ?? 0, 0, 1);
+      const cb = $('ri_' + id + 'C'); cb.style.display = st === 'done' ? 'none' : ''; cb.classList.toggle('on', true);
+      $('ri_' + id + 'S').textContent = st === 'done' ? '' : `Cisza od ${rowAge(ageOf(S, S.cd[id]))}`;
+      $('ri_' + id + 'S').style.display = st === 'done' ? 'none' : '';
+      fold2($('ri_' + id + 'W'), st === 'rev' ? 1 - dk : 0, 'flex');
+      fold2($('ri_' + id + 'D'), st === 'rev' ? dk : 0, 'block');
+      const hasPh = id === 'vol' && S.rFill <= 0;
+      let tag = '', tc = '';
+      if (ph === 'sent') { tag = `${sv(I.check, 12)} Wysłano`; tc = 'ok'; }
+      else if (ph === 'sending') { tag = 'Wysyłanie…'; tc = 'neu'; }
+      else if (st === 'rev' && dk >= 1 && hasPh) { tag = 'Do uzupełnienia'; tc = 'warn'; }
+      setH('ri_' + id + 'T', tag); $('ri_' + id + 'T').className = 'tag ' + tc; $('ri_' + id + 'T').style.display = tag ? '' : 'none';
+      fold2($('ri_' + id + 'N'), st === 'rev' && dk >= 1 && id === 'vol' ? 1 - clamp(S.rFill * 4, 0, 1) : 0, 'flex');
+    });
+    { // draft texts
+      const esc = t => t.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+      const dis = (S.rRow.tes === 'sending' || S.rRow.tes === 'sent') ? ' dis' : '';
+      $('ri_tesD').className = 'dr' + dis; setH('ri_tesD', esc(DR_TES));
+      const disV = (S.rRow.vol === 'sending' || S.rRow.vol === 'sent') ? ' dis' : '';
+      let v;
+      if (S.rFill <= 0) v = esc(DR_VOL_A) + `<span class="phs${S.rSel > 0 ? ' sel' : ''}" id="vPh">${DR_PH}</span>` + esc(DR_VOL_B);
+      else v = esc(DR_VOL_A) + esc(type(DR_FILL, S.rFill)) + (S.rFill < 1 ? '<span class="caret" id="vPh"></span>' : '') + esc(DR_VOL_B);
+      $('ri_volD').className = 'dr' + disV; setH('ri_volD', v);
+    }
+    { // footer
+      const dk = S.rDraft || {}, drafting = ['tes', 'vol'].filter(id => (dk[id] ?? 0) < 1).length;
+      const ready = (dk.tes >= 1 ? 1 : 0) + (dk.vol >= 1 && S.rFill >= 1 ? 1 : 0);
+      let lbl, dis = false;
+      if (st === 'sel') lbl = `${sv(I.bell, 15)}Przygotuj 2 przypomnienia`;
+      else if (st === 'rev') {
+        if (S.rSending) lbl = `Wysyłanie… (${S.rSent + 1} z 2)`, dis = true;
+        else if (drafting > 0) lbl = `Asystent pisze… (${2 - drafting} z 2)`, dis = true;
+        else lbl = `Wyślij ${ready} ${plR(ready)}`;
+      } else lbl = 'Gotowe';
+      setH('rGo', lbl); $('rGo').classList.toggle('dis', dis);
+      $('rSig').style.visibility = st === 'done' ? 'hidden' : ''; $('rCn').style.display = st === 'done' ? 'none' : '';
+    }
+
+    // shimmer of the assistant's placeholder lines, driven by the timeline
+    document.querySelectorAll('.wr span').forEach(e => { e.style.backgroundPosition = `${((S._T || 0) * 480) % 640 - 320}px 0`; });
+
+    // --- camera
+    const tg2 = camTarget(S.cam.to);
+    let cam = tg2;
+    if (prev && S.cam.k < 1) { const k = io3(S.cam.k); cam = { fx: lerp(prev.cam.fx, tg2.fx, k), fy: lerp(prev.cam.fy, tg2.fy, k), s: Math.exp(lerp(Math.log(prev.cam.s), Math.log(tg2.s), k)) }; }
+    const T = S._T || 0, ds2 = cam.s, still = !(prev && S.cam.k < 1);
+    let tx = CX - cam.fx * ds2 + 9 * Math.sin(T * .29), ty = CY - cam.fy * ds2 + 6 * Math.sin(T * .21 + 1);
+    if (still) { tx = Math.round(tx); ty = Math.round(ty); }
+    scene.style.transform = `translate(${tx}px, ${ty}px) scale(${ds2})`;
+
+    // --- highlight ring (glides from the previous one)
+    const hlEl = $('hl');
+    const rr = h => { const r = sRect($(h.el)), p = (h.pad ?? 6) * 1.3; return { x: r.x - p, y: r.y - p, w: r.w + 2 * p, h: r.h + 2 * p }; };
+    let hr = null, ho = 0;
+    if (S.hl) {
+      const b = rr(S.hl);
+      if (S.hlLast && S.hlLast.el !== S.hl.el) { const a = rr(S.hlLast), k = io3(P(s, 0, .6)); hr = { x: lerp(a.x, b.x, k), y: lerp(a.y, b.y, k), w: lerp(a.w, b.w, k), h: lerp(a.h, b.h, k) }; ho = S.hl.k >= 1 ? 1 : Math.max(out3(S.hl.k), 1 - k); }
+      else { hr = b; ho = S.hlLast && S.hlLast.el === S.hl.el && S.hl.k >= 1 ? 1 : out3(S.hl.k); }
+    } else if (S.hlLast && s < .35) { hr = rr(S.hlLast); ho = 1 - s / .35; }
+    if (hr && ho > .001 && hr.w > 4) { hlEl.style.opacity = ho; hlEl.style.left = hr.x + 'px'; hlEl.style.top = hr.y + 'px'; hlEl.style.width = hr.w + 'px'; hlEl.style.height = hr.h + 'px'; hlEl.style.borderRadius = '14px'; } else hlEl.style.opacity = 0;
+
+    // --- mouse cursor (glides in an arc)
+    const ctr = (id, dx, dy) => { const r = sRect($(id)); if (r.w < 1 && r.h < 1) return null; return { x: r.x + r.w / 2 + dx * ds2, y: r.y + r.h / 2 + dy * ds2 }; };
+    const glide = (P0, prevPt, last) => {
+      let p = P0.to ? (ctr(P0.to, P0.dx, P0.dy) || last) : { x: 1500, y: 1180 };
+      if (P0.k < 1 && (prevPt || P0.from)) {
+        const a = (P0.from && ctr(P0.from, P0.fdx, P0.fdy)) || prevPt || p, k = io3(P0.k), dx = p.x - a.x, dy = p.y - a.y, d = Math.hypot(dx, dy) || 1, bend = Math.sin(Math.PI * k) * Math.min(70, d * .14);
+        p = { x: lerp(a.x, p.x, k) - dy / d * bend, y: lerp(a.y, p.y, k) + dx / d * bend };
+      }
+      return p;
+    };
+    const cur = glide(S.cur, prev && prev.cur, lastCur); lastCur = cur;
+    const cv2 = $('cursor'), press = S.tap > 0 && S.cur.vis > 0 ? Math.sin(Math.PI * clamp(S.tap * 2.2, 0, 1)) : 0;
+    cv2.style.opacity = S.cur.vis; cv2.style.transform = `translate(${cur.x - 7}px, ${cur.y - 5}px) scale(${1 - press * .16})`;
+    const ring = $('ring');
+    if (S.tap > 0 && S.tap < 1) { ring.style.opacity = (1 - S.tap) * S.cur.vis; ring.style.transform = `translate(${cur.x}px, ${cur.y}px) scale(${.35 + S.tap * .9})`; } else ring.style.opacity = 0;
+    return { cam, cur };
+  }
+
+  // ---------- timeline driver with memo of each beat's end ----------
+  const ends = [];
+  const endOf = i => {
+    if (i < 0) return null;
+    if (ends[i]) return ends[i];
+    const S = stateAtBeat(i, beats[i].d);
+    ends[i] = paint(S, i > 0 ? endOf(i - 1) : null);
+    return ends[i];
+  };
+  const draw = t => {
+    t = clamp(t, 0, DUR - .001);
+    const i = beatAt(t), b = beats[i];
+    const prev = endOf(i - 1);
+    const S = stateAtBeat(i, t - b.t0);
+    paint(S, prev);
+    paintText(i, t);
+    window.__t = t;
+  };
+
+  // ---------- player ----------
+  const player = $('player');
+  const fit = () => { stage.style.transform = `scale(${player.clientWidth / W})`; };
+  let t = 0, playing = false, rate = 1;
+  const bPlay = $('bPlay');
+  const syncBtn = () => { bPlay.textContent = playing ? 'Pauza' : (t >= DUR - .01 ? 'Od początku' : 'Odtwórz'); };
+  const chapAt = tt => { let c = 0; for (let j = 0; j < CH.length; j++) if (chStart[j] <= tt + .001) c = j; return c; };
+  const go = nt => { t = clamp(nt, 0, DUR - .001); draw(t); $('scrubI').style.width = (t / DUR * 100) + '%'; const c = chapAt(t); Array.from($('chaps').children).forEach((e, j) => e.classList.toggle('on', j === c)); };
+  bPlay.addEventListener('click', () => { if (t >= DUR - .01) go(0); playing = !playing; syncBtn(); });
+  const textStarts = () => beats.filter(b => b.newText).map(b => b.t0);
+  $('bNext').addEventListener('click', () => { const n = textStarts().find(x => x > t + .05); if (n !== undefined) go(n + .01); });
+  $('bPrev').addEventListener('click', () => { const ts = textStarts().filter(x => x < t - .4); go(ts.length ? ts[ts.length - 1] + .01 : 0); });
+  $('bRate').addEventListener('click', () => { rate = rate === 1 ? .75 : 1; $('bRate').textContent = `Tempo ${rate === 1 ? '1' : '0,75'}×`; });
+  $('scrub').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); go((e.clientX - r.left) / r.width * DUR); });
+  let last = performance.now();
+  const frame = now => {
+    const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (playing) {
+      let nt = t + dt * rate;
+      if ($('optStop').checked) { const n = textStarts().find(x => x > t + .001); if (n !== undefined && nt >= n) { nt = n - .001; playing = false; syncBtn(); } }
+      if (nt >= DUR) { nt = DUR - .001; playing = false; syncBtn(); }
+      go(nt);
+    }
+    requestAnimationFrame(frame);
+  };
+  window.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('input')) return; if (e.key === ' ') { e.preventDefault(); bPlay.click(); } if (e.key === 'ArrowRight') $('bNext').click(); if (e.key === 'ArrowLeft') $('bPrev').click(); });
+
+  window.__start = () => {
+    layout();
+    $('chaps').innerHTML = CH.map((c, j) => `<button type="button">${j + 1}. ${c}</button>`).join('');
+    Array.from($('chaps').children).forEach((e, j) => e.addEventListener('click', () => go(chStart[j] + .01)));
+    fit(); try { new ResizeObserver(() => { fit(); ends.length = 0; go(t); }).observe(player); } catch (e) { window.addEventListener('resize', () => { fit(); ends.length = 0; go(t); }); }
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    go(reduce ? chStart[1] + 2 : .01); syncBtn();
+    requestAnimationFrame(frame);
+    window.__seek = tt => { playing = false; syncBtn(); go(tt); };
+    window.__dur = DUR; window.__chStart = chStart; window.__beats = beats.map(b => [b.t0, b.d, b.ch, b.h, b.newText]);
+  };
+})();
+
+(() => {
+  const { P, mv, tap, cam, hl, foc, lay } = window.H;
+  const B = window.beat;
+  const show = (S, s, a = 0, b = .45) => { S.cur.vis = P(s, a, b); };
+  const hide = (S, k) => { S.cur.vis = Math.min(S.cur.vis, 1 - k); };
+  // one camera target per beat
+  const ZB = { el: 'bwrap', s: .9 };
+  const ZL = { el: 'bsc', top: true, dy: 330, dx: -277, s: 1.3 };   // „Oczekuje” + „Odpowiedzieliśmy”
+  const ZM = { el: 'bsc', top: true, dy: 330, dx: 0, s: 1.3 };      // „Odpowiedzieliśmy” + „Wymaga przypomnienia”
+  const ZR = { el: 'bsc', top: true, dy: 330, dx: 277, s: 1.3 };    // „Wymaga przypomnienia” + „Utrata”
+  const ZW = { el: 'rmd', s: 1.15 };
+
+  const ZA = { el: 'bsc', top: true, dy: 330, dx: 0, s: 1.0 };      // all four columns
+
+  // ===== 1 Wycena wysłana =====
+  B(0, { h: 'Jak działa tablica zapytań?', b: '', lead: .2, act: 1.4, hold: .5 }, (S, a, s) => { S.ap = P(s, .2, 1.4); cam(S, 'ap', 1); });
+  B(0, { h: 'Wycena dla pani Nowak jest wysłana.', b: 'Karta Volvo stoi w „Odpowiedzieliśmy”.', lead: .6, act: 1.6, hold: .8 }, (S, a, s) => {
+    S.ap = 1; cam(S, ZL, P(s, 0, 1.9)); foc(S, ['AW', 'RE']); hl(S, 'c_vol', P(a, .4, .8), 4);
+  });
+  B(0, { h: 'Teraz czekasz na klientkę.', b: 'Pod nazwą kolumny widać sumę wycen.', lead: .6, act: 1.4, hold: .6 }, (S, a, s) => {
+    cam(S, ZL, 1); foc(S, ['RE']); hl(S, 'LREh', P(a, .1, .5), 2);
+  });
+
+  // ===== 3 Cisza klienta =====
+  B(1, { h: 'Klientka nie odpisuje przez 3 dni.', b: 'Cisza liczy się od Twojej ostatniej wiadomości.', lead: .6, act: 4.0, hold: .6 }, (S, a, s) => {
+    cam(S, ZM, P(s, 0, 1.9)); foc(S, ['RE', 'NR']);
+    const sh = 72 * P(a, .05, .8); S.shift = sh;
+    if (sh >= 42 && sh < 72) { const A = lay(S); S.cd.tes.lane = 'NR'; S.tr = { from: A, k: P(a, .49, .66) }; }
+    if (sh >= 72) { S.cd.tes.lane = 'NR'; const A = lay(S); S.cd.vol.lane = 'NR'; S.tr = { from: A, k: P(a, .8, .97) }; }
+  });
+  B(1, { h: 'Karta trafia do „Wymaga przypomnienia”.', b: 'To dobry moment, żeby przypomnieć się klientce.', lead: .6, act: 1.4, hold: .6 }, (S, a, s) => {
+    S.shift = 72; cam(S, ZM, 1); foc(S, ['NR']); hl(S, 'LNRh', P(a, .1, .5), 2);
+  });
+
+  // ===== 4 Przypomnienia =====
+  B(2, { h: 'Przygotuj przypomnienia dla całej kolumny.', b: 'Liczba w przycisku to sprawy, do których wyślesz mail.', lead: .6, act: 2.2, hold: .3 }, (S, a, s) => {
+    cam(S, ZM, 1); foc(S, ['NR']); show(S, s, .3, .8);
+    mv(S, 'bRemB', P(a, .05, .45), { dx: -40, dy: 0 }); S.hov = a > .4 && a < .62 ? 'bRemB' : null; tap(S, a, .55, 'bRemB');
+    S.scrim = P(a, .6, 1);
+  });
+  B(2, { h: 'Asystent pisze osobne przypomnienie dla każdej sprawy.', b: 'Każde nawiązuje do Twojej ostatniej wiadomości w tej rozmowie.', lead: .6, act: 4.2, hold: .5 }, (S, a, s) => {
+    S.scrim = 1; S.rmd = P(s, 0, .7); cam(S, ZW, P(s, 0, 1.3));
+    if (a < .2) hide(S, P(s, 0, .4)); else show(S, s, 0, 0);
+    if (a >= .2) { S.cur.vis = P(a, .2, .26); mv(S, 'rGo', P(a, .2, .36), { from: 'ri_vol' }); }
+    S.hov = a > .34 && a < .42 ? 'rGo' : null; tap(S, a, .38, 'rGo');
+    if (a > .42) { S.rStep = 'rev'; S.rFade = P(a, .42, .52); S.rDraft = { tes: P(a, .64, .76), vol: P(a, .82, .94) }; }
+    else S.rFade = 1 - P(a, .36, .42);
+    if (a > .42) hide(S, P(a, .42, .5));
+  });
+  B(2, { h: 'Przeczytaj i popraw przed wysyłką.', b: 'Klient nie dostanie nic bez Twojej zgody.', lead: .6, act: 1.4, hold: .6 }, (S, a, s) => {
+    S.rFade = 1; S.rDraft = { tes: 1, vol: 1 }; cam(S, ZW, 1); hl(S, 'ri_tesD', P(a, .1, .5), 4);
+  });
+  const TG = { h: 'Uzupełnij lukę w nawiasie kwadratowym.', b: 'Bez tego nie wyślesz przypomnienia.' };
+  B(2, { ...TG, lead: .6, act: 1.2, hold: .6 }, (S, a, s) => {
+    S.rDraft = { tes: 1, vol: 1 }; cam(S, ZW, 1); hl(S, 'ri_vol', P(a, .1, .5), 4);
+  });
+  B(2, { ...TG, lead: 0, act: 2.6, hold: .6 }, (S, a, s) => {
+    S.rDraft = { tes: 1, vol: 1 }; cam(S, ZW, 1); show(S, s, 0, .35);
+    if (a < .36) { mv(S, 'vPh', P(a, .02, .22), { from: 'ri_tesD' }); S.rSel = a > .26 ? 1 : 0; tap(S, a, .24); }
+    else { S.rSel = 0; S.rFill = P(a, .36, .9); if (a < .47) mv(S, 'vPh', 1); hide(S, P(a, .36, .46)); }
+  });
+  B(2, { h: 'Wyślij wszystkie przypomnienia naraz.', b: 'Klient dostaje mail w tej samej rozmowie, z Twojej skrzynki.', lead: .6, act: 3.0, hold: .4 }, (S, a, s) => {
+    S.rDraft = { tes: 1, vol: 1 }; S.rFill = 1; S.rmd = 1; cam(S, ZW, 1); show(S, s, .2, .6);
+    mv(S, 'rGo', P(a, .02, .2), { from: 'ri_volD' }); S.hov = a > .18 && a < .28 ? 'rGo' : null; tap(S, a, .24, 'rGo');
+    if (a > .27) { S.rSending = 1; S.rRow = { tes: 'sending' }; S.rSent = 0; }
+    if (a > .45) { S.rRow = { tes: 'sent', vol: 'sending' }; S.rSent = 1; }
+    if (a > .63) { S.rRow = { tes: 'sent', vol: 'sent' }; S.rSent = 2; }
+    if (a > .72) { S.rFade = 1 - P(a, .72, .78); }
+    if (a > .78) { S.rStep = 'done'; S.rSending = 0; S.rFade = P(a, .78, .9); }
+  });
+  const TB = { h: 'Karty wracają do „Odpowiedzieliśmy”.', b: 'Na jedną ciszę klienta wysyłasz jedno przypomnienie.' };
+  B(2, { ...TB, lead: .6, act: 1.6, hold: 0 }, (S, a, s) => {
+    S.rFade = 1; cam(S, ZW, 1);
+    mv(S, 'rGo', P(a, 0, .3)); S.hov = a > .25 && a < .4 ? 'rGo' : null; tap(S, a, .35, 'rGo');
+    S.rmd = 1 - P(a, .4, .7); S.scrim = 1 - P(a, .45, .8); if (a > .5) hide(S, P(a, .5, .7));
+  });
+  B(2, { ...TB, lead: 0, act: 2.2, hold: .8 }, (S, a, s) => {
+    S.rmd = 0; S.scrim = 0; S.cur.vis = 0; cam(S, ZM, P(s, 0, 1.3)); foc(S, ['RE', 'NR']);
+    const A = lay(S);
+    ['tes', 'vol'].forEach(id => Object.assign(S.cd[id], { lane: 'RE', rem: 1, h: -S.shift }));
+    S.tr = { from: A, k: P(a, .1, .55) };
+    hl(S, 'c_tes', P(a, .6, .9), 4);
+  });
+
+  // ===== 5 Odpowiedź klienta =====
+  B(3, { h: 'W piątek pani Nowak odpisuje.', b: 'Karta wraca do „Oczekuje na odpowiedź”.', lead: .6, act: 2.2, hold: .8 }, (S, a, s) => {
+    cam(S, ZL, P(s, 0, 1.3)); foc(S, ['AW', 'RE']);
+    if (a > .1) { const A = lay(S); Object.assign(S.cd.vol, { lane: 'AW', sen: 'Odpisał na wycenę', hot: 1, rem: 0, h: -S.shift }); S.tr = { from: A, k: P(a, .1, .6) }; }
+    hl(S, 'c_vol', P(a, .6, .9), 4);
+  });
+  B(3, { h: 'Po rezerwacji karta znika z tablicy.', b: 'Rezerwację dodasz prosto ze sprawy.', lead: .6, act: 1.8, hold: .8 }, (S, a, s) => {
+    cam(S, ZL, 1); foc(S, ['AW']);
+    if (a > .2) { const A = lay(S); S.cd.vol.lane = null; S.tr = { from: A, k: P(a, .2, .7) }; }
+  });
+  B(3, { h: 'Po 10 dniach ciszy karta trafia do „Utraty”.', b: 'Status sprawy się nie zmienia. Gdy klient odpisze, karta wraca.', lead: .6, act: 1.6, hold: .8 }, (S, a, s) => {
+    cam(S, ZR, P(s, 0, 1.9)); foc(S, ['LA']); hl(S, 'c_toy', P(a, .2, .6), 4);
+  });
+
+  // ===== 6 Ręczne przeniesienie =====
+  const TD = { h: 'Przeciągnij kartę, gdy wiesz więcej niż rozmowa.', b: 'Na przykład klient zrezygnował przez telefon.' };
+  B(4, { ...TD, lead: .6, act: 2.8, hold: 0 }, (S, a, s) => {
+    cam(S, ZA, P(s, 0, 1.9)); foc(S, ['AW', 'RE', 'NR', 'LA']); show(S, s, .5, 1.0);
+    S.cd.sko.lane = 'LA'; S.cd.sko.cl = 'AW';
+    const over = P(a, .6, .76);
+    S.drag = { id: 'sko', to: 'LA', lift: P(a, .3, .4), p: P(a, .38, .88), over, land: 0 };
+    S.tr = { from: (() => { const L = lay(S); L.LA = L.LA.filter(x => x !== 'sko'); L.AW.push('sko'); L.AW.sort((x, y) => (S.cd[y].h + S.shift) - (S.cd[x].h + S.shift)); return L; })(), k: over };
+    if (a < .3) mv(S, 'c_sko', P(a, .04, .29), { dx: 30, dy: -6 }); else mv(S, 'c_sko', 1, { dx: 30, dy: -6 });
+    S.hov = a > .24 && a < .38 ? 'c_sko' : null;
+  });
+  B(4, { ...TD, lead: 0, act: 1.4, hold: .6 }, (S, a, s) => {
+    cam(S, ZA, 1); foc(S, ['AW', 'RE', 'NR', 'LA']);
+    S.cd.sko.lane = 'LA';
+    if (a < .35) S.cd.sko.cl = 'AW'; else { S.cd.sko.cl = null; S.cd.sko.man = 1; }
+    S.drag = { id: 'sko', to: 'LA', lift: 1 - P(a, 0, .35), p: 1, over: 1 - P(a, .1, .4), land: P(a, 0, .35) };
+    mv(S, 'c_sko', 1, { dx: 30, dy: -6 }); if (a >= .3) hide(S, P(a, .35, .6));
+  });
+  B(4, { h: 'Ręczne miejsce obowiązuje do następnej wiadomości.', b: 'Na karcie widać „przesunięta ręcznie”.', lead: .6, act: 1.4, hold: .8 }, (S, a, s) => {
+    S.cur.vis = 0; cam(S, ZR, P(s, 0, 1.9)); foc(S, ['LA']); hl(S, 'c_sko', P(a, .1, .5), 4);
+  });
+  B(4, { h: 'Tablica pokazuje, kto ma ruch w każdej sprawie.', b: 'Jeśli coś jest niejasne, napisz do nas przez „Zgłoś problem” w menu.', lead: .6, act: 2.6, hold: 3.5 }, (S, a, s) => {
+    cam(S, 'ap', P(s, 0, 2.6)); if (s > 1.8) hl(S, 'nvR', P(s, 1.8, 2.4), 4);
+  });
+})();
+
+window.__start();</script>
+
+</body>
+</html>
