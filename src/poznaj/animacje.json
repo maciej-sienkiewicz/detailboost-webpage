@@ -1,335 +1,362 @@
 [
     {
-        "slug": "jak-zalozyc-rezerwacje",
-        "kategoria": "kalendarz",
-        "tytul": "Jak założyć rezerwację?",
-        "opis": "Nowa rezerwacja krok po kroku: termin, klient i auto, usługi z cennika z rabatem i notatką dla ekipy, odbiór door to door i SMS-y do klienta.",
-        "rodzaj": "mp4",
-        "zrodlo": "jak-zalozyc-rezerwacje/jak-zalozyc-rezerwacje.mp4",
+        "slug": "jak-wyglada-program",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak wygląda program?",
+        "opis": "Pierwsze spojrzenie na DetailBoost: menu po lewej i „Tablica” z dniem studia.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/01-jak-wyglada-program",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-uzupelnic-dane-firmy",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak uzupełnić dane firmy?",
+        "opis": "Zanim przyjdzie pierwszy klient, Marek wpisuje dane studia. Animacja pokazuje, jak dodać logo, pobrać dane z GUS po NIP-ie i dopisać kontakt oraz konto bankowe.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/02-jak-uzupelnic-dane-firmy",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-dodac-usluge-do-cennika",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak dodać usługę do cennika?",
+        "opis": "Marek dodaje do cennika powłokę ceramiczną. Animacja pokazuje, jak dodać usługę, wpisać cenę dla klienta i sprawdzić ją na liście.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/03-jak-dodac-usluge-do-cennika",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-stworzyc-pakiet-uslug",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak stworzyć pakiet usług?",
+        "opis": "Marek łączy dwie usługi w pakiet z jedną ceną. Animacja pokazuje, jak nazwać pakiet, ustalić jego cenę i wybrać usługi z cennika.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/04-jak-stworzyc-pakiet-uslug",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-zalozyc-konto-pracownikowi",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak założyć konto pracownikowi?",
+        "opis": "Do studia dołącza Kuba, detailer. Animacja pokazuje, jak dodać pracownika, założyć mu konto, wybrać rolę i wysłać zaproszenie.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/05-jak-zalozyc-konto-pracownikowi",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-dodac-swoj-podpis",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak dodać swój podpis?",
+        "opis": "Marek dodaje swój podpis, który program wstawi na protokoły przyjęcia. Animacja pokazuje, gdzie go narysować i jak go zapisać.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/06-jak-dodac-swoj-podpis",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-sparowac-tablet",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak sparować tablet?",
+        "opis": "Marek paruje tablet w recepcji, na którym klienci podpiszą protokół przyjęcia. Animacja pokazuje, skąd wziąć kod i gdzie go wpisać.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/07-jak-sparowac-tablet",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-przeniesc-kontakty-na-telefon",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak przenieść kontakty na telefon?",
+        "opis": "Marek dodaje klientów studia do kontaktów w swoim iPhonie, żeby przy połączeniu widzieć, kto dzwoni. Animacja pokazuje drogę od kodu QR w programie do Kontaktów w telefonie.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/08-jak-przeniesc-kontakty-na-telefon",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-ustawic-nazwe-nadawcy-sms",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak ustawić nazwę nadawcy SMS?",
+        "opis": "Marek ustawia nazwę, którą klienci zobaczą zamiast numeru przy SMS-ach ze studia, i podpisuje upoważnienie dla operatora.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/09-jak-ustawic-nazwe-nadawcy-sms",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-wlaczyc-automatyczne-wiadomosci",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak włączyć automatyczne wiadomości?",
+        "opis": "Marek włącza potwierdzenie rezerwacji i przypomnienie przed wizytą, które program wyśle klientom sam.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/10-jak-wlaczyc-automatyczne-wiadomosci",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-wylaczyc-karte-wizyty",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak wyłączyć kartę wizyty?",
+        "opis": "Marek sprawdza, gdzie wyłącza się kartę wizyty i co się wtedy zmienia, a potem włącza ją z powrotem.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/11-jak-wylaczyc-karte-wizyty",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-podlaczyc-poczte",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak podłączyć pocztę studia?",
+        "opis": "Marek podłącza firmową skrzynkę biuro@detalstudio.pl, żeby odpisywać klientom prosto z programu.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/12-jak-podlaczyc-poczte",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-ustawic-stopke-email",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak ustawić stopkę e-mail?",
+        "opis": "Marek tworzy swoją stopkę do maili: motyw z logo studia, dane kontaktowe i stanowisko.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/13-jak-ustawic-stopke-email",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-polaczyc-ksef",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak połączyć KSeF z programem?",
+        "opis": "Marek generuje token w Aplikacji Podatnika KSeF i łączy z nim program, żeby faktury szły do KSeF same.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/14-jak-polaczyc-ksef",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-pokazac-ceny-na-protokole",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak pokazać ceny usług na protokole?",
+        "opis": "Marek włącza ceny usług na protokole przyjęcia, żeby klient widział cenę każdej usługi przed podpisem.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/15-jak-pokazac-ceny-na-protokole",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-dzialaja-zapytania",
+        "kategoria": "zapytania",
+        "tytul": "Jak działają zapytania?",
+        "opis": "Pani Nowak pisze do studia o praniu tapicerki i ceramice do swojego Volvo. Animacja pokazuje, jak jej mail staje się sprawą w „Zapytaniach” i jak przygotować do niej wycenę.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/16-jak-dzialaja-zapytania",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-odpowiedziec-klientowi",
+        "kategoria": "zapytania",
+        "tytul": "Jak odpowiedzieć klientowi z wyceną?",
+        "opis": "Pani Nowak czeka na cenę prania tapicerki i ceramiki. Animacja pokazuje odpowiedź z AI z opcją „Z ofertą”: szkic z cenami z wyceny, zdjęcia z galerii studia i Twoją stopkę.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/17-jak-odpowiedziec-klientowi",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-dziala-tablica-zapytan",
+        "kategoria": "zapytania",
+        "tytul": "Jak działa tablica zapytań?",
+        "opis": "Pani Nowak dostała wycenę i nie odpisuje. Tablica układa zapytania w cztery kolumny według tego, kto ma ruch. Animacja pokazuje, co się dzieje z kartą po trzech dniach ciszy, jak przygotować przypomnienie i co dzieje się, gdy klientka odpisze.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/19-jak-dziala-tablica-zapytan",
         "status": "gotowa"
     },
     {
         "slug": "jak-poslugiwac-sie-kalendarzem",
-        "kategoria": "kalendarz",
+        "kategoria": "rezerwacja",
         "tytul": "Jak posługiwać się kalendarzem?",
-        "opis": "Kalendarz studia krok po kroku: podgląd, wyszukiwanie, filtry, nowe wpisy, ustawienia i telefon.",
+        "opis": "Pani Nowak pyta, czy może przyjechać we wtorek 27 października. Sprawdzasz w kalendarzu, czy studio ma wtedy miejsce.",
         "rodzaj": "html",
-        "zrodlo": "jak-poslugiwac-sie-kalendarzem/zrodla",
+        "zrodlo": "kurs/20-jak-poslugiwac-sie-kalendarzem",
         "status": "gotowa"
     },
     {
-        "slug": "jak-odwolac-wizyte",
-        "kategoria": "kalendarz",
-        "tytul": "Jak odwołać wizytę?",
-        "opis": "Zobacz, jak odwołać rezerwację, gdy klient nie przyjedzie, co zmienia się w kalendarzu i jak przywrócić rezerwację odwołaną przez pomyłkę.",
+        "slug": "jak-dodac-rezerwacje",
+        "kategoria": "rezerwacja",
+        "tytul": "Jak dodać rezerwację?",
+        "opis": "Pani Nowak potwierdza termin we wtorek 27 października. Rezerwację zakładasz prosto ze sprawy: wybierasz dni w kalendarzu, a formularz przychodzi wypełniony danymi z wyceny.",
         "rodzaj": "html",
-        "zrodlo": "jak-odwolac-wizyte/zrodla",
-        "status": "robocza"
+        "zrodlo": "kurs/21-jak-dodac-rezerwacje",
+        "status": "gotowa"
     },
     {
-        "slug": "jak-usunac-wizyte",
-        "kategoria": "kalendarz",
-        "tytul": "Jak usunąć wizytę?",
-        "opis": "Animacja pokazuje usuwanie wizyty w kalendarzu, na liście wizyt i w otwartej wizycie.",
+        "slug": "jak-odwolac-rezerwacje",
+        "kategoria": "rezerwacja",
+        "tytul": "Jak odwołać rezerwację?",
+        "opis": "Pan Kaczmarek dzwoni, że w czwartek nie przyjedzie. Odwołujesz jego rezerwację w kalendarzu, sprawdzasz, co się zmienia, i przywracasz ją, gdyby jednak przyjechał.",
         "rodzaj": "html",
-        "zrodlo": "jak-usunac-wizyte/zrodla",
-        "status": "robocza"
+        "zrodlo": "kurs/22-jak-odwolac-rezerwacje",
+        "status": "gotowa"
     },
     {
         "slug": "jak-otworzyc-wizyte",
         "kategoria": "przyjecie",
         "tytul": "Jak otworzyć wizytę?",
-        "opis": "Otwarcie wizyty krok po kroku: z rezerwacji i bez niej, przez zdjęcia, mapę uszkodzeń, podpis protokołu i powiadomienia.",
+        "opis": "Pani Nowak przyjechała z Volvo na umówiony termin. Animacja pokazuje przyjęcie auta z rezerwacji: dane klientki, przebieg, depozyt, usługi i notatki.",
         "rodzaj": "html",
-        "zrodlo": "jak-otworzyc-wizyte/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-dodac-zdjecia-i-uszkodzenia",
-        "kategoria": "przyjecie",
-        "tytul": "Jak dodać zdjęcia i uszkodzenia podczas przyjęcia pojazdu?",
-        "opis": "Zdjęcia auta i mapa uszkodzeń przy przyjęciu: telefonem przy aucie, potem na komputerze, aż po wysyłkę do klienta.",
-        "rodzaj": "html",
-        "zrodlo": "jak-dodac-zdjecia-i-uszkodzenia/zrodla",
-        "status": "robocza"
+        "zrodlo": "kurs/23-jak-otworzyc-wizyte",
+        "status": "gotowa"
     },
     {
         "slug": "jak-dodac-vin-ze-zdjecia",
         "kategoria": "przyjecie",
         "tytul": "Jak dodać VIN ze zdjęcia?",
-        "opis": "Numer VIN odczytany ze zdjęcia tabliczki albo dowodu rejestracyjnego, na przykładzie przyjęcia auta do studia.",
+        "opis": "W rezerwacji Volvo pani Nowak nie ma numeru VIN. Animacja pokazuje, jak odczytać go ze zdjęcia tabliczki zrobionego telefonem, bez przepisywania 17 znaków.",
         "rodzaj": "html",
-        "zrodlo": "jak-dodac-vin-ze-zdjecia/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-dodac-skan-do-karty-pojazdu",
-        "kategoria": "przyjecie",
-        "tytul": "Jak dodać skan dokumentu do karty pojazdu?",
-        "opis": "Animacja pokazuje, gdzie w karcie pojazdu są dokumenty, jak dodać skan z komputera albo zdjęcie dokumentu z telefonu, jak go otworzyć i usunąć.",
-        "rodzaj": "html",
-        "zrodlo": "jak-dodac-skan-do-karty-pojazdu/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-wydrukowac-protokol",
-        "kategoria": "przyjecie",
-        "tytul": "Jak wydrukować protokół?",
-        "opis": "Drukowanie protokołu krok po kroku: przy przyjęciu auta, później z karty wizyty i przy wydaniu auta.",
-        "rodzaj": "html",
-        "zrodlo": "jak-wydrukowac-protokol/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-wlaczyc-ceny-na-protokole",
-        "kategoria": "przyjecie",
-        "tytul": "Jak włączyć ceny usług na protokole?",
-        "opis": "Animacja pokazuje, gdzie włączyć ceny przy każdej usłudze na protokole przyjęcia i jak potem wygląda protokół.",
-        "rodzaj": "html",
-        "zrodlo": "jak-wlaczyc-ceny-na-protokole/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-skonfigurowac-podpis",
-        "kategoria": "przyjecie",
-        "tytul": "Jak skonfigurować swój podpis elektroniczny?",
-        "opis": "Animacja pokazuje, jak dodać swój podpis w ustawieniach, na komputerze albo telefonie, i gdzie potem jest na protokole przyjęcia.",
-        "rodzaj": "html",
-        "zrodlo": "jak-skonfigurowac-podpis/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-sparowac-tablet",
-        "kategoria": "przyjecie",
-        "tytul": "Jak sparować tablet do podpisów elektronicznych?",
-        "opis": "Parowanie tabletu krok po kroku: kod z ustawień, wpisanie go na tablecie i pierwszy podpis protokołu.",
-        "rodzaj": "html",
-        "zrodlo": "jak-sparowac-tablet/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-edytowac-wizyte",
-        "kategoria": "wizyta",
-        "tytul": "Jak edytować wizytę?",
-        "opis": "Zmień termin odbioru, dodaj usługę za zgodą klienta, zdjęcia z telefonu i nowe uszkodzenia, popraw przebieg, zapisz notatkę i komentarze.",
-        "rodzaj": "html",
-        "zrodlo": "jak-edytowac-wizyte/zrodla",
+        "zrodlo": "kurs/24-jak-dodac-vin-ze-zdjecia",
         "status": "gotowa"
     },
     {
-        "slug": "jak-dodac-zdjecia-do-istniejacej-wizyty",
-        "kategoria": "wizyta",
-        "tytul": "Jak dodać zdjęcia auta do istniejącej wizyty?",
-        "opis": "Dodaj zdjęcia telefonem przez kod QR albo z dysku komputera i zobacz, gdzie widzi je klient.",
+        "slug": "jak-dodac-zdjecia-i-uszkodzenia",
+        "kategoria": "przyjecie",
+        "tytul": "Jak dodać zdjęcia i uszkodzenia?",
+        "opis": "Volvo pani Nowak stoi przy stanowisku. Animacja pokazuje drugi krok przyjęcia: zdjęcia auta telefonem, odprysk na masce zaznaczony przy aucie i rysę dopisaną na komputerze.",
         "rodzaj": "html",
-        "zrodlo": "jak-dodac-zdjecia-do-istniejacej-wizyty/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-dodac-dodatkowe-uslugi",
-        "kategoria": "wizyta",
-        "tytul": "Jak dodać dodatkowe usługi?",
-        "opis": "Dodaj do trwającej wizyty usługę z cennika i usługę spoza cennika, a potem poproś klienta o zgodę SMS-em.",
-        "rodzaj": "html",
-        "zrodlo": "jak-dodac-dodatkowe-uslugi/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-zaproponowac-dodatkowe-uslugi",
-        "kategoria": "wizyta",
-        "tytul": "Jak zaproponować dodatkowe usługi do karty wizyty?",
-        "opis": "Dodaj do karty wizyty propozycje usług z cennika, z rabatem i notatką dla klienta. Klient dostaje SMS z linkiem, sam wybiera usługi na telefonie i potwierdza je odpowiedzią TAK.",
-        "rodzaj": "html",
-        "zrodlo": "jak-zaproponowac-dodatkowe-uslugi/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-edytowac-cene-uslugi-w-wizycie",
-        "kategoria": "wizyta",
-        "tytul": "Jak zmienić cenę usługi w trwającej wizycie?",
-        "opis": "Zmień cenę jednej usługi w wizycie, która trwa, i poproś klienta o zgodę SMS-em.",
-        "rodzaj": "html",
-        "zrodlo": "jak-edytowac-cene-uslugi-w-wizycie/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-wylaczyc-karte-wizyty",
-        "kategoria": "wizyta",
-        "tytul": "Jak wyłączyć kartę wizyty?",
-        "opis": "Animacja pokazuje, gdzie w ustawieniach wyłączyć kartę wizyty i co się wtedy zmienia przy rezerwacji i przyjęciu auta.",
-        "rodzaj": "html",
-        "zrodlo": "jak-wylaczyc-karte-wizyty/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-dzialaja-leady",
-        "kategoria": "zapytania",
-        "tytul": "Jak działają leady?",
-        "opis": "Leady to zapytania klientów w „Zapytaniach”. Animacja pokazuje, jak czytać listę spraw, odpisać z wyceną, umówić wizytę i zamknąć sprawę, gdy klient zrezygnuje.",
-        "rodzaj": "html",
-        "zrodlo": "jak-dzialaja-leady/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-skonfigurowac-poczte",
-        "kategoria": "zapytania",
-        "tytul": "Jak skonfigurować pocztę?",
-        "opis": "Animacja pokazuje, jak podłączyć skrzynkę e-mail studia do „Zapytań”, co zrobić, gdy połączenie się nie udaje, i jak wrócić do pracy po zmianie hasła.",
-        "rodzaj": "html",
-        "zrodlo": "jak-skonfigurowac-poczte/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-stworzyc-stopke-email",
-        "kategoria": "zapytania",
-        "tytul": "Jak stworzyć stopkę w e-mailu?",
-        "opis": "Stopka podpisuje Twoje odpowiedzi do klientów: imię, telefon, strona i adres studia. Animacja pokazuje, gdzie ją ustawić, jak wybrać motyw i sprawdzić dane, oraz jak wysłać pojedynczy mail bez stopki.",
-        "rodzaj": "html",
-        "zrodlo": "jak-stworzyc-stopke-email/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "poczta-rozpoznanie-klienta",
-        "kategoria": "zapytania",
-        "tytul": "Jak rozpoznać klienta w poczcie CRM?",
-        "opis": "Animacja pokazuje, co mówią plakietki „Klient” i „Sprawa” na liście maili, co oznacza zielony pasek przy mailu i gdzie sprawdzisz wizyty klienta, zanim odpiszesz.",
-        "rodzaj": "html",
-        "zrodlo": "opcje-poczty/1-rozpoznanie-klienta",
-        "status": "robocza"
-    },
-    {
-        "slug": "poczta-odpowiedz-z-ai-i-zdjecia",
-        "kategoria": "zapytania",
-        "tytul": "Jak odpisać z AI i wysłać zdjęcia przed i po?",
-        "opis": "Klient prosi o zdjęcia auta przed i po powłoce ceramicznej. Animacja pokazuje szkic odpowiedzi z AI, jego poprawianie, Twoją stopkę i zdjęcia z wizyty dodane bez zapisywania plików.",
-        "rodzaj": "html",
-        "zrodlo": "opcje-poczty/2-odpowiedz-z-ai-i-zdjecia",
-        "status": "robocza"
-    },
-    {
-        "slug": "poczta-oferta-z-cenami",
-        "kategoria": "zapytania",
-        "tytul": "Jak wysłać ofertę z cenami w odpowiedzi?",
-        "opis": "Klientka pyta, ile kosztuje powłoka ceramiczna. Animacja pokazuje odpowiedź z AI z opcją „Z ofertą”: szkic podaje usługi i ceny z wyceny sprawy oraz sumę.",
-        "rodzaj": "html",
-        "zrodlo": "opcje-poczty/3-oferta-z-cenami",
-        "status": "robocza"
-    },
-    {
-        "slug": "poczta-klient-ktory-nie-przyjezdza",
-        "kategoria": "zapytania",
-        "tytul": "Jak odpisać klientowi, który nie przyjeżdża?",
-        "opis": "Klient dwa razy nie przyjechał na umówioną wizytę i znów pyta o termin. Animacja pokazuje notatki o kliencie, warunek rezerwacji wpisany dla asystenta, a na końcu założenie sprawy i wizyty prosto z maila.",
-        "rodzaj": "html",
-        "zrodlo": "opcje-poczty/4-klient-ktory-nie-przyjezdza",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-skonfigurowac-automatyczne-wiadomosci",
-        "kategoria": "klienci",
-        "tytul": "Jak skonfigurować automatyczne wiadomości?",
-        "opis": "Ekran „Wiadomości automatyczne” w ustawieniach: które wiadomości dostaje klient, kiedy i z jaką treścią.",
-        "rodzaj": "html",
-        "zrodlo": "jak-skonfigurowac-automatyczne-wiadomosci/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-skonfigurowac-nazwe-nadawcy-sms",
-        "kategoria": "klienci",
-        "tytul": "Jak skonfigurować nazwę firmy w polu nadawcy SMS?",
-        "opis": "Nazwa studia zamiast numeru w SMS-ach do klientów: wpisanie nazwy, upoważnienie dla operatora i zatwierdzenie.",
-        "rodzaj": "html",
-        "zrodlo": "jak-skonfigurowac-nazwe-nadawcy-sms/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-stworzyc-kampanie-sms",
-        "kategoria": "klienci",
-        "tytul": "Jak stworzyć kampanię SMS?",
-        "opis": "Kampania SMS krok po kroku: nazwa, odbiorcy, treść z danymi klienta, koszt i wysyłka.",
-        "rodzaj": "html",
-        "zrodlo": "jak-stworzyc-kampanie-sms/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-przeniesc-kontakty-na-telefon",
-        "kategoria": "klienci",
-        "tytul": "Jak przenieść kontakty z programu na telefon?",
-        "opis": "Klienci studia w Kontaktach iPhone’a krok po kroku: kod QR z ustawień, instalacja profilu na telefonie i lista telefonów w programie.",
-        "rodzaj": "html",
-        "zrodlo": "jak-przeniesc-kontakty-na-telefon/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-ustawic-szpiega-konkurencji",
-        "kategoria": "klienci",
-        "tytul": "Jak ustawić szpiega konkurencji?",
-        "opis": "Moduł „Instagram”: dodaj profile studiów z okolicy i swój profil, a potem porównaj, kto publikuje częściej, kto rośnie i kto płaci za reklamy.",
-        "rodzaj": "html",
-        "zrodlo": "jak-ustawic-szpiega-konkurencji/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-stworzyc-pakiet-uslug",
-        "kategoria": "rozliczenia",
-        "tytul": "Jak stworzyć pakiet usług?",
-        "opis": "Pakiet to kilka usług z cennika sprzedawanych razem, w jednej cenie. Zobacz, gdzie go dodać, jak ustawić cenę i usługi oraz jak wybrać go w rezerwacji.",
-        "rodzaj": "html",
-        "zrodlo": "jak-stworzyc-pakiet-uslug/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-zmienic-stawke-vat",
-        "kategoria": "rozliczenia",
-        "tytul": "Jak zmienić stawkę VAT w usłudze?",
-        "opis": "Nowa stawka VAT przy usłudze z cennika: gdzie ją zmienić, co dzieje się z ceną dla klienta i których wizyt zmiana nie dotyczy.",
-        "rodzaj": "html",
-        "zrodlo": "jak-zmienic-stawke-vat/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-polaczyc-ksef",
-        "kategoria": "rozliczenia",
-        "tytul": "Jak połączyć KSeF z programem?",
-        "opis": "Animacja pokazuje, skąd wziąć token KSeF, jak połączyć KSeF z programem w ustawieniach, jak sprawdzić uprawnienia tokenu i gdzie potem są pobrane faktury kosztowe.",
-        "rodzaj": "html",
-        "zrodlo": "jak-polaczyc-ksef/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-dodac-kontrahenta-do-zlecen-zbiorczych",
-        "kategoria": "rozliczenia",
-        "tytul": "Jak dodać kontrahenta do zleceń zbiorczych?",
-        "opis": "Kontrahent krok po kroku: NIP i dane z GUS, e-mail do rozliczeń, osoba kontaktowa i zapis.",
-        "rodzaj": "html",
-        "zrodlo": "jak-dodac-kontrahenta-do-zlecen-zbiorczych/zrodla",
-        "status": "robocza"
-    },
-    {
-        "slug": "jak-wygenerowac-pdf-zlecenia-zbiorczego",
-        "kategoria": "rozliczenia",
-        "tytul": "Jak wygenerować PDF zlecenia zbiorczego?",
-        "opis": "Zestawienie aut kontrahenta w PDF: wybór okresu, pobranie pliku, co jest w środku, wysyłka do kontrahenta i historia zestawień.",
-        "rodzaj": "html",
-        "zrodlo": "jak-wygenerowac-pdf-zlecenia-zbiorczego/zrodla",
+        "zrodlo": "kurs/25-jak-dodac-zdjecia-i-uszkodzenia",
         "status": "gotowa"
     },
     {
-        "slug": "jak-zalozyc-konto-pracownikowi",
-        "kategoria": "zespol",
-        "tytul": "Jak założyć konto pracownikowi?",
-        "opis": "Moduł „Pracownicy”: dane pracownika, konto z rolą, zaproszenie e-mailem i aktywacja konta przez pracownika.",
+        "slug": "jak-podpisac-i-wydrukowac-protokol",
+        "kategoria": "przyjecie",
+        "tytul": "Jak podpisać i wydrukować protokół?",
+        "opis": "Volvo pani Nowak jest opisane. Animacja pokazuje okno „Dokumenty do podpisu”: podgląd protokołu, kopię na papierze, podpis na tablecie, e-mail do klientki i start wizyty.",
         "rodzaj": "html",
-        "zrodlo": "jak-zalozyc-konto-pracownikowi/zrodla",
-        "status": "robocza"
+        "zrodlo": "kurs/26-jak-podpisac-i-wydrukowac-protokol",
+        "status": "gotowa"
     },
     {
         "slug": "jak-dodac-zadania-dla-zespolu",
-        "kategoria": "zespol",
-        "tytul": "Jak dodać zadanie dla zespołu lub pracownika?",
-        "opis": "Panel „Do zrobienia” na Tablicy: nowe zadanie, wybór osób, które je zobaczą, i odhaczenie zadania przez pracownika.",
+        "kategoria": "studio",
+        "tytul": "Jak dodać zadanie dla zespołu?",
+        "opis": "Volvo pani Nowak jest w studiu. Animacja pokazuje panel „Do zrobienia” na Tablicy: nowe zadanie dla Kuby, wybór osób, które je zobaczą, i zadanie odhaczone po pracy.",
         "rodzaj": "html",
-        "zrodlo": "jak-dodac-zadania-dla-zespolu/zrodla",
-        "status": "robocza"
+        "zrodlo": "kurs/27-jak-dodac-zadania-dla-zespolu",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-edytowac-wizyte",
+        "kategoria": "studio",
+        "tytul": "Jak edytować wizytę?",
+        "opis": "Volvo pani Nowak jest w studiu. Animacja pokazuje, jak na stronie wizyty poprawić przebieg, dopisać notatkę techniczną i przesunąć termin odbioru.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/28-jak-edytowac-wizyte",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-dodac-zdjecia-do-wizyty",
+        "kategoria": "studio",
+        "tytul": "Jak dodać zdjęcia do wizyty?",
+        "opis": "Kuba wyprał tapicerkę w Volvo pani Nowak. Animacja pokazuje, jak przez kod QR dodać do wizyty zdjęcia z telefonu i obejrzeć je na stronie wizyty.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/29-jak-dodac-zdjecia-do-wizyty",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-zaproponowac-dodatkowe-uslugi",
+        "kategoria": "studio",
+        "tytul": "Jak zaproponować dodatkowe usługi?",
+        "opis": "Kuba zauważył zmatowiałe reflektory w Volvo. Animacja pokazuje, jak zaproponować pani Nowak dodatkową usługę na karcie wizyty i jak klientka potwierdza ją SMS-em.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/30-jak-zaproponowac-dodatkowe-uslugi",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-dodac-dodatkowe-uslugi",
+        "kategoria": "studio",
+        "tytul": "Jak dodać dodatkowe usługi?",
+        "opis": "Pani Nowak dzwoni i prosi o mycie komory silnika. Animacja pokazuje, jak dodać usługę z cennika do trwającej wizyty i wysłać klientce SMS o zmianie.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/31-jak-dodac-dodatkowe-uslugi",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-zmienic-cene-uslugi-w-wizycie",
+        "kategoria": "studio",
+        "tytul": "Jak zmienić cenę usługi w wizycie?",
+        "opis": "Marek obiecał pani Nowak niższą cenę za mycie komory silnika. Animacja pokazuje, jak zmienić cenę usługi tylko w tej wizycie, bez zmiany cennika.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/32-jak-zmienic-cene-uslugi-w-wizycie",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-dodac-skan-do-karty-pojazdu",
+        "kategoria": "studio",
+        "tytul": "Jak dodać skan do karty pojazdu?",
+        "opis": "Pani Nowak przysłała skan dowodu rejestracyjnego. Animacja pokazuje, jak zapisać go w karcie Volvo i otworzyć podgląd.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/33-jak-dodac-skan-do-karty-pojazdu",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-wydac-auto-i-rozliczyc-wizyte",
+        "kategoria": "wydanie",
+        "tytul": "Jak wydać auto i rozliczyć wizytę?",
+        "opis": "Pani Nowak przyjeżdża po swoje Volvo. Animacja pokazuje, jak oznaczyć auto jako gotowe, podpisać protokół wydania, wystawić fakturę i wydać auto.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/34-jak-wydac-auto-i-rozliczyc-wizyte",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-sprawdzic-koszty-i-zysk-wizyty",
+        "kategoria": "wydanie",
+        "tytul": "Jak sprawdzić koszty i zysk wizyty?",
+        "opis": "Volvo pani Nowak jest już wydane. Animacja pokazuje, jak przypiąć do wizyty faktury za materiał i sprawdzić zysk netto.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/35-jak-sprawdzic-koszty-i-zysk-wizyty",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-usunac-wizyte",
+        "kategoria": "wydanie",
+        "tytul": "Jak usunąć wizytę?",
+        "opis": "Ola przez pomyłkę założyła dwie takie same wizyty. Animacja pokazuje, jak usunąć zbędną wizytę z listy i gdzie potem ją znaleźć.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/36-jak-usunac-wizyte",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-dodac-kontrahenta-do-zlecen-zbiorczych",
+        "kategoria": "flota",
+        "tytul": "Jak dodać kontrahenta do zleceń zbiorczych?",
+        "opis": "Flota Nord chce myć u was auta firmowe i płacić za nie raz w miesiącu. Animacja pokazuje, jak dodać taką firmę jako kontrahenta, pobrać jej dane z GUS i zapisać pierwsze auto.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/37-jak-dodac-kontrahenta-do-zlecen-zbiorczych",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-wygenerowac-pdf-zlecenia-zbiorczego",
+        "kategoria": "flota",
+        "tytul": "Jak wygenerować PDF zlecenia zbiorczego?",
+        "opis": "Koniec listopada: Flota Nord ma w tym miesiącu pięć aut. Animacja pokazuje, jak pobrać PDF z listą aut, sprawdzić go i wysłać kontrahentowi zestawienie za miesiąc.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/38-jak-wygenerowac-pdf-zlecenia-zbiorczego",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-stworzyc-kampanie-sms",
+        "kategoria": "marketing",
+        "tytul": "Jak stworzyć kampanię SMS?",
+        "opis": "Marek zaprasza klientów po powłoce ceramicznej na zimowy przegląd. Animacja pokazuje, jak wybrać odbiorców, napisać SMS z imieniem klienta i wysłać kampanię.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/39-jak-stworzyc-kampanie-sms",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-obserwowac-konkurencje-na-instagramie",
+        "kategoria": "marketing",
+        "tytul": "Jak obserwować konkurencję na Instagramie?",
+        "opis": "Marek dodaje profil Detal Studio i konkurentów, a potem sprawdza ich posty, reklamy i firmy reklamujące się w okolicy Poznania.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/40-jak-obserwowac-konkurencje-na-instagramie",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-czytac-finanse-i-statystyki",
+        "kategoria": "firma",
+        "tytul": "Jak czytać finanse i statystyki?",
+        "opis": "Marek zamyka listopad. Animacja pokazuje, co znaczą przychody netto, należności, koszty i zysk w „Finansach” oraz jak czytać sprzedaż w „Statystykach”.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/41-jak-czytac-finanse-i-statystyki",
+        "status": "gotowa"
     }
 ]
