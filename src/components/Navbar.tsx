@@ -1,13 +1,20 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { LOGIN_URL, SIGNUP_URL } from '../site';
 
-/** Kotwice sekcji strony. „Kontakt" prowadzi do stopki z danymi spółki. */
+/**
+ * Kotwice sekcji strony głównej i podstrona „Poznaj program". Kotwice idą od `/`,
+ * żeby działały też z podstrony. „Kontakt" prowadzi do stopki z danymi spółki.
+ */
 const LINKS = [
-    ['Funkcje', '#funkcje'],
-    ['KSeF', '#ksef'],
-    ['Cennik', '#cennik'],
-    ['Kontakt', '#kontakt'],
+    ['Funkcje', '/#funkcje'],
+    ['Poznaj program', '/poznaj-program/'],
+    ['KSeF', '/#ksef'],
+    ['Cennik', '/#cennik'],
+    ['Kontakt', '/#kontakt'],
 ] as const;
+
+type Strona = 'poznaj';
+const STRONY: Partial<Record<string, Strona>> = { '/poznaj-program/': 'poznaj' };
 
 /**
  * Pasek nawigacji według fotohub.app: Inter 14 px, miękkie narożniki (6 px przy
@@ -24,8 +31,10 @@ const LINKS = [
  * prosto do stylu elementu, bez stanu Reacta.
  *
  * Na telefonie menu otwiera słowo „Menu", nie hamburger: strona nie używa ikon.
+ *
+ * `current` to podstrona, na której stoi pasek - jej link jest jasny i ma `aria-current`.
  */
-export function Navbar() {
+export function Navbar({ current }: { current?: Strona }) {
     const [open, setOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const progress = useRef<HTMLDivElement>(null);
@@ -97,7 +106,10 @@ export function Navbar() {
                                 <li key={label}>
                                     <a
                                         href={href}
-                                        className="inline-flex h-9 items-center justify-center rounded-md px-2.5 text-sm font-medium text-white/70 transition-colors duration-200 hover:text-white xl:px-4"
+                                        aria-current={current && STRONY[href] === current ? 'page' : undefined}
+                                        className={`inline-flex h-9 items-center justify-center rounded-md px-2.5 text-sm font-medium transition-colors duration-200 hover:text-white xl:px-4 ${
+                                            current && STRONY[href] === current ? 'text-white' : 'text-white/70'
+                                        }`}
                                     >
                                         {label}
                                     </a>
@@ -141,6 +153,7 @@ export function Navbar() {
                             <li key={label}>
                                 <a
                                     href={href}
+                                    aria-current={current && STRONY[href] === current ? 'page' : undefined}
                                     onClick={() => setOpen(false)}
                                     className={`flex h-12 items-center rounded-lg px-3 text-[0.9375rem] font-medium transition-colors duration-200 hover:bg-white/[0.06] hover:text-white ${
                                         label === 'Zaloguj' ? 'text-white/60' : 'text-white/85'
@@ -165,7 +178,7 @@ export function Navbar() {
 export function Wordmark() {
     return (
         <a
-            href="#top"
+            href="/#top"
             aria-label="DetailBoost - strona główna"
             className="flex h-[50px] shrink-0 items-center text-white transition-opacity duration-200 hover:opacity-70"
         >

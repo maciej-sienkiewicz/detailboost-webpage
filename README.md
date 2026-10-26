@@ -71,6 +71,35 @@ buduje obie strony.
 - **`prefers-reduced-motion`**: tło stoi, okno jest płaskie, napisy leżą od razu na
   miejscu, nagrania nie ruszają same. Kliknięcie w nagranie albo pozycję spisu uruchamia nagranie.
 
+## Poznaj program (`/poznaj-program/`)
+
+Osobna podstrona z animacjami-instrukcjami CRM („Jak odwołać wizytę?", „Jak połączyć
+KSeF?" itd.) w siedmiu działach. Druga strona Vite (`poznaj-program/index.html`,
+`src/poznaj.tsx`), z tym samym paskiem i tłem co strona główna; link „Poznaj program"
+jest w nawigacji. Lista i odtwarzacz to jeden widok przełączany kotwicą:
+`/poznaj-program/#jak-odwolac-wizyte` otwiera animację, `#przyjecie` przewija do działu.
+
+Animacje to interaktywne odtwarzacze HTML z projektu animacji (rozdziały, krok po
+kroku, tempo), osadzone w ramce z tej samej domeny. W ramce włączają tryb osadzenia
+(`public/animacje/osadzenie.css`): bez własnego tytułu i wstępu, które stoją na stronie,
+w ciemnym motywie. Animacja, która jest tylko filmem MP4, gra w zwykłym `<video>`.
+
+| Plik | Co jest w środku |
+|---|---|
+| `src/poznaj/animacje.json` | lista animacji: slug, dział, tytuł, opis, rodzaj (`html`/`mp4`), źródło, status (`robocza` daje dopisek „Wersja robocza") |
+| `src/poznaj/animacje.gen.json` | długość i rozdziały - zapisuje skrypt, nie edytować ręcznie |
+| `public/animacje/<slug>/` | `index.html` albo `film.mp4` oraz `plakat.webp` |
+
+Nowa albo poprawiona animacja:
+
+1. Dopisz (albo popraw) wpis w `src/poznaj/animacje.json`. Kolejność wpisów to kolejność
+   na stronie, `zrodlo` to ścieżka względem folderu animacji (np. `jak-odwolac-wizyte/zrodla`).
+2. `node scripts/animacje.mjs /ścieżka/do/animacje jak-odwolac-wizyte` - bez slugów
+   przetwarza wszystkie. Skrypt bierze zbudowany `index.html` (albo buduje go z `build.py`
+   w kopii roboczej), robi plakat z kadru animacji i odczytuje długość i rozdziały.
+   Potrzebuje Chromium (`CHROMIUM_PATH`), `python3` i `ffmpeg`.
+3. Gdy animacja przejdzie akceptację, zmień jej `status` na `gotowa`.
+
 ## Nagrania z aplikacji
 
 `public/scenes/` to prawdziwe nagrania działającego CRM na koncie demonstracyjnym

@@ -1,0 +1,372 @@
+{
+    "jak-czytac-finanse-i-statystyki": {
+        "czas": 71,
+        "rozdzialy": [
+            "Przychody",
+            "Koszty i zysk",
+            "Statystyki"
+        ]
+    },
+    "jak-dodac-dodatkowe-uslugi": {
+        "czas": 59,
+        "rozdzialy": [
+            "Prośba klientki",
+            "Usługa z cennika",
+            "SMS do klientki",
+            "Usługa w wizycie"
+        ]
+    },
+    "jak-dodac-kontrahenta-do-zlecen-zbiorczych": {
+        "czas": 71,
+        "rozdzialy": [
+            "Nowy kontrahent",
+            "Dane z GUS",
+            "Pierwsze auto"
+        ]
+    },
+    "jak-dodac-rezerwacje": {
+        "czas": 72,
+        "rozdzialy": [
+            "Klientka potwierdza",
+            "Termin",
+            "Klientka i auto",
+            "Usługi",
+            "SMS-y",
+            "Zapis"
+        ]
+    },
+    "jak-dodac-skan-do-karty-pojazdu": {
+        "czas": 44,
+        "rozdzialy": [
+            "Karta pojazdu",
+            "Dodawanie skanu",
+            "Skan w karcie"
+        ]
+    },
+    "jak-dodac-swoj-podpis": {
+        "czas": 42,
+        "rozdzialy": [
+            "Gdzie",
+            "Rysowanie",
+            "Na protokole"
+        ]
+    },
+    "jak-dodac-usluge-do-cennika": {
+        "czas": 56,
+        "rozdzialy": [
+            "Cennik",
+            "Nowa usługa",
+            "Na liście"
+        ]
+    },
+    "jak-dodac-vin-ze-zdjecia": {
+        "czas": 42,
+        "rozdzialy": [
+            "Pole VIN",
+            "Kod QR",
+            "Zdjęcie",
+            "Wynik"
+        ]
+    },
+    "jak-dodac-zadania-dla-zespolu": {
+        "czas": 68,
+        "rozdzialy": [
+            "Panel „Do zrobienia”",
+            "Nowe zadanie",
+            "Kto zobaczy zadanie",
+            "Zadanie wykonane"
+        ]
+    },
+    "jak-dodac-zdjecia-do-wizyty": {
+        "czas": 63,
+        "rozdzialy": [
+            "Zdjęcia i dokumenty",
+            "Kod QR",
+            "Zdjęcia telefonem",
+            "Zdjęcia w wizycie"
+        ]
+    },
+    "jak-dodac-zdjecia-i-uszkodzenia": {
+        "czas": 97,
+        "rozdzialy": [
+            "Drugi krok przyjęcia",
+            "Zdjęcia telefonem",
+            "Odprysk przy aucie",
+            "Rysa na komputerze"
+        ]
+    },
+    "jak-dziala-tablica-zapytan": {
+        "czas": 87,
+        "rozdzialy": [
+            "Wycena wysłana",
+            "Cisza klientki",
+            "Przypomnienia",
+            "Odpowiedź klientki",
+            "Ręczne przeniesienie"
+        ]
+    },
+    "jak-dzialaja-zapytania": {
+        "czas": 53,
+        "rozdzialy": [
+            "Klientka pisze",
+            "Lista spraw",
+            "Sprawa klientki",
+            "Wycena"
+        ]
+    },
+    "jak-edytowac-wizyte": {
+        "czas": 76,
+        "rozdzialy": [
+            "Strona wizyty",
+            "Przebieg",
+            "Notatka techniczna",
+            "Termin odbioru"
+        ]
+    },
+    "jak-obserwowac-konkurencje-na-instagramie": {
+        "czas": 134,
+        "rozdzialy": [
+            "Po co",
+            "Pierwsze kroki",
+            "Inspiracje",
+            "Konkurencja",
+            "Reklamy",
+            "W okolicy",
+            "Powiadomienia"
+        ]
+    },
+    "jak-odpowiedziec-klientowi": {
+        "czas": 61,
+        "rozdzialy": [
+            "Odpowiedź",
+            "Szkic z AI",
+            "Zdjęcia i wysyłka"
+        ]
+    },
+    "jak-odwolac-rezerwacje": {
+        "czas": 38,
+        "rozdzialy": [
+            "Telefon od klienta",
+            "Odwołanie",
+            "Co się zmienia",
+            "Pomyłka",
+            "Wolny termin"
+        ]
+    },
+    "jak-otworzyc-wizyte": {
+        "czas": 65,
+        "rozdzialy": [
+            "Klientka przyjechała",
+            "Dane z rezerwacji",
+            "Przy aucie",
+            "Usługi i notatki"
+        ]
+    },
+    "jak-podlaczyc-poczte": {
+        "czas": 44,
+        "rozdzialy": [
+            "Gdzie",
+            "Dane skrzynki",
+            "Gotowe"
+        ]
+    },
+    "jak-podpisac-i-wydrukowac-protokol": {
+        "czas": 67,
+        "rozdzialy": [
+            "Dokumenty do podpisu",
+            "Kopia na papierze",
+            "Podpis na tablecie",
+            "Start wizyty"
+        ]
+    },
+    "jak-pokazac-ceny-na-protokole": {
+        "czas": 34,
+        "rozdzialy": [
+            "Gdzie",
+            "Włączenie",
+            "Gotowe"
+        ]
+    },
+    "jak-polaczyc-ksef": {
+        "czas": 59,
+        "rozdzialy": [
+            "Gdzie",
+            "Token z KSeF",
+            "Połączenie",
+            "Faktury"
+        ]
+    },
+    "jak-poslugiwac-sie-kalendarzem": {
+        "czas": 65,
+        "rozdzialy": [
+            "Pytanie klientki",
+            "Siatka miesiąca",
+            "Podgląd rezerwacji",
+            "Ustawienia widoku",
+            "Wolny termin"
+        ]
+    },
+    "jak-przeniesc-kontakty-na-telefon": {
+        "czas": 65,
+        "rozdzialy": [
+            "Gdzie",
+            "Kod QR",
+            "iPhone",
+            "Gotowe"
+        ]
+    },
+    "jak-sparowac-tablet": {
+        "czas": 52,
+        "rozdzialy": [
+            "Gdzie",
+            "Kod",
+            "Tablet",
+            "Na liście"
+        ]
+    },
+    "jak-sprawdzic-koszty-i-zysk-wizyty": {
+        "czas": 50,
+        "rozdzialy": [
+            "Zysk wizyty",
+            "Przypinanie kosztów",
+            "Wynik wizyty"
+        ]
+    },
+    "jak-stworzyc-kampanie-sms": {
+        "czas": 63,
+        "rozdzialy": [
+            "Rodzaj",
+            "Odbiorcy",
+            "Treść",
+            "Wysyłka"
+        ]
+    },
+    "jak-stworzyc-pakiet-uslug": {
+        "czas": 53,
+        "rozdzialy": [
+            "Nowy pakiet",
+            "Usługi w pakiecie",
+            "Na liście"
+        ]
+    },
+    "jak-ustawic-nazwe-nadawcy-sms": {
+        "czas": 51,
+        "rozdzialy": [
+            "Gdzie",
+            "Nazwa",
+            "Upoważnienie",
+            "Weryfikacja"
+        ]
+    },
+    "jak-ustawic-stanowiska": {
+        "czas": 61,
+        "rozdzialy": [
+            "Włączenie",
+            "Stanowiska",
+            "Zapis"
+        ]
+    },
+    "jak-ustawic-stopke-email": {
+        "czas": 57,
+        "rozdzialy": [
+            "Gdzie",
+            "Motyw",
+            "Twoje dane",
+            "Zapis"
+        ]
+    },
+    "jak-usunac-wizyte": {
+        "czas": 40,
+        "rozdzialy": [
+            "Pomyłka",
+            "Usuwanie",
+            "Usunięte wizyty"
+        ]
+    },
+    "jak-uzupelnic-dane-firmy": {
+        "czas": 59,
+        "rozdzialy": [
+            "Gdzie",
+            "Logo",
+            "Firma",
+            "Kontakt i konto"
+        ]
+    },
+    "jak-wlaczyc-automatyczne-wiadomosci": {
+        "czas": 55,
+        "rozdzialy": [
+            "Gdzie",
+            "Potwierdzenie",
+            "Przypomnienie",
+            "Zapis"
+        ]
+    },
+    "jak-wydac-auto-i-rozliczyc-wizyte": {
+        "czas": 106,
+        "rozdzialy": [
+            "Auto gotowe",
+            "Protokół wydania",
+            "Płatność i faktura",
+            "Auto wydane"
+        ]
+    },
+    "jak-wygenerowac-pdf-zlecenia-zbiorczego": {
+        "czas": 62,
+        "rozdzialy": [
+            "Koniec miesiąca",
+            "PDF do sprawdzenia",
+            "Zestawienie dla klienta"
+        ]
+    },
+    "jak-wyglada-program": {
+        "czas": 58,
+        "rozdzialy": [
+            "Menu",
+            "Tablica"
+        ]
+    },
+    "jak-wylaczyc-karte-wizyty": {
+        "czas": 40,
+        "rozdzialy": [
+            "Gdzie",
+            "Wyłączenie",
+            "Włączenie"
+        ]
+    },
+    "jak-zalozyc-konto-pracownikowi": {
+        "czas": 57,
+        "rozdzialy": [
+            "Zespół",
+            "Dane",
+            "Konto i rola",
+            "Zaproszenie"
+        ]
+    },
+    "jak-zaplanowac-auto-na-stanowisku": {
+        "czas": 97,
+        "rozdzialy": [
+            "Plan tygodnia",
+            "Pierwszy etap",
+            "Kolejny etap",
+            "Wjazd",
+            "Zmiana stanowiska"
+        ]
+    },
+    "jak-zaproponowac-dodatkowe-uslugi": {
+        "czas": 71,
+        "rozdzialy": [
+            "Karta wizyty",
+            "Propozycja usługi",
+            "Wybór klientki",
+            "Zgoda SMS-em"
+        ]
+    },
+    "jak-zmienic-cene-uslugi-w-wizycie": {
+        "czas": 50,
+        "rozdzialy": [
+            "Cena dla klientki",
+            "Nowa cena",
+            "Zapis zmian"
+        ]
+    }
+}
