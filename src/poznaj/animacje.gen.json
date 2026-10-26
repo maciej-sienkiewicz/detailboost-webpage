@@ -258,6 +258,14 @@
             "Weryfikacja"
         ]
     },
+    "jak-ustawic-stanowiska": {
+        "czas": 61,
+        "rozdzialy": [
+            "Włączenie",
+            "Stanowiska",
+            "Zapis"
+        ]
+    },
     "jak-ustawic-stopke-email": {
         "czas": 57,
         "rozdzialy": [
@@ -332,6 +340,16 @@
             "Dane",
             "Konto i rola",
             "Zaproszenie"
+        ]
+    },
+    "jak-zaplanowac-auto-na-stanowisku": {
+        "czas": 96,
+        "rozdzialy": [
+            "Plan tygodnia",
+            "Pierwszy etap",
+            "Kolejny etap",
+            "Wjazd",
+            "Zmiana stanowiska"
         ]
     },
     "jak-zaproponowac-dodatkowe-uslugi": {
