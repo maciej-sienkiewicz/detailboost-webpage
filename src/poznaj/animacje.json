@@ -135,6 +135,15 @@
         "status": "gotowa"
     },
     {
+        "slug": "jak-ustawic-stanowiska",
+        "kategoria": "konfiguracja",
+        "tytul": "Jak ustawić stanowiska?",
+        "opis": "Włączenie stanowisk, lista miejsc na hali i podział ich dnia w planie.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/42-jak-ustawic-stanowiska",
+        "status": "gotowa"
+    },
+    {
         "slug": "jak-dzialaja-zapytania",
         "kategoria": "zapytania",
         "tytul": "Jak działają zapytania?",
@@ -231,6 +240,15 @@
         "opis": "Volvo pani Nowak jest w studiu. Animacja pokazuje panel „Do zrobienia” na Tablicy: nowe zadanie dla Kuby, wybór osób, które je zobaczą, i zadanie odhaczone po pracy.",
         "rodzaj": "html",
         "zrodlo": "kurs/27-jak-dodac-zadania-dla-zespolu",
+        "status": "gotowa"
+    },
+    {
+        "slug": "jak-zaplanowac-auto-na-stanowisku",
+        "kategoria": "studio",
+        "tytul": "Jak zaplanować auto na stanowisku?",
+        "opis": "Plan tygodnia po stanowiskach, drugi etap auta, wjazd na halę i zmiana stanowiska w wizycie.",
+        "rodzaj": "html",
+        "zrodlo": "kurs/43-jak-zaplanowac-auto-na-stanowisku",
         "status": "gotowa"
     },
     {
