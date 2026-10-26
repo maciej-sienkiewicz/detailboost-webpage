@@ -30,8 +30,39 @@ export function PoznajProgram() {
     return animacja ? <Odtwarzacz animacja={animacja} /> : <Lista />;
 }
 
+/**
+ * Nazwy animacji sprzed kursu z 26.10.2026. Linki z nimi poszły już do klientów,
+ * więc stara kotwica prowadzi do lekcji, która ją zastąpiła.
+ */
+const DAWNE: Record<string, string> = {
+    'jak-zalozyc-rezerwacje': 'jak-dodac-rezerwacje',
+    'jak-odwolac-wizyte': 'jak-odwolac-rezerwacje',
+    'jak-wydrukowac-protokol': 'jak-podpisac-i-wydrukowac-protokol',
+    'jak-wlaczyc-ceny-na-protokole': 'jak-pokazac-ceny-na-protokole',
+    'jak-skonfigurowac-podpis': 'jak-dodac-swoj-podpis',
+    'jak-dodac-zdjecia-do-istniejacej-wizyty': 'jak-dodac-zdjecia-do-wizyty',
+    'jak-edytowac-cene-uslugi-w-wizycie': 'jak-zmienic-cene-uslugi-w-wizycie',
+    'jak-dzialaja-leady': 'jak-dzialaja-zapytania',
+    'jak-skonfigurowac-poczte': 'jak-podlaczyc-poczte',
+    'jak-stworzyc-stopke-email': 'jak-ustawic-stopke-email',
+    'poczta-rozpoznanie-klienta': 'jak-odpowiedziec-klientowi',
+    'poczta-odpowiedz-z-ai-i-zdjecia': 'jak-odpowiedziec-klientowi',
+    'poczta-oferta-z-cenami': 'jak-odpowiedziec-klientowi',
+    'poczta-klient-ktory-nie-przyjezdza': 'jak-odpowiedziec-klientowi',
+    'jak-skonfigurowac-automatyczne-wiadomosci': 'jak-wlaczyc-automatyczne-wiadomosci',
+    'jak-skonfigurowac-nazwe-nadawcy-sms': 'jak-ustawic-nazwe-nadawcy-sms',
+    'jak-ustawic-szpiega-konkurencji': 'jak-obserwowac-konkurencje-na-instagramie',
+    'jak-zmienic-stawke-vat': 'jak-dodac-usluge-do-cennika',
+};
+
 function useHash() {
-    const read = () => decodeURIComponent(window.location.hash.slice(1));
+    const read = () => {
+        const h = decodeURIComponent(window.location.hash.slice(1));
+        const nowa = DAWNE[h];
+        // Podmiana adresu bez nowego wpisu w historii: „Wstecz" nie wraca do starej nazwy.
+        if (nowa) window.history.replaceState(null, '', `#${nowa}`);
+        return nowa ?? h;
+    };
     const [hash, setHash] = useState(read);
     useEffect(() => {
         const on = () => setHash(read());
